@@ -1,16 +1,33 @@
 import { Resend } from 'resend'
 
-if (!process.env.RESEND_API_KEY) {
-  throw new Error('RESEND_API_KEY is not defined in environment variables')
+// Lazy initialization to avoid build-time errors
+let resend: Resend | null = null
+let fromEmail: string | null = null
+let appUrl: string = 'http://localhost:3000'
+
+function getResendClient(): Resend {
+  if (!resend) {
+    if (!process.env.RESEND_API_KEY) {
+      throw new Error('RESEND_API_KEY is not defined in environment variables')
+    }
+    resend = new Resend(process.env.RESEND_API_KEY)
+  }
+  return resend
 }
 
-if (!process.env.EMAIL_FROM) {
-  throw new Error('EMAIL_FROM is not defined in environment variables')
+function getFromEmail(): string {
+  if (!fromEmail) {
+    if (!process.env.EMAIL_FROM) {
+      throw new Error('EMAIL_FROM is not defined in environment variables')
+    }
+    fromEmail = process.env.EMAIL_FROM
+  }
+  return fromEmail
 }
 
-const resend = new Resend(process.env.RESEND_API_KEY)
-const fromEmail = process.env.EMAIL_FROM
-const appUrl = process.env.NEXTAUTH_URL || 'http://localhost:3000'
+function getAppUrl(): string {
+  return process.env.NEXTAUTH_URL || appUrl
+}
 
 /**
  * Send verification email to newly registered users
@@ -19,11 +36,11 @@ const appUrl = process.env.NEXTAUTH_URL || 'http://localhost:3000'
  * @returns Promise resolving to the Resend API response
  */
 export async function sendVerificationEmail(email: string, token: string) {
-  const verificationUrl = `${appUrl}/verify-email?token=${token}`
+  const verificationUrl = `${getAppUrl()}/verify-email?token=${token}`
 
   try {
-    const data = await resend.emails.send({
-      from: fromEmail,
+    const data = await getResendClient().emails.send({
+      from: getFromEmail(),
       to: email,
       subject: 'Verify your email address - Finds',
       html: `
@@ -98,11 +115,11 @@ The Finds Team`,
  * @returns Promise resolving to the Resend API response
  */
 export async function sendPasswordResetEmail(email: string, token: string) {
-  const resetUrl = `${appUrl}/reset-password?token=${token}`
+  const resetUrl = `${getAppUrl()}/reset-password?token=${token}`
 
   try {
-    const data = await resend.emails.send({
-      from: fromEmail,
+    const data = await getResendClient().emails.send({
+      from: getFromEmail(),
       to: email,
       subject: 'Reset your password - Finds',
       html: `
