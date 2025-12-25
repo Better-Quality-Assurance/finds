@@ -1,0 +1,105 @@
+/**
+ * Service Contracts
+ *
+ * This module exports TypeScript interfaces for all services in the Finds auction platform.
+ * These interfaces enable proper dependency injection, testability, and loose coupling.
+ *
+ * Usage:
+ * - Import interfaces when declaring dependencies
+ * - Use for mocking in tests
+ * - Implement these interfaces in service classes for DI containers
+ */
+
+// Notification Service
+export type {
+  INotificationService,
+} from './notification.interface'
+
+// Audit Service
+export type {
+  IAuditService,
+  AuditEventParams,
+  GetAuditLogsOptions,
+  AuditStats,
+} from './audit.interface'
+
+// Payment Services
+export type {
+  IBidDepositService,
+  IBuyerFeeService,
+  ISellerPayoutService,
+  DepositResult,
+  PaymentResult,
+  PayoutResult,
+  BiddingEligibility,
+  SetupIntent,
+  PaymentStatusDetails,
+  SellerPayoutStatus,
+} from './payment.interface'
+
+// Fraud Service
+export type {
+  IFraudService,
+  FraudCheckResult,
+  FraudAlertItem,
+  BidFraudCheckParams,
+  CreateFraudAlertParams,
+  GetOpenAlertsOptions,
+  FraudStats,
+  UserFraudHistory,
+} from './fraud.interface'
+
+// Storage Service
+export type {
+  IStorageService,
+  UploadResult,
+} from './storage.interface'
+
+// Email Service
+export type {
+  IEmailService,
+  EmailResult,
+} from './email.interface'
+
+// Listing Service
+export type {
+  IListingService,
+  CreateListingInput,
+  UpdateListingInput,
+  AddMediaInput,
+  UpdateMediaInput,
+  ListingWithRelations,
+} from './listing.interface'
+
+// Auction Service
+export type {
+  IAuctionService,
+  AuctionWithRelations,
+  GetActiveAuctionsOptions,
+  PaginatedAuctions,
+  PlaceBidResult,
+  BidMetadata,
+  UserBidsResult,
+} from './auction.interface'
+
+/**
+ * Re-export common Prisma types for convenience
+ */
+export type {
+  AuditLog,
+  AuditSeverity,
+  AuditStatus,
+  FraudAlert,
+  AlertSeverity,
+  BidDeposit,
+  DepositStatus,
+  PaymentStatus,
+  Listing,
+  ListingMedia,
+  ListingStatus,
+  VehicleCategory,
+  MediaType,
+  Auction,
+  AuctionStatus,
+  Bid,
+} from '@prisma/client'

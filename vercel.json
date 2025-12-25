@@ -1,0 +1,16 @@
+{
+  "crons": [
+    {
+      "path": "/api/cron/activate-auctions",
+      "schedule": "* * * * *"
+    },
+    {
+      "path": "/api/cron/end-auctions",
+      "schedule": "* * * * *"
+    },
+    {
+      "path": "/api/cron/release-deposits",
+      "schedule": "0 * * * *"
+    }
+  ]
+}

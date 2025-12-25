@@ -1,0 +1,200 @@
+name: Security
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+  schedule:
+    # Run security checks weekly on Mondays at 00:00 UTC
+    - cron: '0 0 * * 1'
+
+jobs:
+  npm-audit:
+    name: NPM Audit
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Run npm audit
+        run: |
+          # Run audit and capture output
+          npm audit --audit-level=moderate || true
+
+          # Run production-only audit (stricter)
+          echo "::group::Production Dependencies Audit"
+          npm audit --production --audit-level=high
+          echo "::endgroup::"
+        continue-on-error: false
+
+  secret-scan:
+    name: Secret Scanning
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Fetch all history for better secret detection
+
+      - name: Check for hardcoded secrets
+        run: |
+          echo "Scanning for potential secrets in code..."
+
+          # Common secret patterns to check
+          PATTERNS=(
+            "password.*=.*['\"].*['\"]"
+            "api[_-]?key.*=.*['\"].*['\"]"
+            "secret.*=.*['\"].*['\"]"
+            "token.*=.*['\"].*['\"]"
+            "aws.*key.*=.*['\"].*['\"]"
+            "private[_-]?key.*=.*['\"].*['\"]"
+            "stripe.*key.*=.*['\"]sk_live.*['\"]"
+          )
+
+          FOUND_SECRETS=0
+
+          for pattern in "${PATTERNS[@]}"; do
+            echo "Checking pattern: $pattern"
+            if git grep -iE "$pattern" -- ':!*.md' ':!package-lock.json' ':!*.yml' ':!*.yaml' ':!.github'; then
+              FOUND_SECRETS=1
+              echo "WARNING: Potential secret found matching pattern: $pattern"
+            fi
+          done
+
+          if [ $FOUND_SECRETS -eq 1 ]; then
+            echo "ERROR: Potential secrets detected in code!"
+            echo "Please review the findings above and ensure no sensitive data is committed."
+            exit 1
+          else
+            echo "No obvious secrets detected."
+          fi
+
+      - name: Check for .env files in git
+        run: |
+          if git ls-files | grep -E '\.env$|\.env\.local$|\.env\.production$'; then
+            echo "ERROR: .env files should not be committed to git!"
+            exit 1
+          else
+            echo "No .env files found in git. Good!"
+          fi
+
+      - name: Check for AWS credentials
+        run: |
+          if git grep -iE 'AKIA[0-9A-Z]{16}' -- ':!*.md'; then
+            echo "ERROR: AWS Access Key detected!"
+            exit 1
+          fi
+          echo "No AWS credentials detected."
+
+      - name: Check for private keys
+        run: |
+          if git grep -l 'BEGIN.*PRIVATE KEY' -- ':!*.md'; then
+            echo "ERROR: Private key detected!"
+            exit 1
+          fi
+          echo "No private keys detected."
+
+  dependency-check:
+    name: Dependency Security Check
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Check for outdated packages with vulnerabilities
+        run: |
+          echo "Checking for outdated packages..."
+          npm outdated || true
+
+          echo ""
+          echo "Checking for packages with known vulnerabilities..."
+          npm audit --json > audit-report.json || true
+
+          # Display summary
+          if [ -f audit-report.json ]; then
+            echo "Audit report generated. Review for vulnerabilities."
+            cat audit-report.json | grep -E '"total":|"critical":|"high":|"moderate":|"low":' || true
+          fi
+
+      - name: Upload audit report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: npm-audit-report
+          path: audit-report.json
+          retention-days: 30
+
+  prisma-security:
+    name: Prisma Security Check
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Check Prisma schema for security issues
+        run: |
+          echo "Validating Prisma schema..."
+          npx prisma validate
+
+          echo "Checking for @db.Text on password fields..."
+          if grep -n "password" prisma/schema.prisma | grep -v "@db.Text"; then
+            echo "WARNING: Password fields should use @db.Text for hashed values"
+          fi
+
+          echo "Checking for proper indexing on sensitive queries..."
+          if ! grep -q "@@index" prisma/schema.prisma; then
+            echo "WARNING: No indexes found. Consider adding indexes for performance and security."
+          fi
+
+  env-validation:
+    name: Environment Variables Validation
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Check .env.example is up to date
+        run: |
+          if [ ! -f .env.example ]; then
+            echo "ERROR: .env.example file is missing!"
+            exit 1
+          fi
+
+          echo "Validating .env.example file..."
+
+          # Check for placeholder values
+          if grep -E '=.*your.*|=.*secret.*|=.*key.*' .env.example; then
+            echo "Good: .env.example contains placeholder values (not real secrets)"
+          fi
+
+          echo ".env.example validation complete."

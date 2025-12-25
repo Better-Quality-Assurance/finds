@@ -1,0 +1,98 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  release:
+    name: Create Release
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run tests
+        run: npm run test:run
+        env:
+          DATABASE_URL: postgresql://user:pass@localhost:5432/test
+
+      - name: Build project
+        run: npm run build
+        env:
+          DATABASE_URL: postgresql://user:pass@localhost:5432/test
+          NEXTAUTH_SECRET: test-secret-for-release
+          NEXTAUTH_URL: http://localhost:3000
+
+      - name: Extract version from tag
+        id: version
+        run: echo "VERSION=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
+
+      - name: Generate changelog
+        id: changelog
+        run: |
+          # Get commits since last tag
+          PREVIOUS_TAG=$(git describe --abbrev=0 --tags ${GITHUB_REF}^ 2>/dev/null || echo "")
+          if [ -z "$PREVIOUS_TAG" ]; then
+            COMMITS=$(git log --pretty=format:"- %s (%h)" --no-merges)
+          else
+            COMMITS=$(git log ${PREVIOUS_TAG}..${GITHUB_REF} --pretty=format:"- %s (%h)" --no-merges)
+          fi
+
+          # Save to file
+          echo "$COMMITS" > CHANGELOG.txt
+
+          # Set as output
+          echo "CHANGELOG<<EOF" >> $GITHUB_OUTPUT
+          echo "$COMMITS" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
+      - name: Create GitHub Release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ steps.version.outputs.VERSION }}
+          release_name: Release ${{ steps.version.outputs.VERSION }}
+          body: |
+            ## Changes in ${{ steps.version.outputs.VERSION }}
+
+            ${{ steps.changelog.outputs.CHANGELOG }}
+
+            ## Installation
+
+            ```bash
+            git clone https://github.com/${{ github.repository }}.git
+            cd finds
+            git checkout ${{ steps.version.outputs.VERSION }}
+            npm install
+            ```
+
+            ## Deployment
+
+            See [DEPLOYMENT.md](./docs/DEPLOYMENT.md) for deployment instructions.
+          draft: false
+          prerelease: ${{ contains(steps.version.outputs.VERSION, 'beta') || contains(steps.version.outputs.VERSION, 'alpha') }}
+
+      - name: Notify deployment
+        if: success()
+        run: |
+          echo "Release ${{ steps.version.outputs.VERSION }} created successfully"
+          echo "Remember to deploy to production via Vercel dashboard"

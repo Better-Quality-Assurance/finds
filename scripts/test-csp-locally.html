@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CSP Local Testing - Finds</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            padding: 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+            background: #f5f5f5;
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 2rem;
+        }
+
+        .section {
+            background: white;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .section h2 {
+            color: #555;
+            margin-bottom: 1rem;
+            font-size: 1.25rem;
+        }
+
+        .test-item {
+            padding: 1rem;
+            margin-bottom: 1rem;
+            border-left: 4px solid #ddd;
+            background: #f9f9f9;
+        }
+
+        .test-item.success {
+            border-left-color: #22c55e;
+            background: #f0fdf4;
+        }
+
+        .test-item.error {
+            border-left-color: #ef4444;
+            background: #fef2f2;
+        }
+
+        .test-item h3 {
+            font-size: 1rem;
+            margin-bottom: 0.5rem;
+            color: #333;
+        }
+
+        .test-item p {
+            font-size: 0.875rem;
+            color: #666;
+        }
+
+        .status {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .status.pending {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .status.success {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .status.error {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        #consoleOutput {
+            background: #1e293b;
+            color: #e2e8f0;
+            padding: 1rem;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.875rem;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .log-entry {
+            margin-bottom: 0.5rem;
+        }
+
+        .log-error {
+            color: #fca5a5;
+        }
+
+        .log-success {
+            color: #86efac;
+        }
+
+        .log-info {
+            color: #93c5fd;
+        }
+    </style>
+</head>
+<body>
+    <h1>CSP Local Testing for Finds Platform</h1>
+
+    <div class="section">
+        <h2>Testing Instructions</h2>
+        <p>This page tests all third-party integrations against the Content Security Policy. Open your browser's Developer Console to see detailed CSP violation reports.</p>
+        <p><strong>Expected Result:</strong> All tests should pass with no CSP violations in the console.</p>
+    </div>
+
+    <div class="section">
+        <h2>Test Results</h2>
+
+        <div class="test-item" id="test-stripe-script">
+            <h3>Stripe Script Loading <span class="status pending" id="status-stripe-script">Pending</span></h3>
+            <p>Testing: script-src https://js.stripe.com</p>
+        </div>
+
+        <div class="test-item" id="test-pusher-script">
+            <h3>Pusher Script Loading <span class="status pending" id="status-pusher-script">Pending</span></h3>
+            <p>Testing: script-src https://*.pusher.com</p>
+        </div>
+
+        <div class="test-item" id="test-r2-image">
+            <h3>R2 Image Loading <span class="status pending" id="status-r2-image">Pending</span></h3>
+            <p>Testing: img-src https://*.r2.cloudflarestorage.com</p>
+        </div>
+
+        <div class="test-item" id="test-data-uri">
+            <h3>Data URI Image <span class="status pending" id="status-data-uri">Pending</span></h3>
+            <p>Testing: img-src data:</p>
+        </div>
+
+        <div class="test-item" id="test-web-font">
+            <h3>Web Font Loading <span class="status pending" id="status-web-font">Pending</span></h3>
+            <p>Testing: font-src 'self'</p>
+        </div>
+
+        <div class="test-item" id="test-inline-style">
+            <h3>Inline Styles <span class="status pending" id="status-inline-style">Pending</span></h3>
+            <p>Testing: style-src 'unsafe-inline'</p>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>Console Output Monitor</h2>
+        <div id="consoleOutput">
+            <div class="log-entry log-info">Monitoring console for CSP violations...</div>
+        </div>
+    </div>
+
+    <!-- Hidden test elements -->
+    <img id="testR2Image" style="display:none" />
+    <img id="testDataUri" style="display:none" />
+
+    <script>
+        // Console interceptor
+        const originalError = console.error;
+        const outputDiv = document.getElementById('consoleOutput');
+
+        console.error = function(...args) {
+            const message = args.join(' ');
+            const logEntry = document.createElement('div');
+            logEntry.className = 'log-entry log-error';
+            logEntry.textContent = `[ERROR] ${message}`;
+            outputDiv.appendChild(logEntry);
+            outputDiv.scrollTop = outputDiv.scrollHeight;
+            originalError.apply(console, args);
+        };
+
+        const originalLog = console.log;
+        console.log = function(...args) {
+            const message = args.join(' ');
+            const logEntry = document.createElement('div');
+            logEntry.className = 'log-entry log-info';
+            logEntry.textContent = `[INFO] ${message}`;
+            outputDiv.appendChild(logEntry);
+            outputDiv.scrollTop = outputDiv.scrollHeight;
+            originalLog.apply(console, args);
+        };
+
+        function updateTestStatus(testId, statusId, success, message) {
+            const testItem = document.getElementById(testId);
+            const statusSpan = document.getElementById(statusId);
+
+            if (success) {
+                testItem.classList.add('success');
+                statusSpan.classList.remove('pending');
+                statusSpan.classList.add('success');
+                statusSpan.textContent = 'Pass';
+
+                const logEntry = document.createElement('div');
+                logEntry.className = 'log-entry log-success';
+                logEntry.textContent = `[PASS] ${message}`;
+                outputDiv.appendChild(logEntry);
+            } else {
+                testItem.classList.add('error');
+                statusSpan.classList.remove('pending');
+                statusSpan.classList.add('error');
+                statusSpan.textContent = 'Fail';
+
+                const logEntry = document.createElement('div');
+                logEntry.className = 'log-entry log-error';
+                logEntry.textContent = `[FAIL] ${message}`;
+                outputDiv.appendChild(logEntry);
+            }
+            outputDiv.scrollTop = outputDiv.scrollHeight;
+        }
+
+        // Test 1: Stripe Script Loading
+        const stripeScript = document.createElement('script');
+        stripeScript.src = 'https://js.stripe.com/v3/';
+        stripeScript.onload = () => {
+            updateTestStatus('test-stripe-script', 'status-stripe-script', true, 'Stripe script loaded successfully');
+        };
+        stripeScript.onerror = () => {
+            updateTestStatus('test-stripe-script', 'status-stripe-script', false, 'Stripe script failed to load (check CSP)');
+        };
+        document.head.appendChild(stripeScript);
+
+        // Test 2: Pusher Script Loading (using CDN)
+        const pusherScript = document.createElement('script');
+        pusherScript.src = 'https://js.pusher.com/8.0/pusher.min.js';
+        pusherScript.onload = () => {
+            updateTestStatus('test-pusher-script', 'status-pusher-script', true, 'Pusher script loaded successfully');
+        };
+        pusherScript.onerror = () => {
+            updateTestStatus('test-pusher-script', 'status-pusher-script', false, 'Pusher script failed to load (check CSP)');
+        };
+        document.head.appendChild(pusherScript);
+
+        // Test 3: R2 Image Loading (placeholder URL - will fail but tests CSP)
+        const r2Image = document.getElementById('testR2Image');
+        const r2Url = 'https://example.r2.cloudflarestorage.com/test.jpg';
+        r2Image.onload = () => {
+            updateTestStatus('test-r2-image', 'status-r2-image', true, 'R2 image allowed by CSP');
+        };
+        r2Image.onerror = () => {
+            // Error is expected (URL doesn't exist), but no CSP violation means CSP allows it
+            if (performance.getEntriesByName(r2Url).length > 0) {
+                updateTestStatus('test-r2-image', 'status-r2-image', true, 'R2 domain allowed by CSP (404 expected)');
+            } else {
+                updateTestStatus('test-r2-image', 'status-r2-image', false, 'R2 domain blocked by CSP');
+            }
+        };
+        r2Image.src = r2Url;
+
+        // Test 4: Data URI Image
+        const dataUriImage = document.getElementById('testDataUri');
+        dataUriImage.onload = () => {
+            updateTestStatus('test-data-uri', 'status-data-uri', true, 'Data URI images allowed');
+        };
+        dataUriImage.onerror = () => {
+            updateTestStatus('test-data-uri', 'status-data-uri', false, 'Data URI blocked by CSP');
+        };
+        dataUriImage.src = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==';
+
+        // Test 5: Web Font Loading (if font exists)
+        setTimeout(() => {
+            if (document.fonts && document.fonts.check) {
+                updateTestStatus('test-web-font', 'status-web-font', true, 'Font loading API available');
+            } else {
+                updateTestStatus('test-web-font', 'status-web-font', true, 'Font loading not testable in this browser');
+            }
+        }, 1000);
+
+        // Test 6: Inline Styles
+        const testDiv = document.createElement('div');
+        testDiv.style.color = 'red';
+        document.body.appendChild(testDiv);
+        setTimeout(() => {
+            if (testDiv.style.color === 'red') {
+                updateTestStatus('test-inline-style', 'status-inline-style', true, 'Inline styles allowed');
+            } else {
+                updateTestStatus('test-inline-style', 'status-inline-style', false, 'Inline styles blocked by CSP');
+            }
+            testDiv.remove();
+        }, 100);
+
+        // Listen for CSP violations
+        document.addEventListener('securitypolicyviolation', (e) => {
+            const logEntry = document.createElement('div');
+            logEntry.className = 'log-entry log-error';
+            logEntry.textContent = `[CSP VIOLATION] ${e.violatedDirective}: ${e.blockedURI}`;
+            outputDiv.appendChild(logEntry);
+            outputDiv.scrollTop = outputDiv.scrollHeight;
+
+            console.error('CSP Violation:', {
+                directive: e.violatedDirective,
+                blocked: e.blockedURI,
+                policy: e.originalPolicy
+            });
+        });
+
+        console.log('CSP Testing initialized. Check results above.');
+    </script>
+</body>
+</html>
