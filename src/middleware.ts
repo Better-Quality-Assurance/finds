@@ -2,7 +2,6 @@ import createMiddleware from 'next-intl/middleware'
 import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@/lib/auth'
 import { routing } from '@/i18n/routing'
-import * as Sentry from '@sentry/nextjs'
 
 const intlMiddleware = createMiddleware(routing)
 
@@ -35,16 +34,6 @@ export default async function middleware(request: NextRequest) {
 
     // Get session
     const session = await auth()
-
-    // Set Sentry user context if session exists
-    if (session?.user) {
-      Sentry.setUser({
-        id: session.user.id,
-        email: session.user.email,
-        username: session.user.name || undefined,
-        role: session.user.role,
-      })
-    }
 
     // Redirect authenticated users away from auth pages
     if (isAuthPath && session?.user) {
@@ -85,23 +74,10 @@ export default async function middleware(request: NextRequest) {
     // Apply i18n middleware
     return intlMiddleware(request)
   } catch (error) {
-    // Capture middleware errors in Sentry
-    Sentry.captureException(error, {
-      tags: {
-        middleware: 'auth',
-        path: request.nextUrl.pathname,
-      },
-      contexts: {
-        request: {
-          url: request.nextUrl.href,
-          method: request.method,
-          headers: Object.fromEntries(
-            Array.from(request.headers.entries()).filter(
-              ([key]) => !['authorization', 'cookie'].includes(key.toLowerCase())
-            )
-          ),
-        },
-      },
+    // Log middleware errors
+    console.error('[Middleware] Error:', error, {
+      path: request.nextUrl.pathname,
+      url: request.nextUrl.href,
     })
 
     // Re-throw to let Next.js handle the error

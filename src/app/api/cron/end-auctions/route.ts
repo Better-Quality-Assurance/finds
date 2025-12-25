@@ -8,7 +8,6 @@ import {
   notifyWatchlistUsers,
 } from '@/lib/pusher-cron'
 import { prisma } from '@/lib/db'
-import { captureCronError, captureAuctionError } from '@/lib/sentry'
 
 /**
  * Cron job that ends ACTIVE auctions whose currentEndTime has passed
@@ -196,22 +195,6 @@ export async function GET(request: NextRequest) {
         const errorMessage = error instanceof Error ? error.message : 'Unknown error'
         console.error(`[CRON] Failed to end auction ${auction.id}:`, error)
 
-        // Capture auction ending error in Sentry
-        captureAuctionError(error as Error, {
-          auctionId: auction.id,
-          listingId: auction.listing.id,
-          sellerId: auction.listing.sellerId,
-          currentBid: auction.currentBid ? Number(auction.currentBid) : undefined,
-          bidCount: auction.bidCount,
-          status: auction.status,
-          endTime: auction.currentEndTime,
-          operation: 'end',
-          metadata: {
-            cronJob: 'end-auctions',
-            listingTitle: auction.listing.title,
-          },
-        })
-
         results.push({
           auctionId: auction.id,
           listingTitle: auction.listing.title,
@@ -271,16 +254,6 @@ export async function GET(request: NextRequest) {
     const errorMessage = error instanceof Error ? error.message : 'Unknown error'
 
     console.error('[CRON] Error in end-auctions job:', error)
-
-    // Capture cron job error in Sentry
-    captureCronError(error as Error, {
-      jobName: 'end-auctions',
-      startTime: new Date(startTime),
-      metadata: {
-        executionTimeMs: executionTime,
-        severity: 'CRITICAL',
-      },
-    })
 
     // Get container for error logging (in case container wasn't created before error)
     const container = getContainer()

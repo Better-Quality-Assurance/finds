@@ -1,5 +1,4 @@
 import createNextIntlPlugin from 'next-intl/plugin'
-import { withSentryConfig } from '@sentry/nextjs'
 
 const withNextIntl = createNextIntlPlugin('./src/i18n/request.ts')
 
@@ -42,9 +41,6 @@ function getCSP() {
       'wss://*.pusher.com',
       // Resend email API
       'https://api.resend.com',
-      // Sentry error tracking
-      'https://*.ingest.sentry.io',
-      'https://*.sentry.io',
       // Development hot reload
       ...(isDev ? ['ws://localhost:*', 'ws://127.0.0.1:*'] : []),
     ],
@@ -88,7 +84,6 @@ const nextConfig = {
   },
   experimental: {
     optimizePackageImports: ['lucide-react', '@radix-ui/react-icons'],
-    instrumentationHook: true,
   },
   async headers() {
     return [
@@ -159,34 +154,4 @@ const nextConfig = {
   },
 }
 
-// Sentry configuration options
-const sentryWebpackPluginOptions = {
-  org: process.env.SENTRY_ORG,
-  project: process.env.SENTRY_PROJECT,
-
-  // Only print logs for uploading source maps in CI
-  silent: !process.env.CI,
-
-  // Upload source maps for better error tracking
-  widenClientFileUpload: true,
-
-  // Automatically annotate React components
-  reactComponentAnnotation: {
-    enabled: true,
-  },
-
-  // Tunnel requests through Next.js to avoid ad-blockers
-  tunnelRoute: '/monitoring',
-
-  // Hide source maps from client bundles
-  hideSourceMaps: true,
-
-  // Tree-shake Sentry logger statements
-  disableLogger: true,
-
-  // Enable automatic Vercel Cron Monitors
-  automaticVercelMonitors: true,
-}
-
-// Wrap with Sentry, then next-intl
-export default withSentryConfig(withNextIntl(nextConfig), sentryWebpackPluginOptions)
+export default withNextIntl(nextConfig)

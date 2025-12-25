@@ -3,7 +3,6 @@ import { auth } from '@/lib/auth'
 import { z } from 'zod'
 import { getContainer } from '@/lib/container'
 import { calculateDepositAmount } from '@/lib/stripe'
-import { capturePaymentError, captureAPIError } from '@/lib/sentry'
 
 const createDepositSchema = z.object({
   auctionId: z.string().min(1),
@@ -28,13 +27,6 @@ export async function GET() {
     return NextResponse.json({ deposits })
   } catch (error) {
     console.error('Get deposits error:', error)
-
-    // Capture error in Sentry
-    captureAPIError(error as Error, {
-      route: '/api/payments/deposit',
-      method: 'GET',
-      statusCode: 500,
-    })
 
     return NextResponse.json(
       { error: 'Failed to get deposits' },
@@ -102,18 +94,6 @@ export async function POST(request: Request) {
     }
 
     console.error('Create deposit error:', error)
-
-    // Capture payment error in Sentry
-    const session = await auth()
-    capturePaymentError(error as Error, {
-      userId: session?.user?.id || 'unknown',
-      amount: 0, // Unknown at this point
-      currency: 'RON',
-      type: 'deposit',
-      metadata: {
-        error: 'Unexpected error during deposit creation',
-      },
-    })
 
     return NextResponse.json(
       { error: 'Failed to create deposit' },

@@ -5,7 +5,6 @@ import { compare } from 'bcryptjs'
 import { prisma } from '@/lib/db'
 import type { Role } from '@prisma/client'
 import type { Adapter } from 'next-auth/adapters'
-import { setUserContext, clearUserContext } from '@/lib/sentry'
 
 declare module 'next-auth' {
   interface User {
@@ -96,22 +95,8 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         session.user.role = token.role as Role
         session.user.biddingEnabled = token.biddingEnabled as boolean
         session.user.emailVerified = token.emailVerified as Date | null
-
-        // Set Sentry user context for error tracking
-        setUserContext({
-          id: session.user.id,
-          email: session.user.email,
-          name: session.user.name,
-          role: session.user.role,
-        })
       }
       return session
-    },
-  },
-  events: {
-    async signOut() {
-      // Clear Sentry user context on logout
-      clearUserContext()
     },
   },
 })
