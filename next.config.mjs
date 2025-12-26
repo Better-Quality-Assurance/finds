@@ -30,6 +30,8 @@ function getCSP() {
       'https://*.cloudflare.com',
       // Stripe assets
       'https://*.stripe.com',
+      // Placeholder images for mock data
+      'https://placehold.co',
     ],
     'font-src': ["'self'", 'data:'],
     'connect-src': [
@@ -76,6 +78,10 @@ const nextConfig = {
       {
         protocol: 'https',
         hostname: '*.cloudflare.com',
+      },
+      {
+        protocol: 'https',
+        hostname: 'placehold.co',
       },
     ],
     formats: ['image/avif', 'image/webp'],
