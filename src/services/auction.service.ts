@@ -13,6 +13,8 @@ import {
   calculatePaymentDeadline,
 } from '@/domain/auction/rules'
 import { auctionLogger, logError } from '@/lib/logger'
+import { auctionStatusValidator } from '@/services/validators/auction-status.validator'
+import { listingStatusValidator } from '@/services/validators/listing-status.validator'
 
 type AuctionWithRelations = Auction & {
   listing: Listing
@@ -36,7 +38,7 @@ export async function createAuction(
     throw new Error('Listing not found')
   }
 
-  if (listing.status !== 'APPROVED') {
+  if (!listingStatusValidator.isApproved(listing.status)) {
     throw new Error('Listing must be approved before creating auction')
   }
 
@@ -264,8 +266,8 @@ export async function placeBid(
 
     // Validate auction is active
     const now = new Date()
-    if (auction.status !== 'ACTIVE') {
-      throw new Error('Auction is not active')
+    if (!auctionStatusValidator.canPlaceBid(auction.status)) {
+      throw new Error('Auction is not accepting bids')
     }
     if (now < auction.startTime) {
       throw new Error('Auction has not started yet')
@@ -412,8 +414,8 @@ export async function endAuction(auctionId: string): Promise<Auction> {
     throw new Error('Auction not found')
   }
 
-  if (auction.status !== 'ACTIVE') {
-    throw new Error('Auction is not active')
+  if (!auctionStatusValidator.canEnd(auction.status)) {
+    throw new Error('Auction cannot be ended in current status')
   }
 
   // Determine result
@@ -501,7 +503,7 @@ export async function cancelAuction(auctionId: string, reason: string): Promise<
     throw new Error('Auction not found')
   }
 
-  if (!['SCHEDULED', 'ACTIVE'].includes(auction.status)) {
+  if (!auctionStatusValidator.canCancel(auction.status)) {
     throw new Error('Cannot cancel auction in current status')
   }
 

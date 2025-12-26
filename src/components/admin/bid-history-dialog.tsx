@@ -178,11 +178,11 @@ export function BidHistoryDialog({
 
   const getSeverityColor = (severity: string): string => {
     switch (severity) {
-      case 'CRITICAL': return 'bg-red-500 text-white'
-      case 'HIGH': return 'bg-orange-500 text-white'
-      case 'MEDIUM': return 'bg-yellow-500 text-black'
-      case 'LOW': return 'bg-blue-500 text-white'
-      default: return 'bg-gray-500 text-white'
+      case 'CRITICAL': return 'bg-destructive text-destructive-foreground'
+      case 'HIGH': return 'bg-warning text-warning-foreground'
+      case 'MEDIUM': return 'bg-warning text-warning-foreground'
+      case 'LOW': return 'bg-primary text-primary-foreground'
+      default: return 'bg-muted text-muted-foreground'
     }
   }
 
@@ -215,13 +215,13 @@ export function BidHistoryDialog({
                 </div>
                 <div className="rounded-lg border p-3">
                   <p className="text-sm text-muted-foreground">Valid Bids</p>
-                  <p className="text-2xl font-bold text-green-600">
+                  <p className="text-2xl font-bold text-success">
                     {bids.filter(b => b.isValid).length}
                   </p>
                 </div>
                 <div className="rounded-lg border p-3">
                   <p className="text-sm text-muted-foreground">Invalidated</p>
-                  <p className="text-2xl font-bold text-red-600">
+                  <p className="text-2xl font-bold text-destructive">
                     {bids.filter(b => !b.isValid).length}
                   </p>
                 </div>
@@ -253,8 +253,8 @@ export function BidHistoryDialog({
                             key={bid.id}
                             className={cn(
                               'hover:bg-muted/50',
-                              !bid.isValid && 'bg-red-50 dark:bg-red-950/10',
-                              isSuspicious && 'bg-yellow-50 dark:bg-yellow-950/10'
+                              !bid.isValid && 'bg-destructive/10',
+                              isSuspicious && 'bg-warning/10'
                             )}
                           >
                             <td className="px-4 py-3">
@@ -293,7 +293,7 @@ export function BidHistoryDialog({
                             <td className="px-4 py-3">
                               <div className="flex items-center gap-1">
                                 {isFastBid && (
-                                  <Zap className="h-3 w-3 text-orange-500" aria-label="Fast bid" />
+                                  <Zap className="h-3 w-3 text-warning" aria-label="Fast bid" />
                                 )}
                                 <span className="text-sm text-muted-foreground">
                                   {formatVelocity(velocity)}
@@ -303,7 +303,7 @@ export function BidHistoryDialog({
                             <td className="px-4 py-3">
                               <div className="flex flex-wrap items-center gap-1">
                                 {bid.isWinning && (
-                                  <Badge className="bg-green-500 text-white">
+                                  <Badge className="bg-success text-success-foreground">
                                     <Trophy className="mr-1 h-3 w-3" />
                                     Winning
                                   </Badge>
@@ -314,7 +314,7 @@ export function BidHistoryDialog({
                                   </Badge>
                                 )}
                                 {!bid.isValid && (
-                                  <Badge className="bg-red-500 text-white">
+                                  <Badge className="bg-destructive text-destructive-foreground">
                                     <XCircle className="mr-1 h-3 w-3" />
                                     Invalid
                                   </Badge>
@@ -341,7 +341,7 @@ export function BidHistoryDialog({
                                 <Button
                                   variant="ghost"
                                   size="sm"
-                                  className="text-red-600 hover:text-red-700"
+                                  className="text-destructive hover:text-destructive/90"
                                   onClick={() =>
                                     setInvalidateDialog({ bid, reason: '' })
                                   }
@@ -366,10 +366,10 @@ export function BidHistoryDialog({
 
               {/* Fraud Alerts Summary */}
               {fraudAlerts.length > 0 && (
-                <div className="mt-4 rounded-lg border border-yellow-500 bg-yellow-50 p-4 dark:bg-yellow-950/10">
+                <div className="mt-4 rounded-lg border border-warning bg-warning/10 p-4">
                   <div className="mb-2 flex items-center gap-2">
-                    <AlertTriangle className="h-5 w-5 text-yellow-600" />
-                    <h3 className="font-semibold text-yellow-800 dark:text-yellow-200">
+                    <AlertTriangle className="h-5 w-5 text-warning" />
+                    <h3 className="font-semibold text-warning">
                       Fraud Alerts ({fraudAlerts.length})
                     </h3>
                   </div>
@@ -379,7 +379,7 @@ export function BidHistoryDialog({
                         <Badge className={getSeverityColor(alert.severity)}>
                           {alert.severity}
                         </Badge>
-                        <span className="ml-2 text-yellow-900 dark:text-yellow-100">
+                        <span className="ml-2 text-warning">
                           {alert.type}: {alert.description}
                         </span>
                       </div>
@@ -411,7 +411,7 @@ export function BidHistoryDialog({
                 formatCurrency(Number(invalidateDialog.bid.amount), currency)}{' '}
               by {invalidateDialog.bid?.bidder.email}.
               {invalidateDialog.bid?.isWinning && (
-                <span className="mt-2 block font-semibold text-red-600">
+                <span className="mt-2 block font-semibold text-destructive">
                   Warning: This is the current winning bid. The next highest valid bid
                   will become the winner.
                 </span>
@@ -442,7 +442,7 @@ export function BidHistoryDialog({
               </p>
             </div>
 
-            <div className="rounded-lg bg-red-50 p-3 text-sm text-red-800 dark:bg-red-900/20 dark:text-red-200">
+            <div className="rounded-lg bg-destructive/10 p-3 text-sm text-destructive">
               <AlertTriangle className="mb-1 inline h-4 w-4" />
               <span className="ml-1 font-semibold">Important:</span> This action
               cannot be undone. The bidder will be notified and an audit log entry
@@ -455,7 +455,7 @@ export function BidHistoryDialog({
             <AlertDialogAction
               onClick={handleInvalidateBid}
               disabled={processing || invalidateDialog.reason.trim().length < 10}
-              className="bg-red-600 hover:bg-red-700"
+              className="bg-destructive hover:bg-destructive/90"
             >
               {processing && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               Invalidate Bid

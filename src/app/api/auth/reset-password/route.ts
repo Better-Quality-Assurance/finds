@@ -1,32 +1,21 @@
-import { NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { hash } from 'bcryptjs'
 import { z } from 'zod'
 import { getContainer } from '@/lib/container'
+import { withSimpleErrorHandler } from '@/lib/with-error-handler'
+import { successResponse } from '@/lib/api-response'
+import { NotFoundError, ValidationError } from '@/lib/errors'
+import { ERROR_CODES } from '@/lib/error-codes'
+import { resetPasswordSchema } from '@/lib/validation-schemas'
 
-const resetPasswordSchema = z.object({
-  token: z.string().min(1),
-  newPassword: z.string().min(8),
-})
-
-export async function POST(request: Request) {
-  try {
+export const POST = withSimpleErrorHandler(
+  async (request: NextRequest) => {
     const body = await request.json()
     const { token, newPassword } = resetPasswordSchema.parse(body)
 
     const container = getContainer()
 
     // Look up the token in the database
-    const verificationToken = await container.prisma.verificationToken.findUnique({
-      where: {
-        identifier_token: {
-          identifier: token,
-          token: token,
-        },
-      },
-    })
-
-    // If token doesn't exist, try to find by token only
-    // (since identifier is email, we need to find it differently)
     const tokenRecord = await container.prisma.verificationToken.findFirst({
       where: {
         token: token,
@@ -34,9 +23,9 @@ export async function POST(request: Request) {
     })
 
     if (!tokenRecord) {
-      return NextResponse.json(
-        { message: 'Invalid or expired reset token' },
-        { status: 400 }
+      throw new ValidationError(
+        'Invalid or expired reset token',
+        ERROR_CODES.AUTH_INVALID_TOKEN
       )
     }
 
@@ -52,9 +41,9 @@ export async function POST(request: Request) {
         },
       })
 
-      return NextResponse.json(
-        { message: 'Reset token has expired. Please request a new one.' },
-        { status: 400 }
+      throw new ValidationError(
+        'Reset token has expired. Please request a new one.',
+        ERROR_CODES.AUTH_TOKEN_EXPIRED
       )
     }
 
@@ -64,9 +53,9 @@ export async function POST(request: Request) {
     })
 
     if (!user) {
-      return NextResponse.json(
-        { message: 'User not found' },
-        { status: 404 }
+      throw new NotFoundError(
+        'User not found',
+        ERROR_CODES.USER_NOT_FOUND
       )
     }
 
@@ -89,29 +78,12 @@ export async function POST(request: Request) {
       },
     })
 
-    return NextResponse.json({
+    return successResponse({
       message: 'Password reset successfully',
     })
-  } catch (error) {
-    if (error instanceof z.ZodError) {
-      const errors = error.errors.map(err => {
-        if (err.path[0] === 'newPassword') {
-          return 'Password must be at least 8 characters'
-        }
-        return err.message
-      })
-
-      return NextResponse.json(
-        { message: errors[0] || 'Invalid input' },
-        { status: 400 }
-      )
-    }
-
-    console.error('Reset password error:', error)
-
-    return NextResponse.json(
-      { message: 'Something went wrong. Please try again later.' },
-      { status: 500 }
-    )
+  },
+  {
+    resourceType: 'user',
+    action: 'auth.reset-password',
   }
-}
+)

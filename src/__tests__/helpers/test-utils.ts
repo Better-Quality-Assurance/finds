@@ -2,6 +2,7 @@ import { vi } from 'vitest'
 import { PrismaClient, Prisma, DepositStatus, PaymentStatus, AlertSeverity } from '@prisma/client'
 import Stripe from 'stripe'
 import { createTestContainer, ServiceContainer } from '@/lib/container'
+import { IPaymentProcessor } from '@/services/contracts/payment-processor.interface'
 
 /**
  * Create a mock Prisma client for testing
@@ -98,6 +99,29 @@ export function createMockStripe(): Stripe {
       capture: vi.fn(),
     },
   } as unknown as Stripe
+}
+
+/**
+ * Create a mock payment processor for testing
+ */
+export function createMockPaymentProcessor(): IPaymentProcessor {
+  return {
+    createPaymentIntent: vi.fn(),
+    retrievePaymentIntent: vi.fn(),
+    capturePayment: vi.fn(),
+    releasePayment: vi.fn(),
+    createSetupIntent: vi.fn(),
+    createCustomer: vi.fn(),
+    retrieveCustomer: vi.fn(),
+    listCustomersByEmail: vi.fn(),
+    attachPaymentMethod: vi.fn(),
+    getDefaultPaymentMethod: vi.fn(),
+    listPaymentMethods: vi.fn(),
+    createConnectAccount: vi.fn(),
+    createAccountLink: vi.fn(),
+    createTransfer: vi.fn(),
+    constructWebhookEvent: vi.fn(),
+  } as unknown as IPaymentProcessor
 }
 
 /**

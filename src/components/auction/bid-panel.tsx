@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect } from 'react'
 import { useSession } from 'next-auth/react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -9,7 +9,7 @@ import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { toast } from 'sonner'
 import { formatCurrency } from '@/lib/utils'
-import { useAuctionUpdates, useAuctionTimer } from '@/hooks/use-pusher'
+import { useAuctionRealtime } from '@/hooks/useAuctionRealtime'
 import {
   calculateMinimumBid,
   calculateSuggestedBid,
@@ -53,10 +53,26 @@ type BidPanelProps = {
 
 export function BidPanel({ auction: initialAuction, bids: initialBids }: BidPanelProps) {
   const { data: session } = useSession()
-  const [auction, setAuction] = useState(initialAuction)
-  const [bids, setBids] = useState(initialBids)
   const [bidAmount, setBidAmount] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
+
+  // Real-time auction state management
+  const {
+    auction,
+    bids,
+    timeRemaining,
+    isEnded,
+    isEndingSoon,
+    isActive,
+    updateAuctionState,
+    updateEndTime,
+  } = useAuctionRealtime(initialAuction, initialBids, {
+    showToasts: true,
+    onNewBid: () => {
+      // Clear bid input when new bid arrives
+      setBidAmount('')
+    },
+  })
 
   const currentBid = auction.currentBid
   const startingPrice = auction.listing.startingPrice
@@ -65,83 +81,8 @@ export function BidPanel({ auction: initialAuction, bids: initialBids }: BidPane
   const minimumBid = calculateMinimumBid(currentBid, startingPrice)
   const suggestedBid = calculateSuggestedBid(currentBid, startingPrice)
 
-  const { timeRemaining, isEnded, seconds, updateEndTime } = useAuctionTimer(
-    auction.currentEndTime,
-    () => {
-      // Auction ended
-      setAuction((prev) => ({ ...prev, status: 'ENDED' }))
-    }
-  )
-
-  const isEndingSoon = seconds > 0 && seconds < 120 // Less than 2 minutes
-  const isActive = auction.status === 'ACTIVE' && !isEnded
   const isSeller = session?.user?.id === auction.listing.sellerId
   const isWinning = bids[0]?.bidder.id === session?.user?.id
-
-  // Handle real-time updates
-  const handleNewBid = useCallback((data: {
-    bidId: string
-    amount: number
-    bidderName: string | null
-    bidCount: number
-    isReserveMet: boolean
-    timestamp: string
-  }) => {
-    // Update auction state
-    setAuction((prev) => ({
-      ...prev,
-      currentBid: data.amount,
-      bidCount: data.bidCount,
-      reserveMet: data.isReserveMet,
-    }))
-
-    // Add bid to list
-    setBids((prev) => [
-      {
-        id: data.bidId,
-        amount: data.amount,
-        createdAt: data.timestamp,
-        bidder: { id: '', name: data.bidderName },
-      },
-      ...prev,
-    ])
-
-    // Clear bid input
-    setBidAmount('')
-
-    // Show toast
-    toast.info(`New bid: ${formatCurrency(data.amount, currency)}`)
-  }, [currency])
-
-  const handleExtended = useCallback((data: {
-    newEndTime: string
-    extensionCount: number
-  }) => {
-    updateEndTime(data.newEndTime)
-    setAuction((prev) => ({
-      ...prev,
-      currentEndTime: data.newEndTime,
-      extensionCount: data.extensionCount,
-    }))
-    toast.info('Auction extended by 2 minutes!')
-  }, [updateEndTime])
-
-  const handleEnded = useCallback((data: {
-    status: 'SOLD' | 'NO_SALE' | 'CANCELLED'
-    finalPrice: number | null
-    winnerId: string | null
-  }) => {
-    setAuction((prev) => ({
-      ...prev,
-      status: data.status,
-    }))
-  }, [])
-
-  useAuctionUpdates(auction.id, {
-    onNewBid: handleNewBid,
-    onExtended: handleExtended,
-    onEnded: handleEnded,
-  })
 
   // Set initial bid amount
   useEffect(() => {
@@ -178,18 +119,13 @@ export function BidPanel({ auction: initialAuction, bids: initialBids }: BidPane
       const result = await response.json()
       toast.success('Bid placed successfully!')
 
-      // Update will come through Pusher, but also update locally for instant feedback
-      setAuction((prev) => ({
-        ...prev,
+      // Optimistic update - Pusher will also send updates
+      updateAuctionState({
         currentBid: result.auction.currentBid,
         bidCount: result.auction.bidCount,
         reserveMet: result.auction.reserveMet,
         currentEndTime: result.auction.currentEndTime,
-      }))
-
-      if (result.auction.extended) {
-        updateEndTime(result.auction.currentEndTime)
-      }
+      })
     } catch (error) {
       toast.error(error instanceof Error ? error.message : 'Failed to place bid')
     } finally {
@@ -202,20 +138,22 @@ export function BidPanel({ auction: initialAuction, bids: initialBids }: BidPane
   }
 
   return (
-    <Card>
-      <CardHeader>
+    <Card variant="glass" className="sticky top-20">
+      <CardHeader className="pb-4">
         <div className="flex items-center justify-between">
-          <CardTitle className="flex items-center gap-2">
-            <Gavel className="h-5 w-5" aria-hidden="true" />
+          <CardTitle className="flex items-center gap-2 font-heading">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-primary to-primary/80 shadow-lg shadow-primary/25">
+              <Gavel className="h-5 w-5 text-primary-foreground" aria-hidden="true" />
+            </div>
             {isActive ? 'Place Your Bid' : 'Auction Ended'}
           </CardTitle>
           {isActive && (
             <div
               className={cn(
-                'flex items-center gap-1 rounded-full px-3 py-1 text-sm font-medium',
+                'flex items-center gap-1.5 rounded-full px-4 py-2 text-sm font-semibold',
                 isEndingSoon
-                  ? 'animate-pulse bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-100'
-                  : 'bg-muted'
+                  ? 'animate-pulse-subtle bg-gradient-ending text-white shadow-lg shadow-destructive/30'
+                  : 'bg-muted/80 backdrop-blur-sm'
               )}
               aria-live={isEndingSoon ? 'assertive' : 'polite'}
               aria-atomic="true"
@@ -227,25 +165,25 @@ export function BidPanel({ auction: initialAuction, bids: initialBids }: BidPane
         </div>
       </CardHeader>
 
-      <CardContent className="space-y-4">
+      <CardContent className="space-y-5">
         {/* Current bid */}
-        <div className="rounded-lg bg-muted p-4" aria-live="polite" aria-atomic="true">
+        <div className="rounded-2xl bg-gradient-to-br from-muted/80 to-muted/50 p-5 backdrop-blur-sm" aria-live="polite" aria-atomic="true">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-muted-foreground" id="bid-label">
+              <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground" id="bid-label">
                 {currentBid ? 'Current Bid' : 'Starting Bid'}
               </p>
-              <p className="text-3xl font-bold text-primary">
+              <p className="font-mono text-4xl font-bold text-primary">
                 {formatCurrency(currentBid || startingPrice, currency)}
               </p>
             </div>
             <div className="text-right">
-              <p className="flex items-center gap-1 text-sm text-muted-foreground">
+              <p className="flex items-center gap-1.5 rounded-full bg-background/50 px-3 py-1.5 text-sm font-medium text-muted-foreground">
                 <TrendingUp className="h-4 w-4" aria-hidden="true" />
                 {auction.bidCount} {auction.bidCount === 1 ? 'bid' : 'bids'}
               </p>
               {auction.extensionCount > 0 && (
-                <p className="mt-1 text-xs text-muted-foreground">
+                <p className="mt-2 text-xs text-muted-foreground">
                   Extended {auction.extensionCount}x
                 </p>
               )}
@@ -253,10 +191,10 @@ export function BidPanel({ auction: initialAuction, bids: initialBids }: BidPane
           </div>
 
           {/* Reserve status */}
-          <div className="mt-3">
+          <div className="mt-4">
             <Badge
               variant={auction.reserveMet ? 'success' : 'warning'}
-              className="w-full justify-center py-1"
+              className="w-full justify-center py-1.5 text-sm"
             >
               {auction.listing.reservePrice
                 ? auction.reserveMet
@@ -269,9 +207,9 @@ export function BidPanel({ auction: initialAuction, bids: initialBids }: BidPane
 
         {/* Winning status */}
         {session && isWinning && isActive && (
-          <div className="flex items-center gap-2 rounded-lg bg-green-100 p-3 text-green-800 dark:bg-green-900 dark:text-green-100">
+          <div className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-success/10 to-emerald-500/10 p-4 text-success">
             <CheckCircle className="h-5 w-5" />
-            <span className="font-medium">You are the high bidder!</span>
+            <span className="font-semibold">You are the high bidder!</span>
           </div>
         )}
 
@@ -301,7 +239,9 @@ export function BidPanel({ auction: initialAuction, bids: initialBids }: BidPane
                 <Button
                   onClick={handleBid}
                   disabled={!session || isSubmitting}
-                  className="min-w-[100px]"
+                  variant="bid"
+                  size="lg"
+                  className="min-w-[120px]"
                   aria-label="Submit bid"
                 >
                   {isSubmitting ? (
@@ -364,7 +304,7 @@ export function BidPanel({ auction: initialAuction, bids: initialBids }: BidPane
         )}
 
         {isSeller && (
-          <div className="flex items-center gap-2 rounded-lg bg-amber-100 p-3 text-amber-800 dark:bg-amber-900 dark:text-amber-100">
+          <div className="flex items-center gap-2 rounded-lg bg-warning/10 p-3 text-warning">
             <AlertTriangle className="h-5 w-5" />
             <span>You cannot bid on your own listing</span>
           </div>

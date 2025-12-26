@@ -1,18 +1,25 @@
-import { NextResponse } from 'next/server'
+import { NextRequest } from 'next/server'
 import { auth } from '@/lib/auth'
 import { getContainer } from '@/lib/container'
 import { approveListing } from '@/services/listing.service'
 import { createAuction } from '@/services/auction.service'
 import { prisma } from '@/lib/db'
 import { AUCTION_RULES } from '@/domain/auction/rules'
+import { withErrorHandler } from '@/lib/with-error-handler'
+import { successResponse } from '@/lib/api-response'
+import { UnauthorizedError, ForbiddenError, ValidationError, AppError } from '@/lib/errors'
+import { ERROR_CODES } from '@/lib/error-codes'
 
 type RouteParams = { params: Promise<{ id: string }> }
 
-export async function POST(request: Request, { params }: RouteParams) {
-  try {
+export const POST = withErrorHandler<{ id: string }>(
+  async (request: NextRequest, { params }: { params: Promise<{ id: string }> }) => {
     const session = await auth()
     if (!session?.user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+      throw new UnauthorizedError(
+        'You must be logged in',
+        ERROR_CODES.AUTH_REQUIRED
+      )
     }
 
     // Check if user has admin/moderator/reviewer role
@@ -22,7 +29,10 @@ export async function POST(request: Request, { params }: RouteParams) {
     })
 
     if (!user || !['ADMIN', 'MODERATOR', 'REVIEWER'].includes(user.role)) {
-      return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+      throw new ForbiddenError(
+        'You do not have permission to approve listings',
+        ERROR_CODES.AUTH_INSUFFICIENT_PERMISSIONS
+      )
     }
 
     const { id } = await params
@@ -34,11 +44,10 @@ export async function POST(request: Request, { params }: RouteParams) {
 
     // Validate duration
     if (durationDays < AUCTION_RULES.MIN_DURATION_DAYS || durationDays > AUCTION_RULES.MAX_DURATION_DAYS) {
-      return NextResponse.json(
-        {
-          error: `Duration must be between ${AUCTION_RULES.MIN_DURATION_DAYS} and ${AUCTION_RULES.MAX_DURATION_DAYS} days`
-        },
-        { status: 400 }
+      throw new ValidationError(
+        `Duration must be between ${AUCTION_RULES.MIN_DURATION_DAYS} and ${AUCTION_RULES.MAX_DURATION_DAYS} days`,
+        ERROR_CODES.VALIDATION_INVALID_INPUT,
+        { field: 'durationDays', min: AUCTION_RULES.MIN_DURATION_DAYS, max: AUCTION_RULES.MAX_DURATION_DAYS }
       )
     }
 
@@ -135,30 +144,20 @@ export async function POST(request: Request, { params }: RouteParams) {
         },
       })
 
-      return NextResponse.json(
-        {
-          error: 'Listing approved but auction creation failed: ' + (auctionError instanceof Error ? auctionError.message : 'Unknown error'),
-          listing
-        },
-        { status: 500 }
+      throw new AppError(
+        'Listing approved but auction creation failed: ' + (auctionError instanceof Error ? auctionError.message : 'Unknown error'),
+        ERROR_CODES.INTERNAL_SERVER_ERROR,
+        500,
+        { listing }
       )
     }
 
-    return NextResponse.json({ listing, auction })
-  } catch (error) {
-    if (error instanceof Error) {
-      if (error.message.includes('not found')) {
-        return NextResponse.json({ error: error.message }, { status: 404 })
-      }
-      if (error.message.includes('Cannot approve')) {
-        return NextResponse.json({ error: error.message }, { status: 400 })
-      }
-    }
-
-    console.error('Approve listing error:', error)
-    return NextResponse.json(
-      { error: 'Failed to approve listing' },
-      { status: 500 }
-    )
+    return successResponse({ listing, auction })
+  },
+  {
+    requiresAuth: true,
+    resourceType: 'listing',
+    action: 'admin.listing.approve',
+    auditLog: true,
   }
-}
+)

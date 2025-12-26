@@ -168,12 +168,12 @@ export default async function SellerDashboardPage() {
 
                         {/* Status-specific messages */}
                         {status === 'CHANGES_REQUESTED' && listing.rejectionReason && (
-                          <div className="mt-4 rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-800 dark:border-amber-800 dark:bg-amber-950 dark:text-amber-200">
+                          <div className="mt-4 rounded-lg border border-warning/20 bg-warning/10 p-3 text-sm text-warning">
                             <strong>Changes requested:</strong> {listing.rejectionReason}
                           </div>
                         )}
                         {status === 'REJECTED' && listing.rejectionReason && (
-                          <div className="mt-4 rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-800 dark:border-red-800 dark:bg-red-950 dark:text-red-200">
+                          <div className="mt-4 rounded-lg border border-destructive/20 bg-destructive/10 p-3 text-sm text-destructive">
                             <strong>Rejection reason:</strong> {listing.rejectionReason}
                           </div>
                         )}

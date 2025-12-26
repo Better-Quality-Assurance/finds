@@ -51,10 +51,15 @@ export function AuctionCard({
   const primaryPhoto = auction.listing.media[0]
 
   return (
-    <Card className="group overflow-hidden transition-shadow hover:shadow-lg" role="article" aria-label={`Auction for ${auction.listing.year} ${auction.listing.make} ${auction.listing.model}`}>
+    <Card
+      variant="elevated"
+      className="group overflow-hidden"
+      role="article"
+      aria-label={`Auction for ${auction.listing.year} ${auction.listing.make} ${auction.listing.model}`}
+    >
       <Link href={`/auctions/${auction.id}`}>
         {/* Image */}
-        <div className="relative aspect-[4/3] overflow-hidden bg-muted">
+        <div className="relative aspect-[4/3] overflow-hidden bg-gradient-to-br from-muted to-muted/50">
           {primaryPhoto ? (
             <Image
               src={primaryPhoto.publicUrl}
@@ -62,7 +67,7 @@ export function AuctionCard({
               fill
               sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
               priority={false}
-              className="object-cover transition-transform group-hover:scale-105"
+              className="object-cover transition-transform duration-500 group-hover:scale-110"
             />
           ) : (
             <div className="flex h-full items-center justify-center" role="img" aria-label="No image available">
@@ -70,15 +75,18 @@ export function AuctionCard({
             </div>
           )}
 
+          {/* Gradient overlay on hover */}
+          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
+
           {/* Time badge */}
           <div
             className={cn(
-              'absolute left-2 top-2 flex items-center gap-1 rounded px-2 py-1 text-sm font-medium text-white',
+              'absolute left-3 top-3 flex items-center gap-1.5 rounded-full px-3 py-1.5 text-sm font-semibold backdrop-blur-sm',
               isEnded
-                ? 'bg-gray-600'
+                ? 'bg-muted text-muted-foreground'
                 : isEndingSoon
-                  ? 'animate-pulse bg-red-500'
-                  : 'bg-black/70'
+                  ? 'animate-pulse-subtle bg-gradient-ending text-white shadow-lg shadow-destructive/30'
+                  : 'bg-black/60 text-white'
             )}
             aria-label={`Time remaining: ${timeRemaining}`}
           >
@@ -90,7 +98,7 @@ export function AuctionCard({
           {!auction.listing.isRunning && (
             <Badge
               variant="warning"
-              className="absolute right-2 top-2"
+              className="absolute right-3 top-3"
             >
               Non-Running
             </Badge>
@@ -98,9 +106,9 @@ export function AuctionCard({
 
           {/* Reserve badge */}
           {auction.currentBid && (
-            <div className="absolute bottom-2 left-2">
+            <div className="absolute bottom-3 left-3">
               <Badge
-                variant={auction.reserveMet ? 'success' : 'secondary'}
+                variant={auction.reserveMet ? 'success' : 'muted'}
               >
                 {auction.reserveMet ? 'Reserve Met' : 'Reserve Not Met'}
               </Badge>
@@ -110,7 +118,7 @@ export function AuctionCard({
 
         <CardContent className="p-4">
           {/* Title */}
-          <h3 className="line-clamp-1 font-semibold">
+          <h3 className="line-clamp-1 font-heading text-lg font-semibold tracking-tight">
             {auction.listing.title}
           </h3>
 
@@ -120,23 +128,23 @@ export function AuctionCard({
           </p>
 
           {/* Location */}
-          <p className="mt-1 flex items-center gap-1 text-sm text-muted-foreground">
+          <p className="mt-2 flex items-center gap-1 text-sm text-muted-foreground">
             <MapPin className="h-3.5 w-3.5" aria-hidden="true" />
             {auction.listing.locationCity}, {auction.listing.locationCountry}
           </p>
 
           {/* Price and bids */}
-          <div className="mt-3 flex items-end justify-between">
+          <div className="mt-4 flex items-end justify-between border-t border-border/50 pt-4">
             <div>
-              <p className="text-xs text-muted-foreground">
+              <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
                 {auction.currentBid ? 'Current Bid' : 'Starting Bid'}
               </p>
-              <p className="text-lg font-bold text-primary">
+              <p className="font-mono text-xl font-bold text-primary">
                 {formatCurrency(currentPrice, auction.listing.currency)}
               </p>
             </div>
             <div className="text-right">
-              <p className="flex items-center gap-1 text-sm text-muted-foreground">
+              <p className="flex items-center gap-1.5 rounded-full bg-muted/50 px-2.5 py-1 text-sm font-medium text-muted-foreground">
                 <Gavel className="h-3.5 w-3.5" aria-hidden="true" />
                 {auction.bidCount} {auction.bidCount === 1 ? 'bid' : 'bids'}
               </p>

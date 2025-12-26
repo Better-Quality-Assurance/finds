@@ -44,24 +44,7 @@ import {
   Eye,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
-
-type UserData = {
-  id: string
-  email: string
-  name: string | null
-  role: 'USER' | 'SELLER' | 'MODERATOR' | 'REVIEWER' | 'ADMIN'
-  emailVerified: string | null
-  biddingEnabled: boolean
-  bannedAt: string | null
-  banReason: string | null
-  unbannedAt: string | null
-  unbanReason: string | null
-  createdAt: string
-  _count: {
-    listings: number
-    bids: number
-  }
-}
+import type { UserData } from '@/types'
 
 type UsersManagementClientProps = {
   isAdmin: boolean
@@ -145,13 +128,13 @@ export function UsersManagementClient({ isAdmin }: UsersManagementClientProps) {
 
   const getRoleBadge = (role: string) => {
     const variants: Record<string, string> = {
-      ADMIN: 'bg-red-500 text-white',
-      MODERATOR: 'bg-purple-500 text-white',
-      REVIEWER: 'bg-blue-500 text-white',
-      SELLER: 'bg-green-500 text-white',
-      USER: 'bg-gray-500 text-white',
+      ADMIN: 'bg-destructive text-destructive-foreground',
+      MODERATOR: 'bg-secondary text-secondary-foreground',
+      REVIEWER: 'bg-primary text-primary-foreground',
+      SELLER: 'bg-success text-success-foreground',
+      USER: 'bg-muted text-muted-foreground',
     }
-    return <Badge className={variants[role] || 'bg-gray-500'}>{role}</Badge>
+    return <Badge className={variants[role] || 'bg-muted text-muted-foreground'}>{role}</Badge>
   }
 
   const getStatusBadge = (user: UserData) => {
@@ -316,7 +299,7 @@ export function UsersManagementClient({ isAdmin }: UsersManagementClientProps) {
                                 {user.bannedAt ? (
                                   <DropdownMenuItem
                                     onClick={() => setActionDialog({ type: 'unban', user })}
-                                    className="text-green-600"
+                                    className="text-success"
                                   >
                                     <ShieldCheck className="mr-2 h-4 w-4" />
                                     Unban User
@@ -324,7 +307,7 @@ export function UsersManagementClient({ isAdmin }: UsersManagementClientProps) {
                                 ) : (
                                   <DropdownMenuItem
                                     onClick={() => setActionDialog({ type: 'ban', user })}
-                                    className="text-red-600"
+                                    className="text-destructive"
                                   >
                                     <Ban className="mr-2 h-4 w-4" />
                                     Ban User
@@ -426,14 +409,14 @@ export function UsersManagementClient({ isAdmin }: UsersManagementClientProps) {
             </div>
 
             {actionDialog.type === 'ban' && (
-              <div className="rounded-lg bg-red-50 p-3 text-sm text-red-800 dark:bg-red-900 dark:text-red-100">
+              <div className="rounded-lg bg-destructive/10 p-3 text-sm">
                 <ShieldAlert className="mb-1 h-4 w-4" />
                 This action will disable the user&apos;s account and bidding. They will not be able to participate in auctions until unbanned.
               </div>
             )}
 
             {actionDialog.type === 'unban' && actionDialog.user?.banReason && (
-              <div className="rounded-lg bg-amber-50 p-3 text-sm text-amber-800 dark:bg-amber-900 dark:text-amber-100">
+              <div className="rounded-lg bg-warning/10 p-3 text-sm">
                 <div className="font-medium mb-1">Original ban reason:</div>
                 <div className="text-xs">{actionDialog.user.banReason}</div>
                 {actionDialog.user.bannedAt && (
@@ -525,10 +508,10 @@ export function UsersManagementClient({ isAdmin }: UsersManagementClientProps) {
                   <h3 className="font-semibold mb-3">Ban History</h3>
                   <div className="space-y-3">
                     {actionDialog.user.bannedAt && (
-                      <div className="rounded-lg bg-red-50 p-3 dark:bg-red-900/20">
+                      <div className="rounded-lg bg-destructive/10 p-3">
                         <div className="flex items-center gap-2 mb-1">
-                          <Ban className="h-4 w-4 text-red-600" />
-                          <span className="font-medium text-red-600">Currently Banned</span>
+                          <Ban className="h-4 w-4 text-destructive" />
+                          <span className="font-medium text-destructive">Currently Banned</span>
                         </div>
                         <div className="text-sm space-y-1">
                           <p>
@@ -545,10 +528,10 @@ export function UsersManagementClient({ isAdmin }: UsersManagementClientProps) {
                       </div>
                     )}
                     {actionDialog.user.unbannedAt && !actionDialog.user.bannedAt && (
-                      <div className="rounded-lg bg-green-50 p-3 dark:bg-green-900/20">
+                      <div className="rounded-lg bg-success/10 p-3">
                         <div className="flex items-center gap-2 mb-1">
-                          <ShieldCheck className="h-4 w-4 text-green-600" />
-                          <span className="font-medium text-green-600">Previously Banned (Unbanned)</span>
+                          <ShieldCheck className="h-4 w-4 text-success" />
+                          <span className="font-medium text-success">Previously Banned (Unbanned)</span>
                         </div>
                         <div className="text-sm space-y-1">
                           <p>

@@ -46,40 +46,11 @@ import {
 import { cn } from '@/lib/utils'
 import { formatCurrency } from '@/lib/utils'
 import { BidHistoryDialog } from '@/components/admin/bid-history-dialog'
-
-type AuctionData = {
-  id: string
-  status: 'SCHEDULED' | 'ACTIVE' | 'EXTENDED' | 'ENDED' | 'SOLD' | 'NO_SALE' | 'CANCELLED'
-  currentBid: string | null
-  bidCount: number
-  startTime: string
-  currentEndTime: string
-  extensionCount: number
-  reserveMet: boolean
-  currency: string
-  listing: {
-    id: string
-    title: string
-    make: string
-    model: string
-    year: number
-    seller: {
-      id: string
-      name: string | null
-      email: string
-    }
-  }
-  _count: {
-    bids: number
-    watchlist: number
-  }
-}
-
-type Stats = Record<string, number>
+import type { AdminAuctionData, DashboardStats } from '@/types'
 
 export function AuctionsManagementClient() {
-  const [auctions, setAuctions] = useState<AuctionData[]>([])
-  const [stats, setStats] = useState<Stats>({})
+  const [auctions, setAuctions] = useState<AdminAuctionData[]>([])
+  const [stats, setStats] = useState<DashboardStats>({})
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState('')
   const [statusFilter, setStatusFilter] = useState('')
@@ -88,7 +59,7 @@ export function AuctionsManagementClient() {
 
   const [actionDialog, setActionDialog] = useState<{
     type: 'cancel' | 'end' | 'extend' | 'view' | null
-    auction: AuctionData | null
+    auction: AdminAuctionData | null
   }>({ type: null, auction: null })
   const [actionReason, setActionReason] = useState('')
   const [extensionMinutes, setExtensionMinutes] = useState('60')
@@ -160,15 +131,15 @@ export function AuctionsManagementClient() {
 
   const getStatusBadge = (status: string) => {
     const variants: Record<string, { class: string; label: string }> = {
-      SCHEDULED: { class: 'bg-blue-500', label: 'Scheduled' },
-      ACTIVE: { class: 'bg-green-500', label: 'Active' },
-      EXTENDED: { class: 'bg-yellow-500', label: 'Extended' },
-      ENDED: { class: 'bg-gray-500', label: 'Ended' },
-      SOLD: { class: 'bg-emerald-500', label: 'Sold' },
-      NO_SALE: { class: 'bg-orange-500', label: 'No Sale' },
-      CANCELLED: { class: 'bg-red-500', label: 'Cancelled' },
+      SCHEDULED: { class: 'bg-primary', label: 'Scheduled' },
+      ACTIVE: { class: 'bg-success', label: 'Active' },
+      EXTENDED: { class: 'bg-warning', label: 'Extended' },
+      ENDED: { class: 'bg-muted-foreground', label: 'Ended' },
+      SOLD: { class: 'bg-success', label: 'Sold' },
+      NO_SALE: { class: 'bg-warning', label: 'No Sale' },
+      CANCELLED: { class: 'bg-destructive', label: 'Cancelled' },
     }
-    const v = variants[status] || { class: 'bg-gray-500', label: status }
+    const v = variants[status] || { class: 'bg-muted-foreground', label: status }
     return <Badge className={`${v.class} text-white`}>{v.label}</Badge>
   }
 
@@ -196,10 +167,10 @@ export function AuctionsManagementClient() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Active</CardTitle>
-            <Gavel className="h-4 w-4 text-green-500" />
+            <Gavel className="h-4 w-4 text-success" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-green-500">
+            <div className="text-2xl font-bold text-success">
               {stats.ACTIVE || 0}
             </div>
           </CardContent>
@@ -208,10 +179,10 @@ export function AuctionsManagementClient() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Scheduled</CardTitle>
-            <Clock className="h-4 w-4 text-blue-500" />
+            <Clock className="h-4 w-4 text-primary" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-blue-500">
+            <div className="text-2xl font-bold text-primary">
               {stats.SCHEDULED || 0}
             </div>
           </CardContent>
@@ -220,10 +191,10 @@ export function AuctionsManagementClient() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Sold</CardTitle>
-            <TrendingUp className="h-4 w-4 text-emerald-500" />
+            <TrendingUp className="h-4 w-4 text-success" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-emerald-500">
+            <div className="text-2xl font-bold text-success">
               {stats.SOLD || 0}
             </div>
           </CardContent>
@@ -232,10 +203,10 @@ export function AuctionsManagementClient() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Cancelled</CardTitle>
-            <XCircle className="h-4 w-4 text-red-500" />
+            <XCircle className="h-4 w-4 text-destructive" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-red-500">
+            <div className="text-2xl font-bold text-destructive">
               {stats.CANCELLED || 0}
             </div>
           </CardContent>
@@ -414,7 +385,7 @@ export function AuctionsManagementClient() {
                                 <DropdownMenuSeparator />
                                 <DropdownMenuItem
                                   onClick={() => setActionDialog({ type: 'cancel', auction })}
-                                  className="text-red-600"
+                                  className="text-destructive"
                                 >
                                   <XCircle className="mr-2 h-4 w-4" />
                                   Cancel Auction
@@ -509,7 +480,7 @@ export function AuctionsManagementClient() {
             </div>
 
             {actionDialog.type === 'cancel' && (
-              <div className="rounded-lg bg-red-50 p-3 text-sm text-red-800 dark:bg-red-900 dark:text-red-100">
+              <div className="rounded-lg bg-destructive/10 p-3 text-sm">
                 <AlertTriangle className="mb-1 h-4 w-4" />
                 This will cancel the auction and release all deposits.
               </div>
@@ -592,14 +563,14 @@ export function AuctionsManagementClient() {
               </div>
 
               {actionDialog.auction.bidCount > 0 && (
-                <div className="mt-4 flex items-center gap-2 rounded-lg border border-blue-200 bg-blue-50 p-3 dark:border-blue-800 dark:bg-blue-950/20">
-                  <TrendingUp className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+                <div className="mt-4 flex items-center gap-2 rounded-lg bg-primary/10 p-3">
+                  <TrendingUp className="h-5 w-5 text-primary" />
                   <div className="flex-1">
-                    <p className="text-sm font-medium text-blue-900 dark:text-blue-100">
+                    <p className="text-sm font-medium">
                       This auction has {actionDialog.auction.bidCount} bid
                       {actionDialog.auction.bidCount !== 1 ? 's' : ''}
                     </p>
-                    <p className="text-xs text-blue-700 dark:text-blue-300">
+                    <p className="text-xs text-muted-foreground">
                       View complete bid history and manage bids
                     </p>
                   </div>

@@ -22,7 +22,7 @@ export default function AuctionsLoading() {
       <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
         {Array.from({ length: 9 }).map((_, i) => (
           <Card key={i}>
-            <Skeleton className="aspect-[4/3] w-full rounded-t-lg" />
+            <Skeleton className="aspect-[4/3] w-full rounded-t-xl" />
             <CardHeader className="space-y-2">
               <Skeleton className="h-6 w-3/4" />
               <Skeleton className="h-4 w-1/2" />

@@ -4,7 +4,6 @@ import { useState } from 'react'
 import { useTranslations } from 'next-intl'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { z } from 'zod'
 import { Link } from '@/i18n/routing'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -19,12 +18,7 @@ import {
 } from '@/components/ui/card'
 import { toast } from 'sonner'
 import { Loader2, ArrowLeft, Mail } from 'lucide-react'
-
-const forgotPasswordSchema = z.object({
-  email: z.string().email(),
-})
-
-type ForgotPasswordFormData = z.infer<typeof forgotPasswordSchema>
+import { forgotPasswordSchema, type ForgotPasswordFormData } from '@/lib/validation-schemas'
 
 export default function ForgotPasswordPage() {
   const t = useTranslations('auth')

@@ -1,53 +1,13 @@
 'use client'
 
 import { UseFormReturn } from 'react-hook-form'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select'
-import type { ListingFormData } from '../listing-form'
+import { FormInput, FormSelect } from '@/components/ui/form-field'
+import type { ListingFormData } from '@/lib/validation-schemas'
+import { EU_COUNTRIES } from '@/constants/listing-form'
 
 type LocationStepProps = {
   form: UseFormReturn<ListingFormData>
 }
-
-const EU_COUNTRIES = [
-  { code: 'RO', name: 'Romania' },
-  { code: 'AT', name: 'Austria' },
-  { code: 'BE', name: 'Belgium' },
-  { code: 'BG', name: 'Bulgaria' },
-  { code: 'HR', name: 'Croatia' },
-  { code: 'CY', name: 'Cyprus' },
-  { code: 'CZ', name: 'Czech Republic' },
-  { code: 'DK', name: 'Denmark' },
-  { code: 'EE', name: 'Estonia' },
-  { code: 'FI', name: 'Finland' },
-  { code: 'FR', name: 'France' },
-  { code: 'DE', name: 'Germany' },
-  { code: 'GR', name: 'Greece' },
-  { code: 'HU', name: 'Hungary' },
-  { code: 'IE', name: 'Ireland' },
-  { code: 'IT', name: 'Italy' },
-  { code: 'LV', name: 'Latvia' },
-  { code: 'LT', name: 'Lithuania' },
-  { code: 'LU', name: 'Luxembourg' },
-  { code: 'MT', name: 'Malta' },
-  { code: 'NL', name: 'Netherlands' },
-  { code: 'PL', name: 'Poland' },
-  { code: 'PT', name: 'Portugal' },
-  { code: 'SK', name: 'Slovakia' },
-  { code: 'SI', name: 'Slovenia' },
-  { code: 'ES', name: 'Spain' },
-  { code: 'SE', name: 'Sweden' },
-  { code: 'GB', name: 'United Kingdom' },
-  { code: 'CH', name: 'Switzerland' },
-  { code: 'NO', name: 'Norway' },
-]
 
 export function LocationStep({ form }: LocationStepProps) {
   const { register, formState: { errors }, setValue, watch } = form
@@ -59,59 +19,42 @@ export function LocationStep({ form }: LocationStepProps) {
         buyers plan for transport and inspection.
       </p>
 
-      <div className="space-y-2">
-        <Label htmlFor="locationCountry">Country *</Label>
-        <Select
-          value={watch('locationCountry')}
-          onValueChange={(value) => setValue('locationCountry', value)}
-        >
-          <SelectTrigger>
-            <SelectValue placeholder="Select country" />
-          </SelectTrigger>
-          <SelectContent>
-            {EU_COUNTRIES.map((country) => (
-              <SelectItem key={country.code} value={country.code}>
-                {country.name}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-        {errors.locationCountry && (
-          <p className="text-sm text-destructive">{errors.locationCountry.message}</p>
-        )}
-      </div>
+      <FormSelect
+        label="Country"
+        fieldName="locationCountry"
+        value={watch('locationCountry')}
+        onValueChange={(value) => setValue('locationCountry', value)}
+        placeholder="Select country"
+        options={EU_COUNTRIES.map((country) => ({
+          value: country.code,
+          label: country.name,
+        }))}
+        error={errors.locationCountry}
+        required
+      />
 
       <div className="grid gap-4 md:grid-cols-2">
-        <div className="space-y-2">
-          <Label htmlFor="locationCity">City *</Label>
-          <Input
-            id="locationCity"
-            placeholder="e.g., Bucharest, Munich, London"
-            {...register('locationCity')}
-          />
-          {errors.locationCity && (
-            <p className="text-sm text-destructive">{errors.locationCity.message}</p>
-          )}
-        </div>
+        <FormInput
+          label="City"
+          registration={register('locationCity')}
+          placeholder="e.g., Bucharest, Munich, London"
+          error={errors.locationCity}
+          required
+        />
 
-        <div className="space-y-2">
-          <Label htmlFor="locationRegion">Region/State (optional)</Label>
-          <Input
-            id="locationRegion"
-            placeholder="e.g., Ilfov, Bavaria, Kent"
-            {...register('locationRegion')}
-          />
-          {errors.locationRegion && (
-            <p className="text-sm text-destructive">{errors.locationRegion.message}</p>
-          )}
-        </div>
+        <FormInput
+          label="Region/State"
+          registration={register('locationRegion')}
+          placeholder="e.g., Ilfov, Bavaria, Kent"
+          error={errors.locationRegion}
+        />
       </div>
 
-      <div className="rounded-lg border border-blue-200 bg-blue-50 p-4 dark:border-blue-800 dark:bg-blue-950">
-        <h4 className="font-medium text-blue-800 dark:text-blue-200">
+      <div className="rounded-lg border border-primary/20 bg-primary/10 p-4">
+        <h4 className="font-medium text-primary">
           Transport Note
         </h4>
-        <p className="mt-1 text-sm text-blue-700 dark:text-blue-300">
+        <p className="mt-1 text-sm text-primary/80">
           Buyers are responsible for arranging transport. Many vehicles sold on
           Finds are non-running and require flatbed transport. The exact pickup
           address will be shared with the winning buyer after payment.

@@ -29,57 +29,20 @@ import {
   Camera,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
-
-type ListingMedia = {
-  id: string
-  publicUrl: string
-  type: string
-  category: string | null
-}
-
-type Listing = {
-  id: string
-  title: string
-  description: string
-  make: string
-  model: string
-  year: number
-  mileage: number | null
-  locationCity: string
-  locationCountry: string
-  startingPrice: unknown // Prisma Decimal type
-  reservePrice: unknown // Prisma Decimal type
-  currency: string
-  status: string
-  isRunning: boolean
-  conditionRating: number | null
-  knownIssues: string | null
-  createdAt: string | Date
-  seller: {
-    id: string
-    name: string | null
-    email: string
-  }
-  media: ListingMedia[]
-  _count: {
-    media: number
-  }
-}
+import type { AdminListing, ListingStatusFilter } from '@/types'
 
 type AdminListingsClientProps = {
-  initialListings: Listing[]
+  initialListings: AdminListing[]
   statusCounts: Record<string, number>
   userRole: string
 }
 
-type StatusFilter = 'PENDING_REVIEW' | 'CHANGES_REQUESTED' | 'APPROVED' | 'REJECTED' | 'ALL'
-
-const STATUS_TABS: { value: StatusFilter; label: string; color: string }[] = [
-  { value: 'PENDING_REVIEW', label: 'Pending Review', color: 'bg-amber-500' },
-  { value: 'CHANGES_REQUESTED', label: 'Changes Requested', color: 'bg-yellow-500' },
-  { value: 'APPROVED', label: 'Approved', color: 'bg-green-500' },
-  { value: 'REJECTED', label: 'Rejected', color: 'bg-red-500' },
-  { value: 'ALL', label: 'All', color: 'bg-gray-500' },
+const STATUS_TABS: { value: ListingStatusFilter; label: string; color: string }[] = [
+  { value: 'PENDING_REVIEW', label: 'Pending Review', color: 'bg-warning' },
+  { value: 'CHANGES_REQUESTED', label: 'Changes Requested', color: 'bg-warning' },
+  { value: 'APPROVED', label: 'Approved', color: 'bg-success' },
+  { value: 'REJECTED', label: 'Rejected', color: 'bg-destructive' },
+  { value: 'ALL', label: 'All', color: 'bg-muted-foreground' },
 ]
 
 export function AdminListingsClient({
@@ -87,15 +50,15 @@ export function AdminListingsClient({
   statusCounts,
   userRole,
 }: AdminListingsClientProps) {
-  const [listings, setListings] = useState<Listing[]>(initialListings)
-  const [activeStatus, setActiveStatus] = useState<StatusFilter>('PENDING_REVIEW')
+  const [listings, setListings] = useState<AdminListing[]>(initialListings)
+  const [activeStatus, setActiveStatus] = useState<ListingStatusFilter>('PENDING_REVIEW')
   const [isLoading, setIsLoading] = useState(false)
-  const [selectedListing, setSelectedListing] = useState<Listing | null>(null)
+  const [selectedListing, setSelectedListing] = useState<AdminListing | null>(null)
   const [actionType, setActionType] = useState<'approve' | 'reject' | 'request-changes' | null>(null)
   const [reason, setReason] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
 
-  const fetchListings = async (status: StatusFilter) => {
+  const fetchListings = async (status: ListingStatusFilter) => {
     setIsLoading(true)
     try {
       const url = `/api/admin/listings?status=${status}&limit=50`
@@ -110,7 +73,7 @@ export function AdminListingsClient({
     }
   }
 
-  const handleStatusChange = (status: StatusFilter) => {
+  const handleStatusChange = (status: ListingStatusFilter) => {
     setActiveStatus(status)
     fetchListings(status)
   }
@@ -156,7 +119,7 @@ export function AdminListingsClient({
     }
   }
 
-  const openActionDialog = (listing: Listing, action: 'approve' | 'reject' | 'request-changes') => {
+  const openActionDialog = (listing: AdminListing, action: 'approve' | 'reject' | 'request-changes') => {
     setSelectedListing(listing)
     setActionType(action)
     setReason('')

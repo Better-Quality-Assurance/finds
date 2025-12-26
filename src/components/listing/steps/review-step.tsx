@@ -6,9 +6,10 @@ import { UseFormReturn } from 'react-hook-form'
 import { Badge } from '@/components/ui/badge'
 import { Loader2, MapPin, Car, Wrench, Euro, Camera, AlertTriangle, Video } from 'lucide-react'
 import { formatCurrency, calculateBuyerFee, calculateTotalWithFee } from '@/lib/utils'
-import type { ListingFormData } from '../listing-form'
+import type { ListingFormData } from '@/lib/validation-schemas'
 import { LISTING_RULES } from '@/domain/listing/rules'
 import { cn } from '@/lib/utils'
+import { CATEGORY_LABELS, COUNTRY_NAMES, CONDITION_LABELS } from '@/constants/listing-form'
 
 type ReviewStepProps = {
   form: UseFormReturn<ListingFormData>
@@ -21,62 +22,6 @@ type ListingMedia = {
   type: string
   category: string | null
   fileSize?: number
-}
-
-const CATEGORY_LABELS: Record<string, string> = {
-  CLASSIC_CAR: 'Classic Car',
-  RETRO_CAR: 'Retro Car',
-  BARN_FIND: 'Barn Find',
-  PROJECT_CAR: 'Project Car',
-  MOTORCYCLE: 'Motorcycle',
-  PARTS: 'Parts',
-  MEMORABILIA: 'Memorabilia',
-}
-
-const COUNTRY_NAMES: Record<string, string> = {
-  RO: 'Romania',
-  AT: 'Austria',
-  BE: 'Belgium',
-  BG: 'Bulgaria',
-  HR: 'Croatia',
-  CY: 'Cyprus',
-  CZ: 'Czech Republic',
-  DK: 'Denmark',
-  EE: 'Estonia',
-  FI: 'Finland',
-  FR: 'France',
-  DE: 'Germany',
-  GR: 'Greece',
-  HU: 'Hungary',
-  IE: 'Ireland',
-  IT: 'Italy',
-  LV: 'Latvia',
-  LT: 'Lithuania',
-  LU: 'Luxembourg',
-  MT: 'Malta',
-  NL: 'Netherlands',
-  PL: 'Poland',
-  PT: 'Portugal',
-  SK: 'Slovakia',
-  SI: 'Slovenia',
-  ES: 'Spain',
-  SE: 'Sweden',
-  GB: 'United Kingdom',
-  CH: 'Switzerland',
-  NO: 'Norway',
-}
-
-const CONDITION_LABELS: Record<number, string> = {
-  1: '1 - Parts only',
-  2: '2 - Heavily deteriorated',
-  3: '3 - Major restoration needed',
-  4: '4 - Restoration project',
-  5: '5 - Running but needs work',
-  6: '6 - Driver quality',
-  7: '7 - Good condition',
-  8: '8 - Very good condition',
-  9: '9 - Excellent condition',
-  10: '10 - Concours/Show quality',
 }
 
 export function ReviewStep({ form, listingId }: ReviewStepProps) {
@@ -133,12 +78,12 @@ export function ReviewStep({ form, listingId }: ReviewStepProps) {
 
       {/* Warnings */}
       {(!hasMinPhotos || missingCategories.length > 0) && (
-        <div className="rounded-lg border border-amber-200 bg-amber-50 p-4 dark:border-amber-800 dark:bg-amber-950">
-          <h4 className="flex items-center gap-2 font-medium text-amber-800 dark:text-amber-200">
+        <div className="rounded-lg border border-warning/20 bg-warning/10 p-4">
+          <h4 className="flex items-center gap-2 font-medium text-warning">
             <AlertTriangle className="h-4 w-4" />
             Issues to Address
           </h4>
-          <ul className="mt-2 space-y-1 text-sm text-amber-700 dark:text-amber-300">
+          <ul className="mt-2 space-y-1 text-sm text-warning/80">
             {!hasMinPhotos && (
               <li>
                 • You have uploaded {photoCount} photos. Minimum required:{' '}
@@ -344,7 +289,7 @@ export function ReviewStep({ form, listingId }: ReviewStepProps) {
             <p className="mt-2 text-sm text-muted-foreground">
               {photos.length} photos uploaded
               {!hasMinPhotos && (
-                <span className="ml-2 text-amber-600">
+                <span className="ml-2 text-warning">
                   ({LISTING_RULES.MIN_PHOTOS - photos.length} more needed)
                 </span>
               )}
@@ -372,7 +317,7 @@ export function ReviewStep({ form, listingId }: ReviewStepProps) {
             </div>
           </>
         ) : (
-          <p className="mt-2 text-sm text-amber-600">
+          <p className="mt-2 text-sm text-warning">
             No photos uploaded. Please go back and add at least{' '}
             {LISTING_RULES.MIN_PHOTOS} photos.
           </p>
@@ -420,11 +365,11 @@ export function ReviewStep({ form, listingId }: ReviewStepProps) {
       </div>
 
       {/* Terms reminder */}
-      <div className="rounded-lg border border-blue-200 bg-blue-50 p-4 dark:border-blue-800 dark:bg-blue-950">
-        <h4 className="font-medium text-blue-800 dark:text-blue-200">
+      <div className="rounded-lg border border-primary/20 bg-primary/10 p-4">
+        <h4 className="font-medium text-primary">
           Before You Submit
         </h4>
-        <ul className="mt-2 space-y-1 text-sm text-blue-700 dark:text-blue-300">
+        <ul className="mt-2 space-y-1 text-sm text-primary/80">
           <li>• Your listing will be reviewed within 1-2 business days</li>
           <li>• You may be asked to provide additional photos or information</li>
           <li>

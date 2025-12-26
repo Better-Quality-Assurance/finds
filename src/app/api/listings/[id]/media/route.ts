@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { auth } from '@/lib/auth'
 import { getContainer } from '@/lib/container'
 import { LISTING_RULES, validateFileType, validateFileSize } from '@/domain/listing/rules'
+import { listingStatusValidator } from '@/services/validators/listing-status.validator'
 import { z } from 'zod'
 import { MediaType } from '@prisma/client'
 
@@ -37,7 +38,7 @@ export async function POST(request: Request, { params }: RouteParams) {
       )
     }
 
-    if (!['DRAFT', 'CHANGES_REQUESTED'].includes(listing.status)) {
+    if (!listingStatusValidator.isEditable(listing.status)) {
       return NextResponse.json(
         { error: 'Cannot add media to listing in current status' },
         { status: 400 }

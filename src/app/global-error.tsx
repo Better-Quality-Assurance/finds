@@ -25,9 +25,9 @@ export default function GlobalError({
       <body className={`${inter.variable} font-sans antialiased`}>
         <div className="flex min-h-screen items-center justify-center bg-background p-4">
           <div className="max-w-md w-full rounded-lg border bg-card p-8 text-center shadow-lg">
-            <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-red-100">
+            <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-destructive/10">
               <svg
-                className="h-8 w-8 text-red-600"
+                className="h-8 w-8 text-destructive"
                 fill="none"
                 viewBox="0 0 24 24"
                 stroke="currentColor"

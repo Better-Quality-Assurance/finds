@@ -1,16 +1,15 @@
-import { NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
 import { getContainer } from '@/lib/container'
 import { randomUUID } from 'crypto'
 import { checkRateLimit, emailRateLimitKey, createRateLimitHeaders, createRateLimitResponse } from '@/middleware/rate-limit'
 import { PASSWORD_RESET_RATE_LIMIT } from '@/lib/rate-limit-config'
+import { withSimpleErrorHandler } from '@/lib/with-error-handler'
+import { successResponse } from '@/lib/api-response'
+import { forgotPasswordSchema } from '@/lib/validation-schemas'
 
-const forgotPasswordSchema = z.object({
-  email: z.string().email(),
-})
-
-export async function POST(request: Request) {
-  try {
+export const POST = withSimpleErrorHandler(
+  async (request: NextRequest) => {
     const body = await request.json()
     const { email } = forgotPasswordSchema.parse(body)
 
@@ -94,20 +93,9 @@ export async function POST(request: Request) {
     })
 
     return response
-  } catch (error) {
-    if (error instanceof z.ZodError) {
-      return NextResponse.json(
-        { message: 'Invalid email address' },
-        { status: 400 }
-      )
-    }
-
-    console.error('Forgot password error:', error)
-
-    // Return a generic error message
-    return NextResponse.json(
-      { message: 'Something went wrong. Please try again later.' },
-      { status: 500 }
-    )
+  },
+  {
+    resourceType: 'user',
+    action: 'auth.forgot-password',
   }
-}
+)

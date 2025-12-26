@@ -1,31 +1,17 @@
 // Auction Repository - Auction-specific database queries
-import { PrismaClient, Auction, AuctionStatus, Listing, Bid } from '@prisma/client'
+import { PrismaClient, Auction, AuctionStatus } from '@prisma/client'
 import { BaseRepository, IRepository } from './base.repository'
+import type {
+  AuctionWithListing,
+  AuctionWithBids,
+  AuctionWithMedia,
+  AuctionFilters,
+  BidUpdateData,
+  SoldAuctionData,
+} from '@/types'
 
-export type AuctionWithListing = Auction & {
-  listing: Listing
-}
-
-export type AuctionWithBids = Auction & {
-  listing: Listing
-  bids: (Bid & {
-    bidder: {
-      id: string
-      name: string | null
-    }
-  })[]
-}
-
-export type AuctionWithMedia = Auction & {
-  listing: Listing & {
-    media: {
-      id: string
-      publicUrl: string
-      isPrimary: boolean
-      position: number
-    }[]
-  }
-}
+// Re-export types for backward compatibility
+export type { AuctionWithListing, AuctionWithBids, AuctionWithMedia }
 
 /**
  * Auction repository interface with specific query methods
@@ -36,14 +22,7 @@ export interface IAuctionRepository extends IRepository<Auction> {
   findEndedAuctionsToClose(): Promise<{ id: string }[]>
   findWithBids(id: string): Promise<AuctionWithBids | null>
   findByListingId(listingId: string): Promise<Auction | null>
-  findActiveWithFilters(filters: {
-    category?: string
-    minPrice?: number
-    maxPrice?: number
-    country?: string
-    skip?: number
-    take?: number
-  }): Promise<Auction[]>
+  findActiveWithFilters(filters: AuctionFilters): Promise<Auction[]>
   findEndingSoon(hoursAhead: number, limit?: number): Promise<AuctionWithMedia[]>
   updateStatus(id: string, status: AuctionStatus): Promise<Auction>
   incrementBidCount(id: string): Promise<Auction>
@@ -150,14 +129,7 @@ export class AuctionRepository extends BaseRepository<Auction> implements IAucti
   /**
    * Find active auctions with various filters
    */
-  async findActiveWithFilters(filters: {
-    category?: string
-    minPrice?: number
-    maxPrice?: number
-    country?: string
-    skip?: number
-    take?: number
-  }): Promise<Auction[]> {
+  async findActiveWithFilters(filters: AuctionFilters): Promise<Auction[]> {
     const { category, minPrice, maxPrice, country, skip = 0, take = 20 } = filters
 
     const where: Record<string, unknown> = {
@@ -262,12 +234,7 @@ export class AuctionRepository extends BaseRepository<Auction> implements IAucti
    */
   async updateWithBidInfo(
     id: string,
-    data: {
-      currentBid: number
-      reserveMet?: boolean
-      currentEndTime?: Date
-      extensionCount?: number
-    }
+    data: BidUpdateData
   ): Promise<Auction> {
     const updateData: Record<string, unknown> = {
       currentBid: data.currentBid,
@@ -297,13 +264,7 @@ export class AuctionRepository extends BaseRepository<Auction> implements IAucti
    */
   async markAsSold(
     id: string,
-    data: {
-      winnerId: string
-      winningBidId?: string
-      finalPrice: number
-      buyerFeeAmount: number
-      paymentDeadline: Date
-    }
+    data: SoldAuctionData
   ): Promise<Auction> {
     return this.prisma.auction.update({
       where: { id },

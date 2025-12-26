@@ -9,15 +9,7 @@ import { ConflictError, RateLimitError } from '@/lib/errors'
 import { ERROR_CODES } from '@/lib/error-codes'
 import { checkRateLimit, ipRateLimitKey } from '@/middleware/rate-limit'
 import { REGISTRATION_RATE_LIMIT } from '@/lib/rate-limit-config'
-
-const registerSchema = z.object({
-  name: z.string().min(2),
-  email: z.string().email(),
-  password: z.string().min(8),
-  acceptedTerms: z.boolean().refine((val) => val === true, {
-    message: 'You must accept the Terms of Service to register',
-  }),
-})
+import { registerApiSchema } from '@/lib/validation-schemas'
 
 export const POST = withSimpleErrorHandler(
   async (request: NextRequest) => {
@@ -37,7 +29,7 @@ export const POST = withSimpleErrorHandler(
     }
 
     const body = await request.json()
-    const { name, email, password } = registerSchema.parse(body)
+    const { name, email, password } = registerApiSchema.parse(body)
 
     const container = getContainer()
 

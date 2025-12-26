@@ -1,6 +1,7 @@
 import { prisma } from '@/lib/db'
 import { uploadToR2, deleteFromR2, generateMediaKey } from '@/lib/r2'
 import { LISTING_RULES, validatePhotos } from '@/domain/listing/rules'
+import { listingStatusValidator } from '@/services/validators/listing-status.validator'
 import type {
   Listing,
   ListingMedia,
@@ -94,7 +95,7 @@ export async function updateListing(
     throw new Error('Listing not found or unauthorized')
   }
 
-  if (!['DRAFT', 'CHANGES_REQUESTED'].includes(listing.status)) {
+  if (!listingStatusValidator.isEditable(listing.status)) {
     throw new Error('Cannot edit listing in current status')
   }
 
@@ -115,7 +116,7 @@ export async function addMedia(input: AddMediaInput): Promise<ListingMedia> {
     throw new Error('Listing not found')
   }
 
-  if (!['DRAFT', 'CHANGES_REQUESTED'].includes(listing.status)) {
+  if (!listingStatusValidator.isEditable(listing.status)) {
     throw new Error('Cannot add media to listing in current status')
   }
 
@@ -173,7 +174,7 @@ export async function updateMedia(
     throw new Error('Media not found or unauthorized')
   }
 
-  if (!['DRAFT', 'CHANGES_REQUESTED'].includes(media.listing.status)) {
+  if (!listingStatusValidator.isEditable(media.listing.status)) {
     throw new Error('Cannot update media for listing in current status')
   }
 
@@ -216,7 +217,7 @@ export async function removeMedia(
     throw new Error('Media not found or unauthorized')
   }
 
-  if (!['DRAFT', 'CHANGES_REQUESTED'].includes(media.listing.status)) {
+  if (!listingStatusValidator.isEditable(media.listing.status)) {
     throw new Error('Cannot remove media from listing in current status')
   }
 
@@ -242,7 +243,7 @@ export async function submitForReview(
     throw new Error('Listing not found or unauthorized')
   }
 
-  if (!['DRAFT', 'CHANGES_REQUESTED'].includes(listing.status)) {
+  if (!listingStatusValidator.canSubmitForReview(listing.status)) {
     throw new Error('Listing cannot be submitted in current status')
   }
 
@@ -334,7 +335,7 @@ export async function approveListing(
     throw new Error('Listing not found')
   }
 
-  if (listing.status !== 'PENDING_REVIEW') {
+  if (!listingStatusValidator.canApprove(listing.status)) {
     throw new Error('Listing is not pending review')
   }
 
@@ -362,7 +363,7 @@ export async function rejectListing(
     throw new Error('Listing not found')
   }
 
-  if (listing.status !== 'PENDING_REVIEW') {
+  if (!listingStatusValidator.canReject(listing.status)) {
     throw new Error('Listing is not pending review')
   }
 
@@ -390,7 +391,7 @@ export async function requestChanges(
     throw new Error('Listing not found')
   }
 
-  if (listing.status !== 'PENDING_REVIEW') {
+  if (!listingStatusValidator.canRequestChanges(listing.status)) {
     throw new Error('Listing is not pending review')
   }
 

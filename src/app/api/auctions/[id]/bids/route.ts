@@ -8,6 +8,7 @@ import { prisma } from '@/lib/db'
 import { z } from 'zod'
 import { withErrorHandler } from '@/lib/with-error-handler'
 import { successResponse } from '@/lib/api-response'
+import { placeBidSchema } from '@/lib/validation-schemas'
 import {
   UnauthorizedError,
   NotFoundError,
@@ -22,10 +23,6 @@ import { checkRateLimit, userRateLimitKey, createRateLimitResponse } from '@/mid
 import { BID_RATE_LIMIT } from '@/lib/rate-limit-config'
 
 type RouteParams = { params: Promise<{ id: string }> }
-
-const placeBidSchema = z.object({
-  amount: z.number().positive(),
-})
 
 // GET - Get bid history
 export const GET = withErrorHandler<{ id: string }>(

@@ -1,28 +1,19 @@
 // Bid Deposit Service - handles bid deposit management
 import { PrismaClient, BidDeposit } from '@prisma/client'
-import Stripe from 'stripe'
-import {
-  calculateDepositAmount,
-  createDepositHold,
-  captureDeposit,
-  releaseDeposit,
-  getDefaultPaymentMethod,
-  getOrCreateCustomer,
-  createSetupIntent,
-  DEPOSIT_CONFIG,
-} from '@/lib/stripe'
+import { calculateDepositAmount, DEPOSIT_CONFIG } from '@/lib/stripe'
 import {
   IBidDepositService,
   DepositResult,
   BiddingEligibility,
   SetupIntent,
 } from './contracts/payment.interface'
+import { IPaymentProcessor } from './contracts/payment-processor.interface'
 import { paymentLogger, logError } from '@/lib/logger'
 
 export class DepositService implements IBidDepositService {
   constructor(
     private readonly prisma: PrismaClient,
-    private readonly stripe: Stripe
+    private readonly paymentProcessor: IPaymentProcessor
   ) {}
 
   /**
@@ -45,25 +36,30 @@ export class DepositService implements IBidDepositService {
     email: string
     name: string | null
   }): Promise<SetupIntent> {
-    // Get or create Stripe customer
-    const customer = await getOrCreateCustomer({
-      userId: user.id,
-      email: user.email,
-      name: user.name,
-    })
+    // Get or create customer
+    const existingCustomers = await this.paymentProcessor.listCustomersByEmail(user.email)
+    let customer = existingCustomers.length > 0 ? existingCustomers[0] : null
 
-    // Update user with Stripe customer ID if needed
+    if (!customer) {
+      customer = await this.paymentProcessor.createCustomer({
+        email: user.email,
+        name: user.name,
+        metadata: { userId: user.id },
+      })
+    }
+
+    // Update user with customer ID if needed
     await this.prisma.user.update({
       where: { id: user.id },
       data: { stripeCustomerId: customer.id },
     })
 
     // Create SetupIntent for saving card
-    const setupIntent = await createSetupIntent(customer.id)
+    const setupIntent = await this.paymentProcessor.createSetupIntent(customer.id)
 
     return {
       customerId: customer.id,
-      clientSecret: setupIntent.client_secret!,
+      clientSecret: setupIntent.clientSecret!,
     }
   }
 
@@ -110,7 +106,7 @@ export class DepositService implements IBidDepositService {
     }
 
     // Check for valid payment method
-    const paymentMethod = await getDefaultPaymentMethod(user.stripeCustomerId)
+    const paymentMethod = await this.paymentProcessor.getDefaultPaymentMethod(user.stripeCustomerId)
     if (!paymentMethod) {
       return {
         eligible: false,
@@ -161,19 +157,27 @@ export class DepositService implements IBidDepositService {
     const depositAmount = calculateDepositAmount(bidAmount)
 
     // Get payment method
-    const paymentMethod = await getDefaultPaymentMethod(eligibility.stripeCustomerId!)
+    const paymentMethod = await this.paymentProcessor.getDefaultPaymentMethod(eligibility.stripeCustomerId!)
     if (!paymentMethod) {
       return { success: false, error: 'No valid payment method' }
     }
 
     try {
       // Create payment intent with hold
-      const paymentIntent = await createDepositHold({
+      const paymentIntent = await this.paymentProcessor.createPaymentIntent({
+        amount: depositAmount,
+        currency: DEPOSIT_CONFIG.CURRENCY,
         customerId: eligibility.stripeCustomerId!,
         paymentMethodId: paymentMethod.id,
-        amount: depositAmount,
-        auctionId,
-        userId,
+        captureMethod: 'manual',
+        confirm: true,
+        offSession: true,
+        metadata: {
+          type: 'bid_deposit',
+          auctionId,
+          userId,
+        },
+        returnUrl: `${process.env.NEXT_PUBLIC_APP_URL}/account/bids`,
       })
 
       // Check if action is required (3D Secure, etc.)
@@ -198,7 +202,7 @@ export class DepositService implements IBidDepositService {
           success: false,
           deposit,
           requiresAction: true,
-          clientSecret: paymentIntent.client_secret!,
+          clientSecret: paymentIntent.clientSecret!,
         }
       }
 
@@ -269,7 +273,7 @@ export class DepositService implements IBidDepositService {
 
     try {
       // Check payment intent status
-      const paymentIntent = await this.stripe.paymentIntents.retrieve(
+      const paymentIntent = await this.paymentProcessor.retrievePaymentIntent(
         deposit.stripePaymentIntentId
       )
 
@@ -315,7 +319,7 @@ export class DepositService implements IBidDepositService {
 
     try {
       // Cancel the payment intent to release the hold
-      await releaseDeposit(deposit.stripePaymentIntentId)
+      await this.paymentProcessor.releasePayment(deposit.stripePaymentIntentId)
 
       // Update deposit status
       await this.prisma.bidDeposit.update({
@@ -353,7 +357,7 @@ export class DepositService implements IBidDepositService {
 
     try {
       // Capture the held funds
-      await captureDeposit(deposit.stripePaymentIntentId)
+      await this.paymentProcessor.capturePayment(deposit.stripePaymentIntentId)
 
       // Update deposit status
       await this.prisma.bidDeposit.update({
@@ -442,9 +446,11 @@ export class DepositService implements IBidDepositService {
 // Factory function for creating deposit service with default dependencies
 import { prisma } from '@/lib/db'
 import { getStripe } from '@/lib/stripe'
+import { createStripePaymentProcessor } from './stripe-payment-processor'
 
-export function createDepositService(): DepositService {
-  return new DepositService(prisma, getStripe())
+export function createDepositService(paymentProcessor?: IPaymentProcessor): DepositService {
+  const processor = paymentProcessor || createStripePaymentProcessor(getStripe())
+  return new DepositService(prisma, processor)
 }
 
 // Default instance for backward compatibility

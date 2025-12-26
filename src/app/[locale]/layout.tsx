@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from 'next'
-import { Inter } from 'next/font/google'
+import { Inter, Playfair_Display, Space_Grotesk } from 'next/font/google'
 import { NextIntlClientProvider } from 'next-intl'
 import { getMessages } from 'next-intl/server'
 import { notFound } from 'next/navigation'
@@ -14,6 +14,18 @@ import '@/app/globals.css'
 const inter = Inter({
   subsets: ['latin'],
   variable: '--font-sans',
+})
+
+const playfair = Playfair_Display({
+  subsets: ['latin'],
+  variable: '--font-heading',
+  weight: ['400', '500', '600', '700', '800', '900'],
+})
+
+const spaceGrotesk = Space_Grotesk({
+  subsets: ['latin'],
+  variable: '--font-mono',
+  weight: ['400', '500', '600', '700'],
 })
 
 const SITE_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://finds.ro'
@@ -169,7 +181,7 @@ export default async function RootLayout({ children, params }: Props) {
           dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
         />
       </head>
-      <body className={`${inter.variable} font-sans antialiased`}>
+      <body className={`${inter.variable} ${playfair.variable} ${spaceGrotesk.variable} font-sans antialiased`}>
         <NextIntlClientProvider messages={messages}>
           <Providers>
             <a href="#main-content" className="skip-link">

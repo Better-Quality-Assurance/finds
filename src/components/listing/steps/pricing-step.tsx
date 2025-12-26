@@ -1,29 +1,14 @@
 'use client'
 
 import { UseFormReturn } from 'react-hook-form'
-import { Input } from '@/components/ui/input'
-import { Textarea } from '@/components/ui/textarea'
-import { Label } from '@/components/ui/label'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select'
+import { FormInput, FormSelect, FormTextarea } from '@/components/ui/form-field'
 import { formatCurrency, calculateBuyerFee, calculateTotalWithFee } from '@/lib/utils'
-import type { ListingFormData } from '../listing-form'
+import type { ListingFormData } from '@/lib/validation-schemas'
+import { CURRENCIES } from '@/constants/listing-form'
 
 type PricingStepProps = {
   form: UseFormReturn<ListingFormData>
 }
-
-const CURRENCIES = [
-  { code: 'EUR', symbol: '€', name: 'Euro' },
-  { code: 'USD', symbol: '$', name: 'US Dollar' },
-  { code: 'GBP', symbol: '£', name: 'British Pound' },
-  { code: 'RON', symbol: 'lei', name: 'Romanian Leu' },
-]
 
 export function PricingStep({ form }: PricingStepProps) {
   const { register, formState: { errors }, setValue, watch } = form
@@ -36,31 +21,27 @@ export function PricingStep({ form }: PricingStepProps) {
   return (
     <div className="space-y-6">
       <div className="space-y-2">
-        <Label htmlFor="title">Listing Title *</Label>
-        <Input
-          id="title"
+        <FormInput
+          label="Listing Title"
+          registration={register('title')}
           placeholder="e.g., 1969 Ford Mustang Mach 1 - Matching Numbers"
-          {...register('title')}
+          error={errors.title}
+          required
         />
-        {errors.title && (
-          <p className="text-sm text-destructive">{errors.title.message}</p>
-        )}
         <p className="text-sm text-muted-foreground">
           A good title includes year, make, model, and a key selling point.
         </p>
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="description">Description *</Label>
-        <Textarea
-          id="description"
+        <FormTextarea
+          label="Description"
+          registration={register('description')}
           placeholder="Provide a detailed description of the vehicle. Include history, previous ownership, any restoration work done, documentation available, and any other relevant details."
           rows={8}
-          {...register('description')}
+          error={errors.description}
+          required
         />
-        {errors.description && (
-          <p className="text-sm text-destructive">{errors.description.message}</p>
-        )}
         <p className="text-sm text-muted-foreground">
           Minimum 100 characters. Be thorough - detailed descriptions get more
           bids.
@@ -68,55 +49,41 @@ export function PricingStep({ form }: PricingStepProps) {
       </div>
 
       <div className="grid gap-4 md:grid-cols-3">
-        <div className="space-y-2 md:col-span-2">
-          <Label htmlFor="startingPrice">Starting Price *</Label>
-          <Input
-            id="startingPrice"
+        <div className="md:col-span-2">
+          <FormInput
+            label="Starting Price"
+            registration={register('startingPrice')}
             type="number"
             min={100}
             max={10000000}
-            {...register('startingPrice')}
+            error={errors.startingPrice}
+            required
           />
-          {errors.startingPrice && (
-            <p className="text-sm text-destructive">{errors.startingPrice.message}</p>
-          )}
         </div>
 
-        <div className="space-y-2">
-          <Label htmlFor="currency">Currency</Label>
-          <Select
-            value={currency}
-            onValueChange={(value: 'EUR' | 'USD' | 'GBP' | 'RON') =>
-              setValue('currency', value)
-            }
-          >
-            <SelectTrigger>
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {CURRENCIES.map((curr) => (
-                <SelectItem key={curr.code} value={curr.code}>
-                  {curr.symbol} {curr.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
+        <FormSelect
+          label="Currency"
+          fieldName="currency"
+          value={currency as 'EUR' | 'USD' | 'GBP' | 'RON'}
+          onValueChange={(value) => setValue('currency', value as 'EUR' | 'USD' | 'GBP' | 'RON')}
+          options={CURRENCIES.map((curr) => ({
+            value: curr.code,
+            label: `${curr.symbol} ${curr.name}`,
+          }))}
+          error={errors.currency}
+        />
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="reservePrice">Reserve Price (optional)</Label>
-        <Input
-          id="reservePrice"
+        <FormInput
+          label="Reserve Price"
+          registration={register('reservePrice')}
           type="number"
           min={100}
           max={10000000}
           placeholder="Leave empty for no reserve"
-          {...register('reservePrice')}
+          error={errors.reservePrice}
         />
-        {errors.reservePrice && (
-          <p className="text-sm text-destructive">{errors.reservePrice.message}</p>
-        )}
         <p className="text-sm text-muted-foreground">
           The minimum price at which you are willing to sell. If bidding does
           not reach this amount, the vehicle will not sell. No-reserve auctions

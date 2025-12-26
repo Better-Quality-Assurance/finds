@@ -29,25 +29,27 @@ export function Header() {
   ]
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+    <header className="sticky top-0 z-50 w-full border-b border-border/50 bg-background/80 backdrop-blur-xl supports-[backdrop-filter]:bg-background/60">
       <nav className="container mx-auto flex h-16 items-center justify-between px-4" role="navigation" aria-label="Main navigation">
         {/* Logo */}
-        <Link href="/" className="flex items-center space-x-2" aria-label="Finds home">
-          <Car className="h-6 w-6" aria-hidden="true" />
-          <span className="text-xl font-bold">Finds</span>
+        <Link href="/" className="group flex items-center gap-2.5" aria-label="Finds home">
+          <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-primary to-primary/80 shadow-md shadow-primary/20 transition-transform group-hover:scale-105">
+            <Car className="h-5 w-5 text-primary-foreground" aria-hidden="true" />
+          </span>
+          <span className="font-heading text-xl font-bold tracking-tight">Finds</span>
         </Link>
 
         {/* Desktop Navigation */}
-        <div className="hidden items-center space-x-6 md:flex">
+        <div className="hidden items-center space-x-1 md:flex">
           {navigation.map((item) => (
             <Link
               key={item.href}
               href={item.href}
               className={cn(
-                'text-sm font-medium transition-colors hover:text-primary',
+                'rounded-lg px-4 py-2 text-sm font-medium transition-all',
                 pathname === item.href
-                  ? 'text-primary'
-                  : 'text-muted-foreground'
+                  ? 'bg-primary/10 text-primary'
+                  : 'text-muted-foreground hover:bg-muted hover:text-foreground'
               )}
               aria-current={pathname === item.href ? 'page' : undefined}
             >
@@ -57,7 +59,7 @@ export function Header() {
         </div>
 
         {/* Right Side */}
-        <div className="flex items-center space-x-4">
+        <div className="flex items-center space-x-3">
           <LanguageSwitcher />
 
           {session?.user ? (
@@ -136,10 +138,10 @@ export function Header() {
             </DropdownMenu>
           ) : (
             <div className="hidden items-center space-x-2 md:flex">
-              <Button variant="ghost" asChild>
+              <Button variant="ghost" asChild className="text-muted-foreground">
                 <Link href="/login">{t('login')}</Link>
               </Button>
-              <Button asChild>
+              <Button asChild variant="premium">
                 <Link href="/register">{t('register')}</Link>
               </Button>
             </div>

@@ -15,6 +15,11 @@ export type {
   INotificationService,
 } from './notification.interface'
 
+// Notification Transport (Low-level abstraction)
+export type {
+  INotificationTransport,
+} from './notification-transport.interface'
+
 // Audit Service
 export type {
   IAuditService,

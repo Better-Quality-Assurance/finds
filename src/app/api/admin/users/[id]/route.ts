@@ -3,6 +3,7 @@ import { auth } from '@/lib/auth'
 import { prisma } from '@/lib/db'
 import { z } from 'zod'
 import { logAuditEvent } from '@/services/audit.service'
+import { updateUserSchema } from '@/lib/validation-schemas'
 
 type RouteContext = {
   params: Promise<{ id: string }>
@@ -109,12 +110,6 @@ export async function GET(request: Request, context: RouteContext) {
     )
   }
 }
-
-const updateUserSchema = z.object({
-  action: z.enum(['suspend', 'unsuspend', 'verify', 'change_role', 'ban', 'unban']),
-  role: z.enum(['USER', 'SELLER', 'MODERATOR', 'REVIEWER', 'ADMIN']).optional(),
-  reason: z.string().optional(),
-})
 
 // PUT - Update user (suspend, unsuspend, verify, change role, ban)
 export async function PUT(request: Request, context: RouteContext) {

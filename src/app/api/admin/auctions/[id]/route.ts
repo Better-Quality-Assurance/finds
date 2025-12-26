@@ -5,6 +5,7 @@ import { z } from 'zod'
 import { logAuditEvent } from '@/services/audit.service'
 import { cancelAuction, endAuction } from '@/services/auction.service'
 import { releaseNonWinningDeposits } from '@/services/payment.service'
+import { auctionActionSchema } from '@/lib/validation-schemas'
 
 type RouteContext = {
   params: Promise<{ id: string }>
@@ -80,13 +81,6 @@ export async function GET(request: Request, context: RouteContext) {
   }
 }
 
-const actionSchema = z.object({
-  action: z.enum(['cancel', 'end', 'extend', 'invalidate_bid']),
-  reason: z.string().optional(),
-  bidId: z.string().optional(),
-  extensionMinutes: z.number().optional(),
-})
-
 // PUT - Admin auction actions
 export async function PUT(request: Request, context: RouteContext) {
   try {
@@ -106,7 +100,7 @@ export async function PUT(request: Request, context: RouteContext) {
 
     const { id } = await context.params
     const body = await request.json()
-    const { action, reason, bidId, extensionMinutes } = actionSchema.parse(body)
+    const { action, reason, bidId, extensionMinutes } = auctionActionSchema.parse(body)
 
     const auction = await prisma.auction.findUnique({
       where: { id },

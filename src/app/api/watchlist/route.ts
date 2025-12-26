@@ -1,16 +1,20 @@
-import { NextResponse } from 'next/server'
+import { NextRequest } from 'next/server'
 import { auth } from '@/lib/auth'
 import { prisma } from '@/lib/db'
-import { z } from 'zod'
+import { addToWatchlistSchema, updateWatchlistSchema } from '@/lib/validation-schemas'
+import { withSimpleErrorHandler } from '@/lib/with-error-handler'
+import { successResponse } from '@/lib/api-response'
+import { UnauthorizedError, NotFoundError, ConflictError, ValidationError } from '@/lib/errors'
+import { ERROR_CODES } from '@/lib/error-codes'
 
 // GET - Get user's watchlist
-export async function GET() {
-  try {
+export const GET = withSimpleErrorHandler(
+  async () => {
     const session = await auth()
     if (!session?.user?.id) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
+      throw new UnauthorizedError(
+        'You must be logged in to view your watchlist',
+        ERROR_CODES.AUTH_REQUIRED
       )
     }
 
@@ -37,28 +41,23 @@ export async function GET() {
       },
     })
 
-    return NextResponse.json({ watchlist })
-  } catch (error) {
-    console.error('Get watchlist error:', error)
-    return NextResponse.json(
-      { error: 'Failed to get watchlist' },
-      { status: 500 }
-    )
+    return successResponse({ watchlist })
+  },
+  {
+    requiresAuth: true,
+    resourceType: 'watchlist',
+    action: 'watchlist.list',
   }
-}
-
-const addToWatchlistSchema = z.object({
-  auctionId: z.string().min(1),
-})
+)
 
 // POST - Add auction to watchlist
-export async function POST(request: Request) {
-  try {
+export const POST = withSimpleErrorHandler(
+  async (request: NextRequest) => {
     const session = await auth()
     if (!session?.user?.id) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
+      throw new UnauthorizedError(
+        'You must be logged in to add to watchlist',
+        ERROR_CODES.AUTH_REQUIRED
       )
     }
 
@@ -71,9 +70,9 @@ export async function POST(request: Request) {
     })
 
     if (!auction) {
-      return NextResponse.json(
-        { error: 'Auction not found' },
-        { status: 404 }
+      throw new NotFoundError(
+        'Auction not found',
+        ERROR_CODES.AUCTION_NOT_FOUND
       )
     }
 
@@ -88,9 +87,9 @@ export async function POST(request: Request) {
     })
 
     if (existing) {
-      return NextResponse.json(
-        { error: 'Already watching this auction' },
-        { status: 400 }
+      throw new ConflictError(
+        'Already watching this auction',
+        ERROR_CODES.RESOURCE_NOT_FOUND // Using generic code since WATCHLIST_DUPLICATE_ENTRY doesn't exist
       )
     }
 
@@ -102,37 +101,24 @@ export async function POST(request: Request) {
       },
     })
 
-    return NextResponse.json({ watchlistItem }, { status: 201 })
-  } catch (error) {
-    if (error instanceof z.ZodError) {
-      return NextResponse.json(
-        { error: 'Invalid auction ID' },
-        { status: 400 }
-      )
-    }
-
-    console.error('Add to watchlist error:', error)
-    return NextResponse.json(
-      { error: 'Failed to add to watchlist' },
-      { status: 500 }
-    )
+    return successResponse({ watchlistItem }, 201)
+  },
+  {
+    requiresAuth: true,
+    resourceType: 'watchlist',
+    action: 'watchlist.add',
+    auditLog: true,
   }
-}
-
-const updateWatchlistSchema = z.object({
-  auctionId: z.string().min(1),
-  notifyOnBid: z.boolean().optional(),
-  notifyOnEnd: z.boolean().optional(),
-})
+)
 
 // PATCH - Update watchlist notification preferences
-export async function PATCH(request: Request) {
-  try {
+export const PATCH = withSimpleErrorHandler(
+  async (request: NextRequest) => {
     const session = await auth()
     if (!session?.user?.id) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
+      throw new UnauthorizedError(
+        'You must be logged in to update watchlist preferences',
+        ERROR_CODES.AUTH_REQUIRED
       )
     }
 
@@ -150,9 +136,9 @@ export async function PATCH(request: Request) {
     })
 
     if (!existing) {
-      return NextResponse.json(
-        { error: 'Watchlist entry not found' },
-        { status: 404 }
+      throw new NotFoundError(
+        'Watchlist entry not found',
+        ERROR_CODES.RESOURCE_NOT_FOUND
       )
     }
 
@@ -170,31 +156,24 @@ export async function PATCH(request: Request) {
       },
     })
 
-    return NextResponse.json({ watchlistItem: updatedWatchlist })
-  } catch (error) {
-    if (error instanceof z.ZodError) {
-      return NextResponse.json(
-        { error: 'Invalid watchlist preferences' },
-        { status: 400 }
-      )
-    }
-
-    console.error('Update watchlist error:', error)
-    return NextResponse.json(
-      { error: 'Failed to update watchlist preferences' },
-      { status: 500 }
-    )
+    return successResponse({ watchlistItem: updatedWatchlist })
+  },
+  {
+    requiresAuth: true,
+    resourceType: 'watchlist',
+    action: 'watchlist.update',
+    auditLog: true,
   }
-}
+)
 
 // DELETE - Remove from watchlist
-export async function DELETE(request: Request) {
-  try {
+export const DELETE = withSimpleErrorHandler(
+  async (request: NextRequest) => {
     const session = await auth()
     if (!session?.user?.id) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
+      throw new UnauthorizedError(
+        'You must be logged in to remove from watchlist',
+        ERROR_CODES.AUTH_REQUIRED
       )
     }
 
@@ -202,9 +181,9 @@ export async function DELETE(request: Request) {
     const auctionId = searchParams.get('auctionId')
 
     if (!auctionId) {
-      return NextResponse.json(
-        { error: 'Auction ID required' },
-        { status: 400 }
+      throw new ValidationError(
+        'Auction ID required',
+        ERROR_CODES.VALIDATION_MISSING_FIELD
       )
     }
 
@@ -217,12 +196,12 @@ export async function DELETE(request: Request) {
       },
     })
 
-    return NextResponse.json({ success: true })
-  } catch (error) {
-    console.error('Remove from watchlist error:', error)
-    return NextResponse.json(
-      { error: 'Failed to remove from watchlist' },
-      { status: 500 }
-    )
+    return successResponse({ success: true })
+  },
+  {
+    requiresAuth: true,
+    resourceType: 'watchlist',
+    action: 'watchlist.remove',
+    auditLog: true,
   }
-}
+)

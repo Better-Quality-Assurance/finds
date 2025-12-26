@@ -3,15 +3,7 @@ import { auth } from '@/lib/auth'
 import { z } from 'zod'
 import { getContainer } from '@/lib/container'
 import { calculateDepositAmount } from '@/lib/stripe'
-
-const createDepositSchema = z.object({
-  auctionId: z.string().min(1),
-  bidAmount: z.number().positive(),
-})
-
-const confirmDepositSchema = z.object({
-  depositId: z.string().min(1),
-})
+import { createDepositSchema, confirmDepositSchema } from '@/lib/validation-schemas'
 
 // GET - Get user's deposits
 export async function GET() {

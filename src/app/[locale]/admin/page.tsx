@@ -113,10 +113,10 @@ export default async function AdminDashboardPage() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Active Auctions</CardTitle>
-            <Gavel className="h-4 w-4 text-green-500" />
+            <Gavel className="h-4 w-4 text-success" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-green-500">{stats.activeAuctions}</div>
+            <div className="text-2xl font-bold text-success">{stats.activeAuctions}</div>
             <p className="text-xs text-muted-foreground">
               {stats.endingSoon} ending soon
             </p>
@@ -126,10 +126,10 @@ export default async function AdminDashboardPage() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Pending Review</CardTitle>
-            <Clock className="h-4 w-4 text-yellow-500" />
+            <Clock className="h-4 w-4 text-warning" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-yellow-500">{stats.pendingListings}</div>
+            <div className="text-2xl font-bold text-warning">{stats.pendingListings}</div>
             <p className="text-xs text-muted-foreground">
               listings awaiting approval
             </p>
@@ -139,10 +139,10 @@ export default async function AdminDashboardPage() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Fraud Alerts</CardTitle>
-            <ShieldAlert className="h-4 w-4 text-red-500" />
+            <ShieldAlert className="h-4 w-4 text-destructive" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-red-500">{stats.openFraudAlerts}</div>
+            <div className="text-2xl font-bold text-destructive">{stats.openFraudAlerts}</div>
             <p className="text-xs text-muted-foreground">
               open alerts
             </p>
@@ -155,10 +155,10 @@ export default async function AdminDashboardPage() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Sold Today</CardTitle>
-            <CheckCircle className="h-4 w-4 text-emerald-500" />
+            <CheckCircle className="h-4 w-4 text-success" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-emerald-500">{stats.soldToday}</div>
+            <div className="text-2xl font-bold text-success">{stats.soldToday}</div>
             <p className="text-xs text-muted-foreground">
               successful auctions
             </p>
@@ -168,10 +168,10 @@ export default async function AdminDashboardPage() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Bids Today</CardTitle>
-            <TrendingUp className="h-4 w-4 text-blue-500" />
+            <TrendingUp className="h-4 w-4 text-primary" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-blue-500">{stats.totalBidsToday}</div>
+            <div className="text-2xl font-bold text-primary">{stats.totalBidsToday}</div>
             <p className="text-xs text-muted-foreground">
               total bids placed
             </p>
@@ -186,8 +186,8 @@ export default async function AdminDashboardPage() {
           <Card className="cursor-pointer transition-shadow hover:shadow-md">
             <CardContent className="flex items-center justify-between p-6">
               <div className="flex items-center gap-4">
-                <div className="rounded-lg bg-yellow-100 p-3 dark:bg-yellow-900">
-                  <FileText className="h-6 w-6 text-yellow-600 dark:text-yellow-300" />
+                <div className="rounded-lg bg-warning/10 p-3">
+                  <FileText className="h-6 w-6 text-warning" />
                 </div>
                 <div>
                   <h3 className="font-semibold">Listings</h3>
@@ -205,8 +205,8 @@ export default async function AdminDashboardPage() {
           <Card className="cursor-pointer transition-shadow hover:shadow-md">
             <CardContent className="flex items-center justify-between p-6">
               <div className="flex items-center gap-4">
-                <div className="rounded-lg bg-green-100 p-3 dark:bg-green-900">
-                  <Gavel className="h-6 w-6 text-green-600 dark:text-green-300" />
+                <div className="rounded-lg bg-success/10 p-3">
+                  <Gavel className="h-6 w-6 text-success" />
                 </div>
                 <div>
                   <h3 className="font-semibold">Auctions</h3>
@@ -224,8 +224,8 @@ export default async function AdminDashboardPage() {
           <Card className="cursor-pointer transition-shadow hover:shadow-md">
             <CardContent className="flex items-center justify-between p-6">
               <div className="flex items-center gap-4">
-                <div className="rounded-lg bg-blue-100 p-3 dark:bg-blue-900">
-                  <Users className="h-6 w-6 text-blue-600 dark:text-blue-300" />
+                <div className="rounded-lg bg-primary/10 p-3">
+                  <Users className="h-6 w-6 text-primary" />
                 </div>
                 <div>
                   <h3 className="font-semibold">Users</h3>
@@ -243,8 +243,8 @@ export default async function AdminDashboardPage() {
           <Card className="cursor-pointer transition-shadow hover:shadow-md">
             <CardContent className="flex items-center justify-between p-6">
               <div className="flex items-center gap-4">
-                <div className="rounded-lg bg-red-100 p-3 dark:bg-red-900">
-                  <AlertTriangle className="h-6 w-6 text-red-600 dark:text-red-300" />
+                <div className="rounded-lg bg-destructive/10 p-3">
+                  <AlertTriangle className="h-6 w-6 text-destructive" />
                 </div>
                 <div>
                   <h3 className="font-semibold">Fraud Alerts</h3>
@@ -263,8 +263,8 @@ export default async function AdminDashboardPage() {
             <Card className="cursor-pointer transition-shadow hover:shadow-md">
               <CardContent className="flex items-center justify-between p-6">
                 <div className="flex items-center gap-4">
-                  <div className="rounded-lg bg-purple-100 p-3 dark:bg-purple-900">
-                    <ShieldAlert className="h-6 w-6 text-purple-600 dark:text-purple-300" />
+                  <div className="rounded-lg bg-secondary/10 p-3">
+                    <ShieldAlert className="h-6 w-6 text-secondary" />
                   </div>
                   <div>
                     <h3 className="font-semibold">Audit Log</h3>

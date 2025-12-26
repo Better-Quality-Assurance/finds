@@ -1,34 +1,15 @@
 'use client'
 
 import { UseFormReturn } from 'react-hook-form'
-import { Textarea } from '@/components/ui/textarea'
 import { Label } from '@/components/ui/label'
 import { Switch } from '@/components/ui/switch'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select'
-import type { ListingFormData } from '../listing-form'
+import { FormSelect, FormTextarea } from '@/components/ui/form-field'
+import type { ListingFormData } from '@/lib/validation-schemas'
+import { CONDITION_RATINGS } from '@/constants/listing-form'
 
 type ConditionStepProps = {
   form: UseFormReturn<ListingFormData>
 }
-
-const CONDITION_RATINGS = [
-  { value: 1, label: '1 - Parts only' },
-  { value: 2, label: '2 - Heavily deteriorated' },
-  { value: 3, label: '3 - Major restoration needed' },
-  { value: 4, label: '4 - Restoration project' },
-  { value: 5, label: '5 - Running but needs work' },
-  { value: 6, label: '6 - Driver quality' },
-  { value: 7, label: '7 - Good condition' },
-  { value: 8, label: '8 - Very good condition' },
-  { value: 9, label: '9 - Excellent condition' },
-  { value: 10, label: '10 - Concours/Show quality' },
-]
 
 export function ConditionStep({ form }: ConditionStepProps) {
   const { register, formState: { errors }, setValue, watch } = form
@@ -53,8 +34,8 @@ export function ConditionStep({ form }: ConditionStepProps) {
       </div>
 
       {!isRunning && (
-        <div className="rounded-lg border border-amber-200 bg-amber-50 p-4 dark:border-amber-800 dark:bg-amber-950">
-          <p className="text-sm text-amber-800 dark:text-amber-200">
+        <div className="rounded-lg border border-warning/20 bg-warning/10 p-4">
+          <p className="text-sm text-warning">
             Non-running vehicles are welcome on Finds. Barn finds and project
             cars are a significant part of our community. Be sure to describe
             what is known about why the vehicle does not run.
@@ -63,51 +44,40 @@ export function ConditionStep({ form }: ConditionStepProps) {
       )}
 
       <div className="space-y-2">
-        <Label htmlFor="conditionRating">Overall Condition Rating (optional)</Label>
-        <Select
+        <FormSelect
+          label="Overall Condition Rating"
+          fieldName="conditionRating"
           value={watch('conditionRating')?.toString()}
           onValueChange={(value) => setValue('conditionRating', parseInt(value))}
-        >
-          <SelectTrigger>
-            <SelectValue placeholder="Select condition rating" />
-          </SelectTrigger>
-          <SelectContent>
-            {CONDITION_RATINGS.map((rating) => (
-              <SelectItem key={rating.value} value={rating.value.toString()}>
-                {rating.label}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+          placeholder="Select condition rating"
+          options={CONDITION_RATINGS.map((rating) => ({
+            value: rating.value.toString(),
+            label: rating.label,
+          }))}
+          error={errors.conditionRating}
+        />
         <p className="text-sm text-muted-foreground">
           Be honest about the condition. Buyers appreciate transparency.
         </p>
       </div>
 
-      <div className="space-y-2">
-        <Label htmlFor="conditionNotes">Condition Notes (optional)</Label>
-        <Textarea
-          id="conditionNotes"
-          placeholder="Describe the overall condition of the vehicle. Include details about bodywork, interior, mechanics, etc."
-          rows={4}
-          {...register('conditionNotes')}
-        />
-        {errors.conditionNotes && (
-          <p className="text-sm text-destructive">{errors.conditionNotes.message}</p>
-        )}
-      </div>
+      <FormTextarea
+        label="Condition Notes"
+        registration={register('conditionNotes')}
+        placeholder="Describe the overall condition of the vehicle. Include details about bodywork, interior, mechanics, etc."
+        rows={4}
+        error={errors.conditionNotes}
+      />
 
       <div className="space-y-2">
-        <Label htmlFor="knownIssues">Known Issues *</Label>
-        <Textarea
-          id="knownIssues"
+        <FormTextarea
+          label="Known Issues"
+          registration={register('knownIssues')}
           placeholder="List all known issues, defects, or problems with the vehicle. Be thorough - this protects both you and the buyer."
           rows={4}
-          {...register('knownIssues')}
+          error={errors.knownIssues}
+          required
         />
-        {errors.knownIssues && (
-          <p className="text-sm text-destructive">{errors.knownIssues.message}</p>
-        )}
         <p className="text-sm text-muted-foreground">
           If there are no known issues, you can write &quot;No known issues&quot;.
           However, for project cars and barn finds, there are usually multiple

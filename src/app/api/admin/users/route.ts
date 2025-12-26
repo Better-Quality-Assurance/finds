@@ -1,23 +1,34 @@
-import { NextResponse } from 'next/server'
+import { NextRequest } from 'next/server'
 import { auth } from '@/lib/auth'
 import { prisma } from '@/lib/db'
+import { withSimpleErrorHandler } from '@/lib/with-error-handler'
+import { successResponse } from '@/lib/api-response'
+import { UnauthorizedError, ForbiddenError } from '@/lib/errors'
+import { ERROR_CODES } from '@/lib/error-codes'
+import { roleValidator } from '@/services/validators'
 
 // GET - List/search users
-export async function GET(request: Request) {
-  try {
+export const GET = withSimpleErrorHandler(
+  async (request: NextRequest) => {
     const session = await auth()
     if (!session?.user?.id) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+      throw new UnauthorizedError(
+        'You must be logged in',
+        ERROR_CODES.AUTH_REQUIRED
+      )
     }
 
     // Check admin role
-    const admin = await prisma.user.findUnique({
+    const user = await prisma.user.findUnique({
       where: { id: session.user.id },
       select: { role: true },
     })
 
-    if (!admin || !['ADMIN', 'MODERATOR'].includes(admin.role)) {
-      return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+    if (!user || !roleValidator.canManageUsers(user.role)) {
+      throw new ForbiddenError(
+        'You do not have permission to access this resource',
+        ERROR_CODES.AUTH_INSUFFICIENT_PERMISSIONS
+      )
     }
 
     const { searchParams } = new URL(request.url)
@@ -84,7 +95,7 @@ export async function GET(request: Request) {
       prisma.user.count({ where }),
     ])
 
-    return NextResponse.json({
+    return successResponse({
       users,
       pagination: {
         page,
@@ -93,11 +104,11 @@ export async function GET(request: Request) {
         totalPages: Math.ceil(total / limit),
       },
     })
-  } catch (error) {
-    console.error('Get users error:', error)
-    return NextResponse.json(
-      { error: 'Failed to get users' },
-      { status: 500 }
-    )
+  },
+  {
+    requiresAuth: true,
+    resourceType: 'user',
+    action: 'admin.user.list',
+    auditLog: true,
   }
-}
+)

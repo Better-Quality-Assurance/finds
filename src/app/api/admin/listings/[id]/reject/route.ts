@@ -1,15 +1,22 @@
-import { NextResponse } from 'next/server'
+import { NextRequest } from 'next/server'
 import { auth } from '@/lib/auth'
 import { rejectListing } from '@/services/listing.service'
 import { prisma } from '@/lib/db'
+import { withErrorHandler } from '@/lib/with-error-handler'
+import { successResponse } from '@/lib/api-response'
+import { UnauthorizedError, ForbiddenError, ValidationError } from '@/lib/errors'
+import { ERROR_CODES } from '@/lib/error-codes'
 
 type RouteParams = { params: Promise<{ id: string }> }
 
-export async function POST(request: Request, { params }: RouteParams) {
-  try {
+export const POST = withErrorHandler<{ id: string }>(
+  async (request: NextRequest, { params }: { params: Promise<{ id: string }> }) => {
     const session = await auth()
     if (!session?.user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+      throw new UnauthorizedError(
+        'You must be logged in',
+        ERROR_CODES.AUTH_REQUIRED
+      )
     }
 
     // Check if user has admin/moderator role
@@ -19,7 +26,10 @@ export async function POST(request: Request, { params }: RouteParams) {
     })
 
     if (!user || !['ADMIN', 'MODERATOR'].includes(user.role)) {
-      return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+      throw new ForbiddenError(
+        'You do not have permission to reject listings',
+        ERROR_CODES.AUTH_INSUFFICIENT_PERMISSIONS
+      )
     }
 
     const { id } = await params
@@ -27,29 +37,21 @@ export async function POST(request: Request, { params }: RouteParams) {
     const { reason } = body
 
     if (!reason || typeof reason !== 'string' || reason.trim().length < 10) {
-      return NextResponse.json(
-        { error: 'Rejection reason must be at least 10 characters' },
-        { status: 400 }
+      throw new ValidationError(
+        'Rejection reason must be at least 10 characters',
+        ERROR_CODES.VALIDATION_INVALID_INPUT,
+        { field: 'reason' }
       )
     }
 
     const listing = await rejectListing(id, session.user.id, reason)
 
-    return NextResponse.json(listing)
-  } catch (error) {
-    if (error instanceof Error) {
-      if (error.message.includes('not found')) {
-        return NextResponse.json({ error: error.message }, { status: 404 })
-      }
-      if (error.message.includes('Cannot reject')) {
-        return NextResponse.json({ error: error.message }, { status: 400 })
-      }
-    }
-
-    console.error('Reject listing error:', error)
-    return NextResponse.json(
-      { error: 'Failed to reject listing' },
-      { status: 500 }
-    )
+    return successResponse(listing)
+  },
+  {
+    requiresAuth: true,
+    resourceType: 'listing',
+    action: 'admin.listing.reject',
+    auditLog: true,
   }
-}
+)

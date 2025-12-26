@@ -1,17 +1,18 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { DepositService } from '@/services/deposit.service'
 import { DepositStatus } from '@prisma/client'
-import { createMockPrisma, createMockStripe, factories } from '../helpers/test-utils'
+import { createMockPrisma, createMockPaymentProcessor, factories } from '../helpers/test-utils'
+import { IPaymentProcessor } from '@/services/contracts/payment-processor.interface'
 
 describe('DepositService', () => {
   let depositService: DepositService
   let mockPrisma: ReturnType<typeof createMockPrisma>
-  let mockStripe: ReturnType<typeof createMockStripe>
+  let mockPaymentProcessor: IPaymentProcessor
 
   beforeEach(() => {
     mockPrisma = createMockPrisma()
-    mockStripe = createMockStripe()
-    depositService = new DepositService(mockPrisma, mockStripe)
+    mockPaymentProcessor = createMockPaymentProcessor()
+    depositService = new DepositService(mockPrisma, mockPaymentProcessor)
   })
 
   describe('checkBiddingEligibility', () => {
@@ -23,9 +24,17 @@ describe('DepositService', () => {
       })
 
       vi.mocked(mockPrisma.user.findUnique).mockResolvedValue(user as any)
-      vi.mocked(mockStripe.paymentMethods.list).mockResolvedValue({
-        data: [factories.stripePaymentMethod()],
-      } as any)
+      vi.mocked(mockPaymentProcessor.getDefaultPaymentMethod).mockResolvedValue({
+        id: 'pm_123',
+        type: 'card',
+        customerId: 'cus_123',
+        card: {
+          brand: 'visa',
+          last4: '4242',
+          expMonth: 12,
+          expYear: 2025,
+        },
+      })
 
       const result = await depositService.checkBiddingEligibility('user-123')
 
@@ -69,9 +78,7 @@ describe('DepositService', () => {
       const user = factories.user({ stripeCustomerId: 'cus_123' })
 
       vi.mocked(mockPrisma.user.findUnique).mockResolvedValue(user as any)
-      vi.mocked(mockStripe.paymentMethods.list).mockResolvedValue({
-        data: [],
-      } as any)
+      vi.mocked(mockPaymentProcessor.getDefaultPaymentMethod).mockResolvedValue(null)
 
       const result = await depositService.checkBiddingEligibility('user-123')
 
@@ -87,17 +94,20 @@ describe('DepositService', () => {
         stripeCustomerId: 'cus_123',
       })
 
-      const paymentIntent = factories.stripePaymentIntent({
-        status: 'requires_capture',
-        amount: 10000, // 100 EUR in cents
-      })
-
       vi.mocked(mockPrisma.user.findUnique).mockResolvedValue(user as any)
-      vi.mocked(mockStripe.paymentMethods.list).mockResolvedValue({
-        data: [factories.stripePaymentMethod()],
-      } as any)
+      vi.mocked(mockPaymentProcessor.getDefaultPaymentMethod).mockResolvedValue({
+        id: 'pm_123',
+        type: 'card',
+        customerId: 'cus_123',
+      })
       vi.mocked(mockPrisma.bidDeposit.findFirst).mockResolvedValue(null)
-      vi.mocked(mockStripe.paymentIntents.create).mockResolvedValue(paymentIntent)
+      vi.mocked(mockPaymentProcessor.createPaymentIntent).mockResolvedValue({
+        id: 'pi_123',
+        amount: 10000,
+        currency: 'eur',
+        status: 'requires_capture',
+        clientSecret: 'pi_123_secret',
+      })
 
       const deposit = factories.bidDeposit({ status: DepositStatus.HELD })
       vi.mocked(mockPrisma.bidDeposit.create).mockResolvedValue(deposit as any)
@@ -123,9 +133,11 @@ describe('DepositService', () => {
       const existingDeposit = factories.bidDeposit({ status: DepositStatus.HELD })
 
       vi.mocked(mockPrisma.user.findUnique).mockResolvedValue(user as any)
-      vi.mocked(mockStripe.paymentMethods.list).mockResolvedValue({
-        data: [factories.stripePaymentMethod()],
-      } as any)
+      vi.mocked(mockPaymentProcessor.getDefaultPaymentMethod).mockResolvedValue({
+        id: 'pm_123',
+        type: 'card',
+        customerId: 'cus_123',
+      })
       vi.mocked(mockPrisma.bidDeposit.findFirst).mockResolvedValue(existingDeposit as any)
 
       const result = await depositService.createBidDeposit({
@@ -136,7 +148,7 @@ describe('DepositService', () => {
 
       expect(result.success).toBe(true)
       expect(result.deposit).toEqual(existingDeposit)
-      expect(mockStripe.paymentIntents.create).not.toHaveBeenCalled()
+      expect(mockPaymentProcessor.createPaymentIntent).not.toHaveBeenCalled()
     })
 
     it('should require action when 3DS authentication needed', async () => {
@@ -145,17 +157,20 @@ describe('DepositService', () => {
         stripeCustomerId: 'cus_123',
       })
 
-      const paymentIntent = factories.stripePaymentIntent({
-        status: 'requires_action',
-        client_secret: 'pi_123_secret',
-      })
-
       vi.mocked(mockPrisma.user.findUnique).mockResolvedValue(user as any)
-      vi.mocked(mockStripe.paymentMethods.list).mockResolvedValue({
-        data: [factories.stripePaymentMethod()],
-      } as any)
+      vi.mocked(mockPaymentProcessor.getDefaultPaymentMethod).mockResolvedValue({
+        id: 'pm_123',
+        type: 'card',
+        customerId: 'cus_123',
+      })
       vi.mocked(mockPrisma.bidDeposit.findFirst).mockResolvedValue(null)
-      vi.mocked(mockStripe.paymentIntents.create).mockResolvedValue(paymentIntent)
+      vi.mocked(mockPaymentProcessor.createPaymentIntent).mockResolvedValue({
+        id: 'pi_123',
+        amount: 10000,
+        currency: 'eur',
+        status: 'requires_action',
+        clientSecret: 'pi_123_secret',
+      })
 
       const deposit = factories.bidDeposit({ status: DepositStatus.PENDING })
       vi.mocked(mockPrisma.bidDeposit.create).mockResolvedValue(deposit as any)
@@ -195,7 +210,13 @@ describe('DepositService', () => {
       })
 
       vi.mocked(mockPrisma.bidDeposit.findUnique).mockResolvedValue(deposit as any)
-      vi.mocked(mockStripe.paymentIntents.cancel).mockResolvedValue({} as any)
+      vi.mocked(mockPaymentProcessor.releasePayment).mockResolvedValue({
+        id: 'pi_123',
+        amount: 10000,
+        currency: 'eur',
+        status: 'canceled',
+        clientSecret: null,
+      })
       vi.mocked(mockPrisma.bidDeposit.update).mockResolvedValue({
         ...deposit,
         status: DepositStatus.RELEASED,
@@ -204,7 +225,7 @@ describe('DepositService', () => {
       const result = await depositService.releaseBidDeposit('deposit-123')
 
       expect(result).toBe(true)
-      expect(mockStripe.paymentIntents.cancel).toHaveBeenCalledWith('pi_123')
+      expect(mockPaymentProcessor.releasePayment).toHaveBeenCalledWith('pi_123')
       expect(mockPrisma.bidDeposit.update).toHaveBeenCalledWith({
         where: { id: 'deposit-123' },
         data: {
@@ -222,7 +243,7 @@ describe('DepositService', () => {
       const result = await depositService.releaseBidDeposit('deposit-123')
 
       expect(result).toBe(false)
-      expect(mockStripe.paymentIntents.cancel).not.toHaveBeenCalled()
+      expect(mockPaymentProcessor.releasePayment).not.toHaveBeenCalled()
     })
 
     it('should return false when deposit not found', async () => {
@@ -242,7 +263,13 @@ describe('DepositService', () => {
       })
 
       vi.mocked(mockPrisma.bidDeposit.findUnique).mockResolvedValue(deposit as any)
-      vi.mocked(mockStripe.paymentIntents.capture).mockResolvedValue({} as any)
+      vi.mocked(mockPaymentProcessor.capturePayment).mockResolvedValue({
+        id: 'pi_123',
+        amount: 10000,
+        currency: 'eur',
+        status: 'succeeded',
+        clientSecret: null,
+      })
       vi.mocked(mockPrisma.bidDeposit.update).mockResolvedValue({
         ...deposit,
         status: DepositStatus.CAPTURED,
@@ -251,7 +278,7 @@ describe('DepositService', () => {
       const result = await depositService.captureBidDeposit('deposit-123')
 
       expect(result).toBe(true)
-      expect(mockStripe.paymentIntents.capture).toHaveBeenCalledWith('pi_123')
+      expect(mockPaymentProcessor.capturePayment).toHaveBeenCalledWith('pi_123')
       expect(mockPrisma.bidDeposit.update).toHaveBeenCalledWith({
         where: { id: 'deposit-123' },
         data: {
@@ -283,13 +310,19 @@ describe('DepositService', () => {
       vi.mocked(mockPrisma.bidDeposit.findUnique)
         .mockResolvedValueOnce(deposits[0] as any)
         .mockResolvedValueOnce(deposits[1] as any)
-      vi.mocked(mockStripe.paymentIntents.cancel).mockResolvedValue({} as any)
+      vi.mocked(mockPaymentProcessor.releasePayment).mockResolvedValue({
+        id: 'pi_123',
+        amount: 10000,
+        currency: 'eur',
+        status: 'canceled',
+        clientSecret: null,
+      })
       vi.mocked(mockPrisma.bidDeposit.update).mockResolvedValue({} as any)
 
       const result = await depositService.releaseNonWinningDeposits('auction-123', 'winner-123')
 
       expect(result).toBe(2)
-      expect(mockStripe.paymentIntents.cancel).toHaveBeenCalledTimes(2)
+      expect(mockPaymentProcessor.releasePayment).toHaveBeenCalledTimes(2)
     })
 
     it('should release all deposits when no winner specified', async () => {
@@ -299,7 +332,13 @@ describe('DepositService', () => {
 
       vi.mocked(mockPrisma.bidDeposit.findMany).mockResolvedValue(deposits as any)
       vi.mocked(mockPrisma.bidDeposit.findUnique).mockResolvedValue(deposits[0] as any)
-      vi.mocked(mockStripe.paymentIntents.cancel).mockResolvedValue({} as any)
+      vi.mocked(mockPaymentProcessor.releasePayment).mockResolvedValue({
+        id: 'pi_123',
+        amount: 10000,
+        currency: 'eur',
+        status: 'canceled',
+        clientSecret: null,
+      })
       vi.mocked(mockPrisma.bidDeposit.update).mockResolvedValue({} as any)
 
       const result = await depositService.releaseNonWinningDeposits('auction-123')

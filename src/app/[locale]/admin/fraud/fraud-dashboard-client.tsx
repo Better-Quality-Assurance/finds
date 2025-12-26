@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -32,29 +32,7 @@ import {
   RefreshCw,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
-
-type FraudAlert = {
-  id: string
-  alertType: string
-  severity: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL'
-  status: 'OPEN' | 'INVESTIGATING' | 'RESOLVED' | 'FALSE_POSITIVE'
-  details: Record<string, unknown>
-  createdAt: string
-  userId: string | null
-  auctionId: string | null
-  user?: {
-    id: string
-    name: string | null
-    email: string
-  } | null
-}
-
-type FraudStats = {
-  openAlerts: number
-  criticalAlerts: number
-  alertsToday: number
-  alertsByType: Record<string, number>
-}
+import type { FraudAlert, FraudStats, FraudAlertStatus } from '@/types'
 
 export function FraudDashboardClient() {
   const [alerts, setAlerts] = useState<FraudAlert[]>([])
@@ -65,7 +43,7 @@ export function FraudDashboardClient() {
   const [reviewNotes, setReviewNotes] = useState('')
   const [reviewing, setReviewing] = useState(false)
 
-  const fetchAlerts = async () => {
+  const fetchAlerts = useCallback(async () => {
     try {
       setLoading(true)
       const params = new URLSearchParams()
@@ -82,13 +60,13 @@ export function FraudDashboardClient() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [severityFilter])
 
   useEffect(() => {
     fetchAlerts()
-  }, [severityFilter])
+  }, [fetchAlerts])
 
-  const handleReview = async (status: 'INVESTIGATING' | 'RESOLVED' | 'FALSE_POSITIVE') => {
+  const handleReview = async (status: FraudAlertStatus) => {
     if (!selectedAlert) return
 
     try {
@@ -115,15 +93,15 @@ export function FraudDashboardClient() {
   const getSeverityColor = (severity: string) => {
     switch (severity) {
       case 'CRITICAL':
-        return 'bg-red-500 text-white'
+        return 'bg-destructive text-white'
       case 'HIGH':
-        return 'bg-orange-500 text-white'
+        return 'bg-warning text-warning-foreground'
       case 'MEDIUM':
-        return 'bg-yellow-500 text-white'
+        return 'bg-warning text-warning-foreground'
       case 'LOW':
-        return 'bg-blue-500 text-white'
+        return 'bg-primary text-white'
       default:
-        return 'bg-gray-500 text-white'
+        return 'bg-muted-foreground text-white'
     }
   }
 
@@ -131,14 +109,14 @@ export function FraudDashboardClient() {
     switch (type) {
       case 'SHILL_BIDDING':
       case 'SELLER_IP_MATCH':
-        return <AlertTriangle className="h-4 w-4 text-red-500" />
+        return <AlertTriangle className="h-4 w-4 text-destructive" />
       case 'COORDINATED_BIDDING':
-        return <AlertCircle className="h-4 w-4 text-orange-500" />
+        return <AlertCircle className="h-4 w-4 text-warning" />
       case 'BID_VELOCITY':
       case 'RAPID_BIDDING':
-        return <RefreshCw className="h-4 w-4 text-yellow-500" />
+        return <RefreshCw className="h-4 w-4 text-warning" />
       default:
-        return <Shield className="h-4 w-4 text-blue-500" />
+        return <Shield className="h-4 w-4 text-primary" />
     }
   }
 
@@ -164,10 +142,10 @@ export function FraudDashboardClient() {
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Critical</CardTitle>
-              <AlertTriangle className="h-4 w-4 text-red-500" />
+              <AlertTriangle className="h-4 w-4 text-destructive" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-red-500">{stats.criticalAlerts}</div>
+              <div className="text-2xl font-bold text-destructive">{stats.criticalAlerts}</div>
             </CardContent>
           </Card>
 
@@ -225,7 +203,7 @@ export function FraudDashboardClient() {
             </div>
           ) : alerts.length === 0 ? (
             <div className="flex flex-col items-center justify-center p-8 text-center">
-              <CheckCircle className="mb-2 h-12 w-12 text-green-500" />
+              <CheckCircle className="mb-2 h-12 w-12 text-success" />
               <p className="text-lg font-medium">No open alerts</p>
               <p className="text-muted-foreground">
                 All fraud alerts have been reviewed

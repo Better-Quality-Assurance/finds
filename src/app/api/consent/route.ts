@@ -1,20 +1,15 @@
-import { NextResponse } from 'next/server'
-import { z } from 'zod'
+import { NextRequest } from 'next/server'
 import { prisma } from '@/lib/db'
 import { auth } from '@/lib/auth'
 import { ConsentType } from '@prisma/client'
+import { consentSchema } from '@/lib/validation-schemas'
+import { withSimpleErrorHandler } from '@/lib/with-error-handler'
+import { successResponse } from '@/lib/api-response'
+import { ValidationError, UnauthorizedError } from '@/lib/errors'
+import { ERROR_CODES } from '@/lib/error-codes'
 
-const consentSchema = z.object({
-  consents: z.array(
-    z.object({
-      type: z.enum(['ESSENTIAL', 'ANALYTICS', 'MARKETING', 'DATA_PROCESSING']),
-      granted: z.boolean(),
-    })
-  ),
-})
-
-export async function POST(request: Request) {
-  try {
+export const POST = withSimpleErrorHandler(
+  async (request: NextRequest) => {
     // Parse request body
     const body = await request.json()
     const { consents } = consentSchema.parse(body)
@@ -33,9 +28,9 @@ export async function POST(request: Request) {
 
     // Validate that we have either a userId or an IP address for tracking
     if (!userId && !ipAddress) {
-      return NextResponse.json(
-        { message: 'Unable to identify user for consent tracking' },
-        { status: 400 }
+      throw new ValidationError(
+        'Unable to identify user for consent tracking',
+        ERROR_CODES.VALIDATION_MISSING_FIELD
       )
     }
 
@@ -76,41 +71,29 @@ export async function POST(request: Request) {
       })
     }
 
-    return NextResponse.json(
+    return successResponse(
       {
         message: 'Consent preferences saved successfully',
         recordCount: consentRecords.length,
       },
-      { status: 201 }
+      201
     )
-  } catch (error) {
-    if (error instanceof z.ZodError) {
-      return NextResponse.json(
-        { message: 'Invalid consent data', errors: error.errors },
-        { status: 400 }
-      )
-    }
-
-    console.error('Consent recording error:', error)
-    return NextResponse.json(
-      {
-        message: 'Failed to save consent preferences',
-        error: error instanceof Error ? error.message : 'Unknown error',
-      },
-      { status: 500 }
-    )
+  },
+  {
+    resourceType: 'consent',
+    action: 'consent.record',
   }
-}
+)
 
-export async function GET(request: Request) {
-  try {
+export const GET = withSimpleErrorHandler(
+  async () => {
     // Get authenticated user
     const session = await auth()
 
     if (!session?.user?.id) {
-      return NextResponse.json(
-        { message: 'Unauthorized - please log in to view consent history' },
-        { status: 401 }
+      throw new UnauthorizedError(
+        'Unauthorized - please log in to view consent history',
+        ERROR_CODES.AUTH_REQUIRED
       )
     }
 
@@ -138,18 +121,14 @@ export async function GET(request: Request) {
       }
     }
 
-    return NextResponse.json({
+    return successResponse({
       latestConsents,
       history: consentRecords,
     })
-  } catch (error) {
-    console.error('Consent retrieval error:', error)
-    return NextResponse.json(
-      {
-        message: 'Failed to retrieve consent history',
-        error: error instanceof Error ? error.message : 'Unknown error',
-      },
-      { status: 500 }
-    )
+  },
+  {
+    requiresAuth: true,
+    resourceType: 'consent',
+    action: 'consent.list',
   }
-}
+)

@@ -6,7 +6,6 @@ import { signIn } from 'next-auth/react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { z } from 'zod'
 import { Link } from '@/i18n/routing'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -21,13 +20,7 @@ import {
 } from '@/components/ui/card'
 import { toast } from 'sonner'
 import { Loader2 } from 'lucide-react'
-
-const loginSchema = z.object({
-  email: z.string().email(),
-  password: z.string().min(1),
-})
-
-type LoginFormData = z.infer<typeof loginSchema>
+import { loginSchema, type LoginFormData } from '@/lib/validation-schemas'
 
 export default function LoginPage() {
   const t = useTranslations('auth')

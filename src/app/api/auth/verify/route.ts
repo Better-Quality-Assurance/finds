@@ -1,5 +1,9 @@
-import { NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { getContainer } from '@/lib/container'
+import { withSimpleErrorHandler } from '@/lib/with-error-handler'
+import { successResponse } from '@/lib/api-response'
+import { ValidationError, NotFoundError } from '@/lib/errors'
+import { ERROR_CODES } from '@/lib/error-codes'
 
 /**
  * POST /api/auth/verify
@@ -14,15 +18,15 @@ import { getContainer } from '@/lib/container'
  * 4. Delete the used token
  * 5. Return success or error response
  */
-export async function POST(request: Request) {
-  try {
+export const POST = withSimpleErrorHandler(
+  async (request: NextRequest) => {
     const body = await request.json()
     const { token } = body
 
     if (!token || typeof token !== 'string') {
-      return NextResponse.json(
-        { message: 'Invalid token provided' },
-        { status: 400 }
+      throw new ValidationError(
+        'Invalid token provided',
+        ERROR_CODES.AUTH_INVALID_TOKEN
       )
     }
 
@@ -36,9 +40,9 @@ export async function POST(request: Request) {
     })
 
     if (!verificationToken) {
-      return NextResponse.json(
-        { message: 'Invalid or expired verification token' },
-        { status: 400 }
+      throw new ValidationError(
+        'Invalid or expired verification token',
+        ERROR_CODES.AUTH_INVALID_TOKEN
       )
     }
 
@@ -55,9 +59,9 @@ export async function POST(request: Request) {
         },
       })
 
-      return NextResponse.json(
-        { message: 'Verification token has expired. Please register again.' },
-        { status: 400 }
+      throw new ValidationError(
+        'Verification token has expired. Please register again.',
+        ERROR_CODES.AUTH_TOKEN_EXPIRED
       )
     }
 
@@ -72,9 +76,9 @@ export async function POST(request: Request) {
     })
 
     if (!user) {
-      return NextResponse.json(
-        { message: 'User not found' },
-        { status: 404 }
+      throw new NotFoundError(
+        'User not found',
+        ERROR_CODES.USER_NOT_FOUND
       )
     }
 
@@ -88,22 +92,16 @@ export async function POST(request: Request) {
       },
     })
 
-    return NextResponse.json(
-      {
-        message: 'Email verified successfully. You can now log in.',
-        email: user.email,
-      },
-      { status: 200 }
-    )
-  } catch (error) {
-    console.error('Email verification error:', error)
-
-    return NextResponse.json(
-      { message: 'An error occurred during verification. Please try again.' },
-      { status: 500 }
-    )
+    return successResponse({
+      message: 'Email verified successfully. You can now log in.',
+      email: user.email,
+    })
+  },
+  {
+    resourceType: 'user',
+    action: 'auth.verify-email',
   }
-}
+)
 
 /**
  * GET /api/auth/verify?token=xxx

@@ -1,5 +1,7 @@
 // Notification Service - handles sending notifications to users
-import { pusher, CHANNELS, EVENTS } from '@/lib/pusher'
+import { INotificationTransport } from './contracts/notification-transport.interface'
+import { createNotificationTransport } from './pusher-notification-transport'
+import { EVENTS } from '@/lib/pusher'
 import { prisma } from '@/lib/db'
 
 export type NotificationType =
@@ -23,15 +25,29 @@ export type NotificationPayload = {
 }
 
 /**
- * Send notification to a specific user via Pusher
+ * Notification transport instance
+ * Uses dependency inversion - service depends on interface, not concrete implementation
+ */
+let transport: INotificationTransport = createNotificationTransport()
+
+/**
+ * Set custom notification transport (for testing or alternative implementations)
+ * @param customTransport - Transport implementation
+ */
+export function setNotificationTransport(customTransport: INotificationTransport): void {
+  transport = customTransport
+}
+
+/**
+ * Send notification to a specific user via configured transport
  */
 export async function sendUserNotification(
   userId: string,
   notification: NotificationPayload
 ): Promise<void> {
   try {
-    await pusher.trigger(
-      CHANNELS.userNotifications(userId),
+    await transport.sendToUser(
+      userId,
       'notification',
       {
         ...notification,
@@ -49,7 +65,7 @@ export async function sendUserNotification(
  */
 export async function broadcastPublic(event: string, data: Record<string, unknown>): Promise<void> {
   try {
-    await pusher.trigger('public', event, data)
+    await transport.send('public', event, data)
     console.log(`Public broadcast: ${event}`)
   } catch (error) {
     console.error(`Failed to broadcast public event ${event}:`, error)

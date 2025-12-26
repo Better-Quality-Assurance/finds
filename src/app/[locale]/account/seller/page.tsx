@@ -132,7 +132,7 @@ export default async function SellerDashboardPage({
 
       {/* Status Messages */}
       {searchParams.success === 'onboarding_complete' && (
-        <Alert className="mb-6 border-green-200 bg-green-50 text-green-800 dark:border-green-800 dark:bg-green-950 dark:text-green-200">
+        <Alert className="mb-6 border-success/20 bg-success/10 text-success">
           <CheckCircle className="h-4 w-4" />
           <AlertDescription>
             {t('dashboard.onboardingComplete')}
@@ -140,7 +140,7 @@ export default async function SellerDashboardPage({
         </Alert>
       )}
       {searchParams.warning === 'additional_info_required' && (
-        <Alert className="mb-6 border-amber-200 bg-amber-50 text-amber-800 dark:border-amber-800 dark:bg-amber-950 dark:text-amber-200">
+        <Alert className="mb-6 border-warning/20 bg-warning/10 text-warning">
           <AlertTriangle className="h-4 w-4" />
           <AlertDescription>
             {t('dashboard.additionalInfoRequired')}
@@ -148,7 +148,7 @@ export default async function SellerDashboardPage({
         </Alert>
       )}
       {searchParams.error && (
-        <Alert className="mb-6 border-red-200 bg-red-50 text-red-800 dark:border-red-800 dark:bg-red-950 dark:text-red-200">
+        <Alert className="mb-6 border-destructive/20 bg-destructive/10 text-destructive">
           <XCircle className="h-4 w-4" />
           <AlertDescription>
             {t(`dashboard.errors.${searchParams.error}`, {
@@ -206,7 +206,7 @@ export default async function SellerDashboardPage({
                     </p>
                   )}
                   {connectAccount?.requirements?.currently_due && connectAccount.requirements.currently_due.length > 0 && (
-                    <p className="text-xs text-amber-600 dark:text-amber-400">
+                    <p className="text-xs text-warning">
                       {t('dashboard.requirementsOutstanding', {
                         count: connectAccount.requirements.currently_due.length
                       })}

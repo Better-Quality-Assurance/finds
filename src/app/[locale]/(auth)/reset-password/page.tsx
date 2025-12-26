@@ -5,7 +5,6 @@ import { useTranslations } from 'next-intl'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { z } from 'zod'
 import { Link } from '@/i18n/routing'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -20,16 +19,7 @@ import {
 } from '@/components/ui/card'
 import { toast } from 'sonner'
 import { Loader2, CheckCircle2, AlertCircle } from 'lucide-react'
-
-const resetPasswordSchema = z.object({
-  password: z.string().min(8),
-  confirmPassword: z.string().min(8),
-}).refine((data) => data.password === data.confirmPassword, {
-  message: 'Passwords do not match',
-  path: ['confirmPassword'],
-})
-
-type ResetPasswordFormData = z.infer<typeof resetPasswordSchema>
+import { resetPasswordFormSchema, type ResetPasswordFormData } from '@/lib/validation-schemas'
 
 export default function ResetPasswordPage() {
   const t = useTranslations('auth')
@@ -47,7 +37,7 @@ export default function ResetPasswordPage() {
     handleSubmit,
     formState: { errors },
   } = useForm<ResetPasswordFormData>({
-    resolver: zodResolver(resetPasswordSchema),
+    resolver: zodResolver(resetPasswordFormSchema),
   })
 
   useEffect(() => {
@@ -139,8 +129,8 @@ export default function ResetPasswordPage() {
       <div className="container mx-auto flex min-h-[70vh] items-center justify-center px-4 py-12">
         <Card className="w-full max-w-md">
           <CardHeader className="text-center">
-            <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-green-100 dark:bg-green-900/20">
-              <CheckCircle2 className="h-8 w-8 text-green-600 dark:text-green-400" />
+            <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-success/10">
+              <CheckCircle2 className="h-8 w-8 text-success" />
             </div>
             <CardTitle className="text-2xl">{t('passwordResetSuccessTitle')}</CardTitle>
             <CardDescription className="text-base">

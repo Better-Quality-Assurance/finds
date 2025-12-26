@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { useTranslations } from 'next-intl'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useSession } from 'next-auth/react'
@@ -35,14 +35,7 @@ export default function VerifyEmailPage() {
   const [userEmail, setUserEmail] = useState<string>('')
   const [resending, setResending] = useState(false)
 
-  useEffect(() => {
-    // If we have a token in the URL, automatically verify it
-    if (token) {
-      verifyEmail(token)
-    }
-  }, [token])
-
-  const verifyEmail = async (verificationToken: string) => {
+  const verifyEmail = useCallback(async (verificationToken: string) => {
     setStatus('verifying')
     setErrorMessage('')
 
@@ -81,7 +74,14 @@ export default function VerifyEmailPage() {
       setErrorMessage(tErrors('serverError'))
       toast.error(tErrors('serverError'))
     }
-  }
+  }, [t, tErrors, callbackUrl, router])
+
+  useEffect(() => {
+    // If we have a token in the URL, automatically verify it
+    if (token) {
+      verifyEmail(token)
+    }
+  }, [token, verifyEmail])
 
   const handleResendEmail = async () => {
     if (resending) return
@@ -129,12 +129,12 @@ export default function VerifyEmailPage() {
           </CardHeader>
           <CardContent className="space-y-4">
             {required && (
-              <Alert variant="default" className="border-yellow-500 bg-yellow-50 dark:bg-yellow-950/20">
-                <AlertCircle className="h-4 w-4 text-yellow-600 dark:text-yellow-500" />
-                <AlertTitle className="text-yellow-800 dark:text-yellow-400">
+              <Alert variant="default" className="border-warning bg-warning/10">
+                <AlertCircle className="h-4 w-4 text-warning" />
+                <AlertTitle className="text-warning">
                   Email Verification Required
                 </AlertTitle>
-                <AlertDescription className="text-yellow-700 dark:text-yellow-500">
+                <AlertDescription className="text-warning/90">
                   {callbackUrl
                     ? 'To continue, please verify your email address by clicking the link we sent to your inbox.'
                     : 'Some features require a verified email address. Please check your inbox for the verification link.'}
@@ -209,8 +209,8 @@ export default function VerifyEmailPage() {
       <div className="container mx-auto flex min-h-[70vh] items-center justify-center px-4 py-12">
         <Card className="w-full max-w-md">
           <CardHeader className="text-center">
-            <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-green-100 dark:bg-green-900/20">
-              <CheckCircle2 className="h-12 w-12 text-green-600 dark:text-green-400" />
+            <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-success/10">
+              <CheckCircle2 className="h-12 w-12 text-success" />
             </div>
             <CardTitle className="text-2xl">{t('verificationSuccess')}</CardTitle>
             <CardDescription>{t('emailVerifiedMessage')}</CardDescription>

@@ -1,13 +1,19 @@
-import { NextResponse } from 'next/server'
+import { NextRequest } from 'next/server'
 import { auth } from '@/lib/auth'
-import { getPendingListings } from '@/services/listing.service'
 import { prisma } from '@/lib/db'
+import { withSimpleErrorHandler } from '@/lib/with-error-handler'
+import { successResponse } from '@/lib/api-response'
+import { UnauthorizedError, ForbiddenError } from '@/lib/errors'
+import { ERROR_CODES } from '@/lib/error-codes'
 
-export async function GET(request: Request) {
-  try {
+export const GET = withSimpleErrorHandler(
+  async (request: NextRequest) => {
     const session = await auth()
     if (!session?.user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+      throw new UnauthorizedError(
+        'You must be logged in',
+        ERROR_CODES.AUTH_REQUIRED
+      )
     }
 
     // Check if user has admin/moderator/reviewer role
@@ -17,7 +23,10 @@ export async function GET(request: Request) {
     })
 
     if (!user || !['ADMIN', 'MODERATOR', 'REVIEWER'].includes(user.role)) {
-      return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+      throw new ForbiddenError(
+        'You do not have permission to access this resource',
+        ERROR_CODES.AUTH_INSUFFICIENT_PERMISSIONS
+      )
     }
 
     const { searchParams } = new URL(request.url)
@@ -57,7 +66,7 @@ export async function GET(request: Request) {
       prisma.listing.count({ where }),
     ])
 
-    return NextResponse.json({
+    return successResponse({
       listings,
       pagination: {
         page,
@@ -66,11 +75,11 @@ export async function GET(request: Request) {
         totalPages: Math.ceil(total / limit),
       },
     })
-  } catch (error) {
-    console.error('Get admin listings error:', error)
-    return NextResponse.json(
-      { error: 'Failed to get listings' },
-      { status: 500 }
-    )
+  },
+  {
+    requiresAuth: true,
+    resourceType: 'listing',
+    action: 'admin.listing.list',
+    auditLog: true,
   }
-}
+)

@@ -31,34 +31,7 @@ import {
   Activity,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
-
-type AuditLogEntry = {
-  id: string
-  createdAt: string
-  actorId: string | null
-  actorEmail: string | null
-  actorIp: string | null
-  action: string
-  resourceType: string
-  resourceId: string | null
-  severity: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL' | null
-  status: 'SUCCESS' | 'FAILURE' | 'BLOCKED' | null
-  details: Record<string, unknown>
-  changes: Record<string, unknown> | null
-  errorMessage: string | null
-  actor?: {
-    id: string
-    name: string | null
-    email: string
-  } | null
-}
-
-type AuditStats = {
-  totalToday: number
-  failedToday: number
-  highSeverityToday: number
-  topActions: Array<{ action: string; count: number }>
-}
+import type { AuditLogEntry, AuditStats } from '@/types'
 
 export function AuditLogClient() {
   const [logs, setLogs] = useState<AuditLogEntry[]>([])
@@ -103,10 +76,10 @@ export function AuditLogClient() {
   const getSeverityBadge = (severity: string | null) => {
     if (!severity) return null
     const variants: Record<string, string> = {
-      CRITICAL: 'bg-red-500 text-white',
-      HIGH: 'bg-orange-500 text-white',
-      MEDIUM: 'bg-yellow-500 text-white',
-      LOW: 'bg-blue-500 text-white',
+      CRITICAL: 'bg-destructive text-destructive-foreground',
+      HIGH: 'bg-destructive text-destructive-foreground',
+      MEDIUM: 'bg-warning text-warning-foreground',
+      LOW: 'bg-primary text-primary-foreground',
     }
     return <Badge className={variants[severity]}>{severity}</Badge>
   }
@@ -114,11 +87,11 @@ export function AuditLogClient() {
   const getStatusIcon = (status: string | null) => {
     switch (status) {
       case 'SUCCESS':
-        return <CheckCircle className="h-4 w-4 text-green-500" />
+        return <CheckCircle className="h-4 w-4 text-success" />
       case 'FAILURE':
-        return <XCircle className="h-4 w-4 text-red-500" />
+        return <XCircle className="h-4 w-4 text-destructive" />
       case 'BLOCKED':
-        return <AlertCircle className="h-4 w-4 text-yellow-500" />
+        return <AlertCircle className="h-4 w-4 text-warning" />
       default:
         return <Activity className="h-4 w-4 text-muted-foreground" />
     }
@@ -146,20 +119,20 @@ export function AuditLogClient() {
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Failed</CardTitle>
-              <XCircle className="h-4 w-4 text-red-500" />
+              <XCircle className="h-4 w-4 text-destructive" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-red-500">{stats.failedToday}</div>
+              <div className="text-2xl font-bold text-destructive">{stats.failedToday}</div>
             </CardContent>
           </Card>
 
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">High Severity</CardTitle>
-              <AlertCircle className="h-4 w-4 text-orange-500" />
+              <AlertCircle className="h-4 w-4 text-warning" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-orange-500">
+              <div className="text-2xl font-bold text-warning">
                 {stats.highSeverityToday}
               </div>
             </CardContent>
@@ -389,7 +362,7 @@ export function AuditLogClient() {
               {selectedLog.errorMessage && (
                 <div>
                   <label className="text-sm text-muted-foreground">Error</label>
-                  <p className="mt-1 rounded bg-red-50 p-2 text-sm text-red-800 dark:bg-red-900 dark:text-red-100">
+                  <p className="mt-1 rounded bg-destructive/10 p-2 text-sm text-destructive">
                     {selectedLog.errorMessage}
                   </p>
                 </div>

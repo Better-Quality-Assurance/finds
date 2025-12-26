@@ -5,52 +5,18 @@ import { useTranslations } from 'next-intl'
 import { useRouter } from 'next/navigation'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { z } from 'zod'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Progress } from '@/components/ui/progress'
 import { toast } from 'sonner'
 import { Loader2, ArrowLeft, ArrowRight, Check } from 'lucide-react'
+import { listingFormSchema, type ListingFormData } from '@/lib/validation-schemas'
 import { VehicleInfoStep } from './steps/vehicle-info-step'
 import { ConditionStep } from './steps/condition-step'
 import { LocationStep } from './steps/location-step'
 import { PricingStep } from './steps/pricing-step'
 import { PhotosStep } from './steps/photos-step'
 import { ReviewStep } from './steps/review-step'
-
-const listingSchema = z.object({
-  // Vehicle Info
-  category: z.string().min(1, 'Category is required'),
-  make: z.string().min(1, 'Make is required').max(50),
-  model: z.string().min(1, 'Model is required').max(50),
-  year: z.coerce.number().int().min(1900).max(new Date().getFullYear() + 1),
-  mileage: z.coerce.number().int().min(0).optional(),
-  mileageUnit: z.enum(['km', 'miles']).default('km'),
-  vin: z.string().max(20).optional(),
-  registrationCountry: z.string().max(50).optional(),
-
-  // Condition
-  conditionRating: z.coerce.number().int().min(1).max(10).optional(),
-  conditionNotes: z.string().max(5000).optional(),
-  knownIssues: z.string().max(5000).optional(),
-  isRunning: z.boolean(),
-
-  // Location
-  locationCountry: z.string().min(2, 'Country is required').max(50),
-  locationCity: z.string().min(2, 'City is required').max(100),
-  locationRegion: z.string().max(100).optional(),
-
-  // Pricing
-  startingPrice: z.coerce.number().min(100).max(10000000),
-  reservePrice: z.coerce.number().min(100).max(10000000).optional(),
-  currency: z.enum(['EUR', 'USD', 'GBP', 'RON']).default('EUR'),
-
-  // Description
-  title: z.string().min(10, 'Title must be at least 10 characters').max(100),
-  description: z.string().min(100, 'Description must be at least 100 characters').max(10000),
-})
-
-export type ListingFormData = z.infer<typeof listingSchema>
 
 const STEPS = [
   { id: 'vehicle', title: 'Vehicle Info' },
@@ -74,7 +40,7 @@ export function ListingForm({ listingId, initialData }: ListingFormProps) {
   const [createdListingId, setCreatedListingId] = useState<string | null>(listingId || null)
 
   const form = useForm<ListingFormData>({
-    resolver: zodResolver(listingSchema),
+    resolver: zodResolver(listingFormSchema),
     defaultValues: {
       category: '',
       make: '',

@@ -5,7 +5,6 @@ import { useTranslations } from 'next-intl'
 import { useRouter } from 'next/navigation'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { z } from 'zod'
 import { Link } from '@/i18n/routing'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -21,23 +20,7 @@ import {
 } from '@/components/ui/card'
 import { toast } from 'sonner'
 import { Loader2 } from 'lucide-react'
-
-const registerSchema = z
-  .object({
-    name: z.string().min(2),
-    email: z.string().email(),
-    password: z.string().min(8),
-    confirmPassword: z.string(),
-    acceptedTerms: z.boolean().refine((val) => val === true, {
-      message: 'You must accept the Terms of Service to register',
-    }),
-  })
-  .refine((data) => data.password === data.confirmPassword, {
-    message: 'Passwords do not match',
-    path: ['confirmPassword'],
-  })
-
-type RegisterFormData = z.infer<typeof registerSchema>
+import { registerSchema, type RegisterFormData } from '@/lib/validation-schemas'
 
 export default function RegisterPage() {
   const t = useTranslations('auth')
