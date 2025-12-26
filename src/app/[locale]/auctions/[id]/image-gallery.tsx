@@ -43,37 +43,37 @@ export function ImageGallery({ images }: ImageGalleryProps) {
   return (
     <>
       {/* Main image */}
-      <div className="relative aspect-[4/3] overflow-hidden rounded-lg bg-muted" role="region" aria-label="Image gallery">
+      <div className="relative aspect-[4/3] overflow-hidden rounded-lg bg-muted sm:rounded-xl" role="region" aria-label="Image gallery">
         <Image
           src={currentImage.url}
           alt={`Image ${currentIndex + 1} of ${images.length}`}
           fill
-          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 80vw, 1200px"
+          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 66vw, 800px"
           priority={currentIndex === 0}
           className="object-contain"
           role="img"
         />
 
-        {/* Navigation arrows */}
+        {/* Navigation arrows - larger touch targets on mobile */}
         {images.length > 1 && (
           <>
             <Button
               variant="ghost"
               size="icon"
-              className="absolute left-2 top-1/2 -translate-y-1/2 bg-black/50 text-white hover:bg-black/70"
+              className="absolute left-1 top-1/2 h-10 w-10 -translate-y-1/2 bg-black/50 text-white hover:bg-black/70 sm:left-2 sm:h-11 sm:w-11"
               onClick={goToPrev}
               aria-label="Previous image"
             >
-              <ChevronLeft className="h-6 w-6" aria-hidden="true" />
+              <ChevronLeft className="h-5 w-5 sm:h-6 sm:w-6" aria-hidden="true" />
             </Button>
             <Button
               variant="ghost"
               size="icon"
-              className="absolute right-2 top-1/2 -translate-y-1/2 bg-black/50 text-white hover:bg-black/70"
+              className="absolute right-1 top-1/2 h-10 w-10 -translate-y-1/2 bg-black/50 text-white hover:bg-black/70 sm:right-2 sm:h-11 sm:w-11"
               onClick={goToNext}
               aria-label="Next image"
             >
-              <ChevronRight className="h-6 w-6" aria-hidden="true" />
+              <ChevronRight className="h-5 w-5 sm:h-6 sm:w-6" aria-hidden="true" />
             </Button>
           </>
         )}
@@ -82,7 +82,7 @@ export function ImageGallery({ images }: ImageGalleryProps) {
         <Button
           variant="ghost"
           size="icon"
-          className="absolute right-2 top-2 bg-black/50 text-white hover:bg-black/70"
+          className="absolute right-1 top-1 h-9 w-9 bg-black/50 text-white hover:bg-black/70 sm:right-2 sm:top-2 sm:h-10 sm:w-10"
           onClick={() => setIsFullscreen(true)}
           aria-label="Enter fullscreen mode"
         >
@@ -90,31 +90,31 @@ export function ImageGallery({ images }: ImageGalleryProps) {
         </Button>
 
         {/* Image counter */}
-        <div className="absolute bottom-2 left-2 rounded bg-black/70 px-2 py-1 text-sm text-white" aria-live="polite" aria-atomic="true">
+        <div className="absolute bottom-1.5 left-1.5 rounded bg-black/70 px-2 py-0.5 text-xs text-white sm:bottom-2 sm:left-2 sm:py-1 sm:text-sm" aria-live="polite" aria-atomic="true">
           <span className="sr-only">Viewing image </span>
           {currentIndex + 1} / {images.length}
         </div>
 
         {/* Category badge */}
         {currentImage.category && (
-          <div className="absolute bottom-2 right-2 rounded bg-black/70 px-2 py-1 text-xs text-white">
+          <div className="absolute bottom-1.5 right-1.5 rounded bg-black/70 px-1.5 py-0.5 text-[10px] text-white sm:bottom-2 sm:right-2 sm:px-2 sm:py-1 sm:text-xs">
             {currentImage.category.replace(/_/g, ' ')}
           </div>
         )}
       </div>
 
-      {/* Thumbnails */}
+      {/* Thumbnails - horizontal scroll with touch-friendly sizing */}
       {images.length > 1 && (
-        <div className="mt-2 flex gap-2 overflow-x-auto pb-2" role="list" aria-label="Image thumbnails">
+        <div className="-mx-4 mt-2 flex gap-1.5 overflow-x-auto px-4 pb-2 sm:mx-0 sm:gap-2 sm:px-0" role="list" aria-label="Image thumbnails">
           {images.map((image, index) => (
             <button
               key={image.id}
               onClick={() => goToIndex(index)}
               className={cn(
-                'relative h-16 w-24 flex-shrink-0 overflow-hidden rounded border-2 transition-all',
+                'relative h-14 w-20 flex-shrink-0 overflow-hidden rounded border-2 transition-all sm:h-16 sm:w-24',
                 index === currentIndex
-                  ? 'border-primary'
-                  : 'border-transparent opacity-60 hover:opacity-100'
+                  ? 'border-primary ring-1 ring-primary'
+                  : 'border-transparent opacity-60 hover:opacity-100 active:opacity-100'
               )}
               aria-label={`View image ${index + 1}`}
               aria-current={index === currentIndex ? 'true' : undefined}
@@ -124,7 +124,7 @@ export function ImageGallery({ images }: ImageGalleryProps) {
                 src={image.url}
                 alt={`Thumbnail ${index + 1}`}
                 fill
-                sizes="96px"
+                sizes="80px"
                 className="object-cover"
               />
             </button>

@@ -34,6 +34,8 @@ function getCSP() {
       'https://placehold.co',
       'https://picsum.photos',
       'https://fastly.picsum.photos',
+      'https://source.unsplash.com',
+      'https://images.unsplash.com',
     ],
     'font-src': ["'self'", 'data:'],
     'connect-src': [
@@ -92,6 +94,14 @@ const nextConfig = {
       {
         protocol: 'https',
         hostname: 'fastly.picsum.photos',
+      },
+      {
+        protocol: 'https',
+        hostname: 'source.unsplash.com',
+      },
+      {
+        protocol: 'https',
+        hostname: 'images.unsplash.com',
       },
     ],
     formats: ['image/avif', 'image/webp'],

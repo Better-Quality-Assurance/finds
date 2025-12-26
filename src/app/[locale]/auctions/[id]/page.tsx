@@ -155,10 +155,10 @@ export default async function AuctionDetailPage({ params }: PageProps) {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
       />
-      <div className="container py-8">
-        <div className="grid gap-8 lg:grid-cols-3">
+      <div className="container px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
+        <div className="grid gap-6 lg:grid-cols-3 lg:gap-8">
           {/* Main content */}
-          <div className="lg:col-span-2 space-y-8">
+          <div className="lg:col-span-2 space-y-6 lg:space-y-8">
           {/* Image Gallery */}
           <ImageGallery
             images={photos.map((p) => ({
@@ -170,11 +170,11 @@ export default async function AuctionDetailPage({ params }: PageProps) {
 
           {/* Title and badges */}
           <div>
-            <h1 className="text-3xl font-bold">{listing.title}</h1>
-            <p className="mt-2 text-lg text-muted-foreground">
+            <h1 className="text-2xl font-bold sm:text-3xl lg:text-4xl">{listing.title}</h1>
+            <p className="mt-1.5 text-base text-muted-foreground sm:mt-2 sm:text-lg">
               {listing.year} {listing.make} {listing.model}
             </p>
-            <div className="mt-4 flex flex-wrap gap-2">
+            <div className="mt-3 flex flex-wrap gap-1.5 sm:mt-4 sm:gap-2">
               <Badge variant={listing.isRunning ? 'success' : 'warning'}>
                 {listing.isRunning ? 'Running' : 'Non-Running'}
               </Badge>
@@ -187,61 +187,88 @@ export default async function AuctionDetailPage({ params }: PageProps) {
             </div>
           </div>
 
+          {/* Mobile Bid Summary - Shows above content on mobile */}
+          <div className="lg:hidden">
+            <BidPanel
+              auction={{
+                id: auction.id,
+                currentBid: auction.currentBid ? Number(auction.currentBid) : null,
+                bidCount: auction.bidCount,
+                currentEndTime: auction.currentEndTime.toISOString(),
+                reserveMet: auction.reserveMet,
+                extensionCount: auction.extensionCount,
+                status: auction.status,
+                listing: {
+                  startingPrice: Number(listing.startingPrice),
+                  reservePrice: listing.reservePrice ? Number(listing.reservePrice) : null,
+                  currency: listing.currency,
+                  sellerId: listing.sellerId,
+                },
+              }}
+              bids={auction.bids.map((b) => ({
+                id: b.id,
+                amount: Number(b.amount),
+                createdAt: b.createdAt.toISOString(),
+                bidder: b.bidder,
+              }))}
+            />
+          </div>
+
           {/* Vehicle details */}
-          <div className="grid gap-4 sm:grid-cols-2">
-            <div className="rounded-lg border p-4">
-              <h3 className="flex items-center gap-2 font-medium">
-                <Car className="h-4 w-4" />
+          <div className="grid gap-3 sm:gap-4 sm:grid-cols-2">
+            <div className="rounded-lg border p-3 sm:p-4">
+              <h3 className="flex items-center gap-2 text-sm font-medium sm:text-base">
+                <Car className="h-4 w-4 flex-shrink-0" />
                 Vehicle Info
               </h3>
-              <dl className="mt-3 space-y-2 text-sm">
-                <div className="flex justify-between">
+              <dl className="mt-2 space-y-1.5 text-sm sm:mt-3 sm:space-y-2">
+                <div className="flex justify-between gap-2">
                   <dt className="text-muted-foreground">Make</dt>
-                  <dd>{listing.make}</dd>
+                  <dd className="text-right">{listing.make}</dd>
                 </div>
-                <div className="flex justify-between">
+                <div className="flex justify-between gap-2">
                   <dt className="text-muted-foreground">Model</dt>
-                  <dd>{listing.model}</dd>
+                  <dd className="text-right">{listing.model}</dd>
                 </div>
-                <div className="flex justify-between">
+                <div className="flex justify-between gap-2">
                   <dt className="text-muted-foreground">Year</dt>
-                  <dd>{listing.year}</dd>
+                  <dd className="text-right">{listing.year}</dd>
                 </div>
                 {listing.mileage && (
-                  <div className="flex justify-between">
+                  <div className="flex justify-between gap-2">
                     <dt className="text-muted-foreground">Mileage</dt>
-                    <dd>
+                    <dd className="text-right">
                       {listing.mileage.toLocaleString()} {listing.mileageUnit}
                     </dd>
                   </div>
                 )}
                 {listing.vin && (
-                  <div className="flex justify-between">
+                  <div className="flex justify-between gap-2">
                     <dt className="text-muted-foreground">VIN</dt>
-                    <dd className="font-mono text-xs">{listing.vin}</dd>
+                    <dd className="text-right font-mono text-xs break-all">{listing.vin}</dd>
                   </div>
                 )}
               </dl>
             </div>
 
-            <div className="rounded-lg border p-4">
-              <h3 className="flex items-center gap-2 font-medium">
-                <MapPin className="h-4 w-4" />
+            <div className="rounded-lg border p-3 sm:p-4">
+              <h3 className="flex items-center gap-2 text-sm font-medium sm:text-base">
+                <MapPin className="h-4 w-4 flex-shrink-0" />
                 Location
               </h3>
-              <dl className="mt-3 space-y-2 text-sm">
-                <div className="flex justify-between">
+              <dl className="mt-2 space-y-1.5 text-sm sm:mt-3 sm:space-y-2">
+                <div className="flex justify-between gap-2">
                   <dt className="text-muted-foreground">City</dt>
-                  <dd>{listing.locationCity}</dd>
+                  <dd className="text-right">{listing.locationCity}</dd>
                 </div>
-                <div className="flex justify-between">
+                <div className="flex justify-between gap-2">
                   <dt className="text-muted-foreground">Country</dt>
-                  <dd>{listing.locationCountry}</dd>
+                  <dd className="text-right">{listing.locationCountry}</dd>
                 </div>
                 {listing.locationRegion && (
-                  <div className="flex justify-between">
+                  <div className="flex justify-between gap-2">
                     <dt className="text-muted-foreground">Region</dt>
-                    <dd>{listing.locationRegion}</dd>
+                    <dd className="text-right">{listing.locationRegion}</dd>
                   </div>
                 )}
               </dl>
@@ -249,26 +276,26 @@ export default async function AuctionDetailPage({ params }: PageProps) {
           </div>
 
           {/* Description */}
-          <div className="rounded-lg border p-4">
-            <h3 className="flex items-center gap-2 font-medium">
-              <FileText className="h-4 w-4" />
+          <div className="rounded-lg border p-3 sm:p-4">
+            <h3 className="flex items-center gap-2 text-sm font-medium sm:text-base">
+              <FileText className="h-4 w-4 flex-shrink-0" />
               Description
             </h3>
-            <div className="mt-3">
+            <div className="mt-2 sm:mt-3">
               <Markdown content={listing.description} />
             </div>
           </div>
 
           {/* Condition */}
           {(listing.conditionNotes || listing.knownIssues) && (
-            <div className="rounded-lg border p-4">
-              <h3 className="flex items-center gap-2 font-medium">
-                <Wrench className="h-4 w-4" />
+            <div className="rounded-lg border p-3 sm:p-4">
+              <h3 className="flex items-center gap-2 text-sm font-medium sm:text-base">
+                <Wrench className="h-4 w-4 flex-shrink-0" />
                 Condition Details
               </h3>
               {listing.conditionNotes && (
-                <div className="mt-3">
-                  <h4 className="text-sm font-medium text-muted-foreground">
+                <div className="mt-2 sm:mt-3">
+                  <h4 className="text-xs font-medium text-muted-foreground sm:text-sm">
                     Condition Notes
                   </h4>
                   <div className="mt-1">
@@ -277,8 +304,8 @@ export default async function AuctionDetailPage({ params }: PageProps) {
                 </div>
               )}
               {listing.knownIssues && (
-                <div className="mt-3">
-                  <h4 className="text-sm font-medium text-muted-foreground">
+                <div className="mt-2 sm:mt-3">
+                  <h4 className="text-xs font-medium text-muted-foreground sm:text-sm">
                     Known Issues
                   </h4>
                   <div className="mt-1">
@@ -290,15 +317,15 @@ export default async function AuctionDetailPage({ params }: PageProps) {
           )}
 
           {/* Seller info */}
-          <div className="rounded-lg border p-4">
-            <h3 className="font-medium">Seller</h3>
-            <div className="mt-3 flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary text-primary-foreground">
+          <div className="rounded-lg border p-3 sm:p-4">
+            <h3 className="text-sm font-medium sm:text-base">Seller</h3>
+            <div className="mt-2 flex items-center gap-3 sm:mt-3">
+              <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full bg-primary text-sm text-primary-foreground sm:h-10 sm:w-10">
                 {listing.seller.name?.[0]?.toUpperCase() || 'S'}
               </div>
-              <div>
-                <p className="font-medium">{listing.seller.name || 'Seller'}</p>
-                <p className="text-sm text-muted-foreground">
+              <div className="min-w-0">
+                <p className="truncate text-sm font-medium sm:text-base">{listing.seller.name || 'Seller'}</p>
+                <p className="text-xs text-muted-foreground sm:text-sm">
                   Member since{' '}
                   {new Date(listing.seller.createdAt).toLocaleDateString('en-US', {
                     month: 'long',
@@ -310,8 +337,8 @@ export default async function AuctionDetailPage({ params }: PageProps) {
           </div>
         </div>
 
-        {/* Sidebar - Bid Panel */}
-        <div className="lg:col-span-1">
+        {/* Sidebar - Bid Panel (Desktop only) */}
+        <div className="hidden lg:block lg:col-span-1">
           <div className="sticky top-4">
             <BidPanel
               auction={{

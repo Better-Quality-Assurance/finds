@@ -139,18 +139,18 @@ export function BidPanel({ auction: initialAuction, bids: initialBids }: BidPane
 
   return (
     <Card variant="glass" className="sticky top-20">
-      <CardHeader className="pb-4">
-        <div className="flex items-center justify-between">
-          <CardTitle className="flex items-center gap-2 font-heading">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-primary to-primary/80 shadow-lg shadow-primary/25">
-              <Gavel className="h-5 w-5 text-primary-foreground" aria-hidden="true" />
+      <CardHeader className="px-4 pb-3 pt-4 sm:px-6 sm:pb-4 sm:pt-5">
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <CardTitle className="flex items-center gap-2 text-base font-heading sm:text-lg">
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-primary to-primary/80 shadow-lg shadow-primary/25 sm:h-10 sm:w-10 sm:rounded-xl">
+              <Gavel className="h-4 w-4 text-primary-foreground sm:h-5 sm:w-5" aria-hidden="true" />
             </div>
             {isActive ? 'Place Your Bid' : 'Auction Ended'}
           </CardTitle>
           {isActive && (
             <div
               className={cn(
-                'flex items-center gap-1.5 rounded-full px-4 py-2 text-sm font-semibold',
+                'flex items-center gap-1 rounded-full px-2.5 py-1.5 text-xs font-semibold sm:gap-1.5 sm:px-4 sm:py-2 sm:text-sm',
                 isEndingSoon
                   ? 'animate-pulse-subtle bg-gradient-ending text-white shadow-lg shadow-destructive/30'
                   : 'bg-muted/80 backdrop-blur-sm'
@@ -158,14 +158,14 @@ export function BidPanel({ auction: initialAuction, bids: initialBids }: BidPane
               aria-live={isEndingSoon ? 'assertive' : 'polite'}
               aria-atomic="true"
             >
-              <Clock className="h-4 w-4" aria-hidden="true" />
+              <Clock className="h-3.5 w-3.5 sm:h-4 sm:w-4" aria-hidden="true" />
               <span><span className="sr-only">Time remaining: </span>{timeRemaining}</span>
             </div>
           )}
         </div>
       </CardHeader>
 
-      <CardContent className="space-y-5">
+      <CardContent className="space-y-4 px-4 sm:space-y-5 sm:px-6">
         {/* Current bid */}
         <div className="rounded-2xl bg-gradient-to-br from-muted/80 to-muted/50 p-5 backdrop-blur-sm" aria-live="polite" aria-atomic="true">
           <div className="flex items-center justify-between">
