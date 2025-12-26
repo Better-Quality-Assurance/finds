@@ -82,6 +82,24 @@ export type {
   UserBidsResult,
 } from './auction.interface'
 
+// Mock Activity Service (Demo/Development)
+export type {
+  IMockBidGenerator,
+  IMockCommentGenerator,
+  IMockActivityOrchestrator,
+  MockBidConfig,
+  MockCommentConfig,
+  MockActivityConfig,
+  MockBidResult,
+  MockCommentResult,
+  MockActivitySummary,
+} from './mock-activity.interface'
+
+export {
+  DEFAULT_MOCK_ACTIVITY_CONFIG,
+  DEMO_MOCK_ACTIVITY_CONFIG,
+} from './mock-activity.interface'
+
 /**
  * Re-export common Prisma types for convenience
  */
