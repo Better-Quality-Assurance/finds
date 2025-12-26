@@ -123,6 +123,20 @@ export {
   DEFAULT_AI_MODERATION_CONFIG,
 } from './ai-moderation.interface'
 
+// AI Provider Interface
+export type {
+  IAIProvider,
+  ChatMessage,
+  ContentPart,
+  AICompletionOptions,
+  AICompletionResult,
+  AIProviderConfig,
+} from './ai-provider.interface'
+
+export {
+  DEFAULT_AI_PROVIDER_CONFIG,
+} from './ai-provider.interface'
+
 /**
  * Re-export common Prisma types for convenience
  */
