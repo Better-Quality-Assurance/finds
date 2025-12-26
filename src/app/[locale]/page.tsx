@@ -1,8 +1,32 @@
 import { useTranslations } from 'next-intl'
+import type { Metadata } from 'next'
 import { Link } from '@/i18n/routing'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { ArrowRight, Car, Shield, Clock, CheckCircle, Sparkles } from 'lucide-react'
+
+export async function generateMetadata(): Promise<Metadata> {
+  return {
+    title: 'Finds - Classic & Collector Car Auctions in Europe',
+    description: 'Curated online auction platform for classic cars, retro vehicles, barn finds, and project cars. Romania-based, serving collectors across Europe. 5% buyer fee, no seller commission.',
+    keywords: [
+      'classic car auction',
+      'retro car auction',
+      'barn find',
+      'project car',
+      'vintage car auction',
+      'collector car',
+      'Romania car auction',
+      'EU car auction',
+      'European classic cars',
+    ],
+    openGraph: {
+      title: 'Finds - Classic & Collector Car Auctions',
+      description: 'Curated online auction platform for classic cars, retro vehicles, barn finds, and project cars.',
+      type: 'website',
+    },
+  }
+}
 
 export default function HomePage() {
   const t = useTranslations()

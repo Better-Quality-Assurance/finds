@@ -17,15 +17,39 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     '/legal/privacy',
     '/legal/terms',
     '/legal/cookies',
+    '/legal/buyer-terms',
+    '/legal/seller-terms',
+    '/login',
+    '/register',
   ]
 
   const staticRoutes: MetadataRoute.Sitemap = locales.flatMap((locale) =>
-    staticPages.map((page) => ({
-      url: `${SITE_URL}/${locale}${page}`,
-      lastModified: new Date(),
-      changeFrequency: page === '' ? 'daily' : 'weekly' as const,
-      priority: page === '' ? 1 : page === '/auctions' ? 0.9 : 0.7,
-    }))
+    staticPages.map((page) => {
+      let priority = 0.5
+      let changeFrequency: 'daily' | 'weekly' | 'monthly' = 'weekly'
+
+      if (page === '') {
+        priority = 1
+        changeFrequency = 'daily'
+      } else if (page === '/auctions') {
+        priority = 0.9
+        changeFrequency = 'daily'
+      } else if (page === '/sell') {
+        priority = 0.8
+      } else if (page.startsWith('/legal/')) {
+        priority = 0.3
+        changeFrequency = 'monthly'
+      } else if (page === '/login' || page === '/register') {
+        priority = 0.6
+      }
+
+      return {
+        url: `${SITE_URL}/${locale}${page}`,
+        lastModified: new Date(),
+        changeFrequency,
+        priority,
+      }
+    })
   )
 
   // Try to get auctions from database

@@ -39,17 +39,46 @@ async function getAuction(id: string) {
   return auction
 }
 
+const SITE_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://finds.ro'
+
 export async function generateMetadata({ params }: PageProps) {
-  const { id } = await params
+  const { id, locale } = await params
   const auction = await getAuction(id)
 
   if (!auction) {
     return { title: 'Auction Not Found' }
   }
 
+  const { listing } = auction
+  const imageUrl = listing.media.find((m) => m.type === 'PHOTO')?.publicUrl
+
   return {
-    title: `${auction.listing.title} - Finds`,
-    description: auction.listing.description.slice(0, 160),
+    title: `${listing.year} ${listing.make} ${listing.model} - Finds`,
+    description: `${listing.title} - ${listing.description.slice(0, 140)}...`,
+    keywords: [
+      listing.make,
+      listing.model,
+      `${listing.year} ${listing.make}`,
+      listing.category.toLowerCase().replace('_', ' '),
+      'classic car',
+      'auction',
+      listing.locationCountry,
+    ],
+    openGraph: {
+      title: `${listing.year} ${listing.make} ${listing.model}`,
+      description: listing.description.slice(0, 200),
+      type: 'website',
+      images: imageUrl ? [{ url: imageUrl, width: 1200, height: 630 }] : undefined,
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: `${listing.year} ${listing.make} ${listing.model}`,
+      description: listing.description.slice(0, 200),
+      images: imageUrl ? [imageUrl] : undefined,
+    },
+    alternates: {
+      canonical: `${SITE_URL}/${locale}/auctions/${id}`,
+    },
   }
 }
 
@@ -64,11 +93,71 @@ export default async function AuctionDetailPage({ params }: PageProps) {
   const { listing } = auction
   const photos = listing.media.filter((m) => m.type === 'PHOTO')
 
+  // Vehicle structured data for SEO and ML/LLM friendliness
+  const structuredData = {
+    '@context': 'https://schema.org',
+    '@type': 'Vehicle',
+    name: listing.title,
+    description: listing.description,
+    brand: {
+      '@type': 'Brand',
+      name: listing.make,
+    },
+    model: listing.model,
+    vehicleModelDate: listing.year.toString(),
+    ...(listing.mileage && {
+      mileageFromOdometer: {
+        '@type': 'QuantitativeValue',
+        value: listing.mileage,
+        unitCode: listing.mileageUnit === 'KM' ? 'KMT' : 'SMI',
+      },
+    }),
+    ...(listing.vin && { vehicleIdentificationNumber: listing.vin }),
+    itemCondition: listing.isRunning
+      ? 'https://schema.org/UsedCondition'
+      : 'https://schema.org/DamagedCondition',
+    offers: {
+      '@type': 'Offer',
+      priceCurrency: listing.currency,
+      price: auction.currentBid
+        ? Number(auction.currentBid)
+        : Number(listing.startingPrice),
+      availability: auction.status === 'ACTIVE'
+        ? 'https://schema.org/InStock'
+        : 'https://schema.org/SoldOut',
+      seller: {
+        '@type': 'Organization',
+        name: 'Finds',
+        url: SITE_URL,
+      },
+      priceValidUntil: auction.currentEndTime.toISOString(),
+    },
+    ...(photos.length > 0 && {
+      image: photos.map((p) => p.publicUrl),
+    }),
+    vehicleConfiguration: listing.category.toLowerCase().replace('_', ' '),
+    ...(listing.locationCity && listing.locationCountry && {
+      vehicleLocation: {
+        '@type': 'Place',
+        address: {
+          '@type': 'PostalAddress',
+          addressLocality: listing.locationCity,
+          addressCountry: listing.locationCountry,
+        },
+      },
+    }),
+  }
+
   return (
-    <div className="container py-8">
-      <div className="grid gap-8 lg:grid-cols-3">
-        {/* Main content */}
-        <div className="lg:col-span-2 space-y-8">
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
+      />
+      <div className="container py-8">
+        <div className="grid gap-8 lg:grid-cols-3">
+          {/* Main content */}
+          <div className="lg:col-span-2 space-y-8">
           {/* Image Gallery */}
           <ImageGallery
             images={photos.map((p) => ({
@@ -249,6 +338,7 @@ export default async function AuctionDetailPage({ params }: PageProps) {
           </div>
         </div>
       </div>
-    </div>
+      </div>
+    </>
   )
 }
