@@ -191,6 +191,8 @@ model Listing {
   media    ListingMedia[]
   auction  Auction?
   comments Comment[]
+  aiAnalysis AIListingAnalysis?
+  aiCarReview AICarReview?
 
   @@index([status])
   @@index([sellerId])
@@ -426,6 +428,9 @@ model Comment {
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
+  // AI Moderation
+  aiModeration AICommentModeration?
+
   @@index([listingId])
   @@index([authorId])
   @@map("comments")
@@ -580,4 +585,207 @@ model DataRequest {
   completedAt DateTime? @map("completed_at")
 
   @@map("data_requests")
+}
+
+// ============================================================================
+// AI MODERATION MODELS
+// ============================================================================
+
+enum AIAnalysisType {
+  LISTING_APPROVAL
+  COMMENT_MODERATION
+  BID_PATTERN
+  CAR_REVIEW
+}
+
+enum AIAnalysisStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  FAILED
+}
+
+enum ModerationDecision {
+  APPROVE
+  REJECT
+  FLAG_FOR_REVIEW
+  NEEDS_CHANGES
+}
+
+model AIListingAnalysis {
+  id        String  @id @default(cuid())
+  listingId String  @map("listing_id")
+  listing   Listing @relation(fields: [listingId], references: [id], onDelete: Cascade)
+
+  // Analysis status
+  status AIAnalysisStatus @default(PENDING)
+
+  // Approval recommendation
+  decision         ModerationDecision?
+  confidenceScore  Float?              @map("confidence_score")
+  approvalReasoning String?            @map("approval_reasoning") @db.Text
+
+  // Content analysis
+  titleAnalysis        Json?  @map("title_analysis") // Spam detection, quality
+  descriptionAnalysis  Json?  @map("description_analysis") // Completeness, red flags
+  imageAnalysis        Json?  @map("image_analysis") // Quality, authenticity, issues
+
+  // Detected issues
+  issues      Json    @default("[]") // Array of {type, severity, description}
+  suggestions Json    @default("[]") // Array of suggested improvements
+
+  // Processing metadata
+  modelUsed       String?   @map("model_used")
+  tokensUsed      Int?      @map("tokens_used")
+  processingTimeMs Int?     @map("processing_time_ms")
+  errorMessage    String?   @map("error_message") @db.Text
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@unique([listingId])
+  @@index([status])
+  @@index([decision])
+  @@map("ai_listing_analysis")
+}
+
+model AICarReview {
+  id        String  @id @default(cuid())
+  listingId String  @map("listing_id")
+  listing   Listing @relation(fields: [listingId], references: [id], onDelete: Cascade)
+
+  // Analysis status
+  status AIAnalysisStatus @default(PENDING)
+
+  // Vehicle assessment
+  overallScore     Int?    // 1-100
+  conditionSummary String? @map("condition_summary") @db.Text
+  highlights       Json    @default("[]") // Positive aspects
+  concerns         Json    @default("[]") // Potential issues
+
+  // Market value estimation
+  estimatedValueLow  Decimal? @map("estimated_value_low") @db.Decimal(12, 2)
+  estimatedValueHigh Decimal? @map("estimated_value_high") @db.Decimal(12, 2)
+  estimatedValueMid  Decimal? @map("estimated_value_mid") @db.Decimal(12, 2)
+  valuationReasoning String?  @map("valuation_reasoning") @db.Text
+  marketComparisons  Json     @default("[]") @map("market_comparisons") // Similar sales
+
+  // Detailed analysis
+  exteriorAnalysis Json? @map("exterior_analysis")
+  interiorAnalysis Json? @map("interior_analysis")
+  mechanicalNotes  Json? @map("mechanical_notes")
+  authenticityCheck Json? @map("authenticity_check")
+
+  // Investment perspective
+  investmentOutlook   String? @map("investment_outlook") // 'strong', 'moderate', 'speculative'
+  appreciationPotential String? @map("appreciation_potential") @db.Text
+
+  // Processing metadata
+  modelUsed       String?  @map("model_used")
+  tokensUsed      Int?     @map("tokens_used")
+  processingTimeMs Int?    @map("processing_time_ms")
+  errorMessage    String?  @map("error_message") @db.Text
+
+  // Visibility
+  isPublished Boolean @default(false) @map("is_published")
+  publishedAt DateTime? @map("published_at")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@unique([listingId])
+  @@index([status])
+  @@index([isPublished])
+  @@map("ai_car_reviews")
+}
+
+enum CommentModerationStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  FLAGGED
+}
+
+model AICommentModeration {
+  id        String  @id @default(cuid())
+  commentId String  @map("comment_id")
+  comment   Comment @relation(fields: [commentId], references: [id], onDelete: Cascade)
+
+  // Moderation result
+  status           CommentModerationStatus @default(PENDING)
+  decision         ModerationDecision?
+  confidenceScore  Float?                  @map("confidence_score")
+
+  // Analysis details
+  isSpam           Boolean @default(false) @map("is_spam")
+  spamScore        Float?  @map("spam_score")
+  isInappropriate  Boolean @default(false) @map("is_inappropriate")
+  toxicityScore    Float?  @map("toxicity_score")
+  isOffTopic       Boolean @default(false) @map("is_off_topic")
+
+  // Detected issues
+  flaggedCategories Json   @default("[]") @map("flagged_categories") // spam, harassment, etc.
+  reasoning         String? @db.Text
+
+  // Auto-action
+  autoActioned    Boolean   @default(false) @map("auto_actioned")
+  actionTaken     String?   @map("action_taken") // hidden, deleted, approved
+  actionedAt      DateTime? @map("actioned_at")
+
+  // Processing metadata
+  modelUsed       String?  @map("model_used")
+  tokensUsed      Int?     @map("tokens_used")
+  processingTimeMs Int?    @map("processing_time_ms")
+
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@unique([commentId])
+  @@index([status])
+  @@index([isSpam])
+  @@map("ai_comment_moderation")
+}
+
+model AIBidPatternAnalysis {
+  id        String  @id @default(cuid())
+  auctionId String  @map("auction_id")
+  userId    String? @map("user_id")
+
+  // Analysis window
+  analysisWindowStart DateTime @map("analysis_window_start")
+  analysisWindowEnd   DateTime @map("analysis_window_end")
+
+  // Pattern detection
+  isSuspicious       Boolean @default(false) @map("is_suspicious")
+  suspicionScore     Float?  @map("suspicion_score")
+  patternType        String? @map("pattern_type") // shill, bot, coordinated, rapid-fire
+
+  // Detected patterns
+  patterns           Json    @default("[]") // Array of detected patterns
+  anomalies          Json    @default("[]") // Statistical anomalies
+
+  // Bid velocity metrics
+  bidsAnalyzed       Int     @default(0) @map("bids_analyzed")
+  avgTimeBetweenBids Float?  @map("avg_time_between_bids")
+  bidVelocityScore   Float?  @map("bid_velocity_score")
+
+  // User behavior
+  userPatterns       Json?   @map("user_patterns") // User-specific patterns
+  ipPatterns         Json?   @map("ip_patterns") // IP correlation patterns
+
+  // Recommendations
+  recommendedAction  String? @map("recommended_action") // monitor, warn, block
+  reasoning          String? @db.Text
+
+  // Processing metadata
+  modelUsed       String?  @map("model_used")
+  tokensUsed      Int?     @map("tokens_used")
+  processingTimeMs Int?    @map("processing_time_ms")
+
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@index([auctionId])
+  @@index([userId])
+  @@index([isSuspicious])
+  @@index([createdAt(sort: Desc)])
+  @@map("ai_bid_pattern_analysis")
 }

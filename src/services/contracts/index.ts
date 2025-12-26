@@ -105,6 +105,43 @@ export {
   DEMO_MOCK_ACTIVITY_CONFIG,
 } from './mock-activity.interface'
 
+// AI Moderation Service
+export type {
+  IAIModerationService,
+  IAIListingAnalysisService,
+  IAICarReviewService,
+  IAICommentModerationService,
+  IAIBidPatternService,
+  ListingAnalysisResult,
+  CarReviewResult,
+  CommentModerationResult,
+  BidPatternResult,
+  ModerationStats,
+  ModerationActivity,
+  AIModerationConfig,
+  AnalysisIssue,
+  ValueEstimate,
+  DetectedPattern,
+} from './ai-moderation.interface'
+
+export {
+  DEFAULT_AI_MODERATION_CONFIG,
+} from './ai-moderation.interface'
+
+// AI Provider Interface
+export type {
+  IAIProvider,
+  ChatMessage,
+  ContentPart,
+  AICompletionOptions,
+  AICompletionResult,
+  AIProviderConfig,
+} from './ai-provider.interface'
+
+export {
+  DEFAULT_AI_PROVIDER_CONFIG,
+} from './ai-provider.interface'
+
 /**
  * Re-export common Prisma types for convenience
  */
@@ -125,4 +162,11 @@ export type {
   Auction,
   AuctionStatus,
   Bid,
+  AIListingAnalysis,
+  AICarReview,
+  AICommentModeration,
+  AIBidPatternAnalysis,
+  AIAnalysisStatus,
+  ModerationDecision,
+  CommentModerationStatus,
 } from '@prisma/client'
