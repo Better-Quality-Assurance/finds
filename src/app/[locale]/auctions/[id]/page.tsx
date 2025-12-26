@@ -6,6 +6,10 @@ import { Badge } from '@/components/ui/badge'
 import { formatCurrency } from '@/lib/utils'
 import { MapPin, Calendar, Gauge, Car, Wrench, FileText } from 'lucide-react'
 import { Markdown } from '@/components/ui/markdown'
+import {
+  transformAuctionForBidPanel,
+  transformBidsForBidPanel,
+} from '@/utils/auction-transformers'
 
 type PageProps = {
   params: Promise<{ id: string; locale: string }>
@@ -97,6 +101,10 @@ export default async function AuctionDetailPage({ params }: PageProps) {
   const { listing } = auction
   const photos = listing.media.filter((m) => m.type === 'PHOTO')
 
+  // Transform auction data once for BidPanel (used in both mobile and desktop)
+  const bidPanelAuction = transformAuctionForBidPanel(auction)
+  const bidPanelBids = transformBidsForBidPanel(auction.bids)
+
   // Vehicle structured data for SEO and ML/LLM friendliness
   const structuredData = {
     '@context': 'https://schema.org',
@@ -171,6 +179,11 @@ export default async function AuctionDetailPage({ params }: PageProps) {
             }))}
           />
 
+          {/* Mobile Bid Summary - Shows above content on mobile */}
+          <div className="lg:hidden">
+            <BidPanel auction={bidPanelAuction} bids={bidPanelBids} />
+          </div>
+
           {/* Title and badges */}
           <div>
             <h1 className="text-2xl font-bold sm:text-3xl lg:text-4xl">{listing.title}</h1>
@@ -188,35 +201,6 @@ export default async function AuctionDetailPage({ params }: PageProps) {
                 </Badge>
               )}
             </div>
-          </div>
-
-          {/* Mobile Bid Summary - Shows above content on mobile */}
-          <div className="lg:hidden">
-            <BidPanel
-              auction={{
-                id: auction.id,
-                currentBid: auction.currentBid ? Number(auction.currentBid) : null,
-                bidCount: auction.bidCount,
-                currentEndTime: auction.currentEndTime.toISOString(),
-                reserveMet: auction.reserveMet,
-                extensionCount: auction.extensionCount,
-                status: auction.status,
-                listing: {
-                  startingPrice: Number(listing.startingPrice),
-                  reservePrice: listing.reservePrice ? Number(listing.reservePrice) : null,
-                  currency: listing.currency,
-                  sellerId: listing.sellerId,
-                },
-              }}
-              bids={auction.bids.map((b) => ({
-                id: b.id,
-                amount: Number(b.amount),
-                createdAt: b.createdAt.toISOString(),
-                bidderNumber: b.bidderNumber,
-                bidderCountry: b.bidderCountry,
-                bidder: { id: b.bidderId },
-              }))}
-            />
           </div>
 
           {/* Vehicle details */}
@@ -349,31 +333,7 @@ export default async function AuctionDetailPage({ params }: PageProps) {
         {/* Sidebar - Bid Panel (Desktop only) */}
         <div className="hidden lg:block lg:col-span-1">
           <div className="sticky top-4">
-            <BidPanel
-              auction={{
-                id: auction.id,
-                currentBid: auction.currentBid ? Number(auction.currentBid) : null,
-                bidCount: auction.bidCount,
-                currentEndTime: auction.currentEndTime.toISOString(),
-                reserveMet: auction.reserveMet,
-                extensionCount: auction.extensionCount,
-                status: auction.status,
-                listing: {
-                  startingPrice: Number(listing.startingPrice),
-                  reservePrice: listing.reservePrice ? Number(listing.reservePrice) : null,
-                  currency: listing.currency,
-                  sellerId: listing.sellerId,
-                },
-              }}
-              bids={auction.bids.map((b) => ({
-                id: b.id,
-                amount: Number(b.amount),
-                createdAt: b.createdAt.toISOString(),
-                bidderNumber: b.bidderNumber,
-                bidderCountry: b.bidderCountry,
-                bidder: { id: b.bidderId },
-              }))}
-            />
+            <BidPanel auction={bidPanelAuction} bids={bidPanelBids} />
           </div>
         </div>
       </div>

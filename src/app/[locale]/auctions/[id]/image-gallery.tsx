@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import Image from 'next/image'
 import { ChevronLeft, ChevronRight, X, Expand } from 'lucide-react'
 import { Button } from '@/components/ui/button'
@@ -18,6 +18,43 @@ export function ImageGallery({ images }: ImageGalleryProps) {
   const [currentIndex, setCurrentIndex] = useState(0)
   const [isFullscreen, setIsFullscreen] = useState(false)
 
+  const goToNext = useCallback(() => {
+    setCurrentIndex((prev) => (prev + 1) % images.length)
+  }, [images.length])
+
+  const goToPrev = useCallback(() => {
+    setCurrentIndex((prev) => (prev - 1 + images.length) % images.length)
+  }, [images.length])
+
+  const goToIndex = useCallback((index: number) => {
+    setCurrentIndex(index)
+  }, [])
+
+  // Keyboard navigation for fullscreen mode
+  useEffect(() => {
+    if (!isFullscreen) return
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      switch (event.key) {
+        case 'ArrowLeft':
+          event.preventDefault()
+          goToPrev()
+          break
+        case 'ArrowRight':
+          event.preventDefault()
+          goToNext()
+          break
+        case 'Escape':
+          event.preventDefault()
+          setIsFullscreen(false)
+          break
+      }
+    }
+
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [isFullscreen, goToPrev, goToNext])
+
   if (images.length === 0) {
     return (
       <div className="flex aspect-[4/3] items-center justify-center rounded-lg bg-muted">
@@ -27,18 +64,6 @@ export function ImageGallery({ images }: ImageGalleryProps) {
   }
 
   const currentImage = images[currentIndex]
-
-  const goToNext = () => {
-    setCurrentIndex((prev) => (prev + 1) % images.length)
-  }
-
-  const goToPrev = () => {
-    setCurrentIndex((prev) => (prev - 1 + images.length) % images.length)
-  }
-
-  const goToIndex = (index: number) => {
-    setCurrentIndex(index)
-  }
 
   return (
     <>
@@ -138,7 +163,7 @@ export function ImageGallery({ images }: ImageGalleryProps) {
           <Button
             variant="ghost"
             size="icon"
-            className="absolute right-4 top-4 text-white hover:bg-white/20 z-10"
+            className="absolute right-2 top-2 h-12 w-12 text-white hover:bg-white/20 sm:right-4 sm:top-4 z-10"
             onClick={() => setIsFullscreen(false)}
             aria-label="Close fullscreen"
           >
@@ -162,24 +187,24 @@ export function ImageGallery({ images }: ImageGalleryProps) {
               <Button
                 variant="ghost"
                 size="icon"
-                className="absolute left-4 top-1/2 -translate-y-1/2 text-white hover:bg-white/20"
+                className="absolute left-2 top-1/2 -translate-y-1/2 h-12 w-12 text-white hover:bg-white/20 sm:left-4 sm:h-14 sm:w-14"
                 onClick={goToPrev}
                 aria-label="Previous image"
               >
-                <ChevronLeft className="h-8 w-8" aria-hidden="true" />
+                <ChevronLeft className="h-6 w-6 sm:h-8 sm:w-8" aria-hidden="true" />
               </Button>
               <Button
                 variant="ghost"
                 size="icon"
-                className="absolute right-4 top-1/2 -translate-y-1/2 text-white hover:bg-white/20"
+                className="absolute right-2 top-1/2 -translate-y-1/2 h-12 w-12 text-white hover:bg-white/20 sm:right-4 sm:h-14 sm:w-14"
                 onClick={goToNext}
                 aria-label="Next image"
               >
-                <ChevronRight className="h-8 w-8" aria-hidden="true" />
+                <ChevronRight className="h-6 w-6 sm:h-8 sm:w-8" aria-hidden="true" />
               </Button>
 
               {/* Thumbnail strip */}
-              <div className="absolute bottom-4 left-1/2 flex -translate-x-1/2 gap-2 overflow-x-auto rounded-lg bg-black/50 p-2 z-10" role="list" aria-label="Image thumbnails">
+              <div className="absolute bottom-2 left-1/2 flex -translate-x-1/2 gap-2 overflow-x-auto rounded-lg bg-black/50 p-2 sm:bottom-4 z-10" role="list" aria-label="Image thumbnails">
                 {images.slice(0, 10).map((image, index) => (
                   <button
                     key={image.id}

@@ -5,7 +5,12 @@ import { LISTING_RULES, validateFileType, validateFileSize } from '@/domain/list
 import { listingStatusValidator } from '@/services/validators/listing-status.validator'
 import { z } from 'zod'
 import { MediaType } from '@prisma/client'
-import { detectLicensePlates, createStoredDetection } from '@/services/ai/license-plate.service'
+import {
+  detectLicensePlates,
+  createStoredDetection,
+  blurLicensePlates,
+} from '@/services/ai/license-plate.service'
+import { uploadToR2 } from '@/lib/r2'
 
 type RouteParams = { params: Promise<{ id: string }> }
 
@@ -158,16 +163,60 @@ export async function PUT(request: Request, { params }: RouteParams) {
           if (result.detected) {
             console.log(`License plate detected in media ${media.id}:`, result.plates.length, 'plates')
 
-            // Update media record with detection data
-            await container.prisma.listingMedia.update({
-              where: { id: media.id },
-              data: {
-                licensePlateDetected: true,
-                plateDetectionData: JSON.parse(JSON.stringify(createStoredDetection(result))),
-                // Keep original URL for admin access, will blur for public
-                originalUrl: media.publicUrl,
-              },
-            })
+            // Filter for high-confidence plates
+            const highConfidencePlates = result.plates.filter(p => p.confidence >= 0.7)
+
+            if (highConfidencePlates.length > 0) {
+              // Blur the plates and upload the blurred version
+              const blurResult = await blurLicensePlates(media.publicUrl!, highConfidencePlates)
+
+              if (blurResult.success && blurResult.blurredBuffer) {
+                // Generate key for blurred version
+                const blurredKey = media.storagePath.replace(/(\.[^.]+)$/, '-blurred$1')
+
+                // Upload blurred image to R2
+                const uploadResult = await uploadToR2(
+                  blurResult.blurredBuffer,
+                  blurredKey,
+                  blurResult.blurredMimeType || 'image/jpeg'
+                )
+
+                console.log(`Blurred image uploaded for media ${media.id}: ${uploadResult.url}`)
+
+                // Update media record with blurred URL as public, keep original for admin
+                await container.prisma.listingMedia.update({
+                  where: { id: media.id },
+                  data: {
+                    licensePlateDetected: true,
+                    licensePlateBlurred: true,
+                    plateDetectionData: JSON.parse(JSON.stringify(createStoredDetection(result))),
+                    originalUrl: media.publicUrl, // Keep original for admin access
+                    publicUrl: uploadResult.url,  // Replace public URL with blurred version
+                  },
+                })
+              } else {
+                // Blur failed, just mark as detected
+                console.error(`Failed to blur plates for media ${media.id}:`, blurResult.error)
+                await container.prisma.listingMedia.update({
+                  where: { id: media.id },
+                  data: {
+                    licensePlateDetected: true,
+                    plateDetectionData: JSON.parse(JSON.stringify(createStoredDetection(result))),
+                    originalUrl: media.publicUrl,
+                  },
+                })
+              }
+            } else {
+              // Plates detected but low confidence, just mark as detected
+              await container.prisma.listingMedia.update({
+                where: { id: media.id },
+                data: {
+                  licensePlateDetected: true,
+                  plateDetectionData: JSON.parse(JSON.stringify(createStoredDetection(result))),
+                  originalUrl: media.publicUrl,
+                },
+              })
+            }
           } else {
             // Mark as checked (no plates found)
             await container.prisma.listingMedia.update({
