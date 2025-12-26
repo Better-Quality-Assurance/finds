@@ -28,10 +28,13 @@ async function getAuction(id: string) {
       bids: {
         orderBy: { createdAt: 'desc' },
         take: 20,
-        include: {
-          bidder: {
-            select: { id: true, name: true },
-          },
+        select: {
+          id: true,
+          amount: true,
+          createdAt: true,
+          bidderNumber: true,
+          bidderCountry: true,
+          bidderId: true,
         },
       },
     },
@@ -209,7 +212,9 @@ export default async function AuctionDetailPage({ params }: PageProps) {
                 id: b.id,
                 amount: Number(b.amount),
                 createdAt: b.createdAt.toISOString(),
-                bidder: b.bidder,
+                bidderNumber: b.bidderNumber,
+                bidderCountry: b.bidderCountry,
+                bidder: { id: b.bidderId },
               }))}
             />
           </div>
@@ -316,19 +321,23 @@ export default async function AuctionDetailPage({ params }: PageProps) {
             </div>
           )}
 
-          {/* Seller info */}
+          {/* Seller info - anonymized for privacy */}
           <div className="rounded-lg border p-3 sm:p-4">
             <h3 className="text-sm font-medium sm:text-base">Seller</h3>
             <div className="mt-2 flex items-center gap-3 sm:mt-3">
-              <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full bg-primary text-sm text-primary-foreground sm:h-10 sm:w-10">
-                {listing.seller.name?.[0]?.toUpperCase() || 'S'}
+              <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full bg-success text-sm text-success-foreground sm:h-10 sm:w-10">
+                <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                </svg>
               </div>
               <div className="min-w-0">
-                <p className="truncate text-sm font-medium sm:text-base">{listing.seller.name || 'Seller'}</p>
+                <p className="flex items-center gap-1.5 text-sm font-medium sm:text-base">
+                  Verified Seller
+                  <Badge variant="success" className="text-[10px]">Verified</Badge>
+                </p>
                 <p className="text-xs text-muted-foreground sm:text-sm">
                   Member since{' '}
                   {new Date(listing.seller.createdAt).toLocaleDateString('en-US', {
-                    month: 'long',
                     year: 'numeric',
                   })}
                 </p>
@@ -360,7 +369,9 @@ export default async function AuctionDetailPage({ params }: PageProps) {
                 id: b.id,
                 amount: Number(b.amount),
                 createdAt: b.createdAt.toISOString(),
-                bidder: b.bidder,
+                bidderNumber: b.bidderNumber,
+                bidderCountry: b.bidderCountry,
+                bidder: { id: b.bidderId },
               }))}
             />
           </div>

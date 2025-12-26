@@ -177,12 +177,13 @@ export const POST = withErrorHandler<{ id: string }>(
       throw error
     }
 
-    // Broadcast new bid to all watchers
+    // Broadcast new bid to all watchers (anonymous - no names)
     await broadcastNewBid({
       bidId: bid.id,
       auctionId: id,
       amount: Number(bid.amount),
-      bidderName: session.user.name || null,
+      bidderNumber: bid.bidderNumber,
+      bidderCountry: bid.bidderCountry,
       bidCount: auction.bidCount,
       timestamp: bid.createdAt.toISOString(),
       isReserveMet: auction.reserveMet,
@@ -208,7 +209,7 @@ export const POST = withErrorHandler<{ id: string }>(
       })
     }
 
-    // Notify watchers about the new bid (non-blocking)
+    // Notify watchers about the new bid (non-blocking, anonymous)
     // Using dynamic import to avoid circular dependencies
     import('@/services/notification.service')
       .then(({ notifyWatchersNewBid }) => {
@@ -216,7 +217,8 @@ export const POST = withErrorHandler<{ id: string }>(
           id,
           Number(bid.amount),
           auction.currency,
-          session.user.name || null
+          bid.bidderNumber,
+          bid.bidderCountry
         )
       })
       .catch(error => {

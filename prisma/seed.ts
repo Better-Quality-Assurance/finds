@@ -1157,10 +1157,9 @@ We visited this Integrale in Sighișoara. Here's the honest assessment:
       },
     })
 
-    // Create placeholder media (using Unsplash with car-related keywords)
+    // Create placeholder media (using Lorem Picsum for reliable placeholder images)
     const mediaCategories = ['exterior', 'exterior', 'interior', 'engine', 'detail']
-    const carKeywords = ['classic-car', 'vintage-car', 'car-interior', 'car-engine', 'car-detail']
-    const listingSeed = listing.id.slice(-8) // Use last 8 chars as unique sig
+    const listingSeed = listing.id.slice(-8) // Use last 8 chars as unique seed
     await Promise.all(
       mediaCategories.map((category, index) =>
         prisma.listingMedia.create({
@@ -1168,8 +1167,8 @@ We visited this Integrale in Sighișoara. Here's the honest assessment:
             listingId: listing.id,
             type: 'PHOTO',
             storagePath: `listings/${listing.id}/${index}.jpg`,
-            publicUrl: `https://source.unsplash.com/800x600/?${carKeywords[index]}&sig=${listingSeed}${index}`,
-            thumbnailUrl: `https://source.unsplash.com/400x300/?${carKeywords[index]}&sig=${listingSeed}${index}`,
+            publicUrl: `https://picsum.photos/seed/${listingSeed}${index}/800/600`,
+            thumbnailUrl: `https://picsum.photos/seed/${listingSeed}${index}/400/300`,
             position: index,
             isPrimary: index === 0,
             category,

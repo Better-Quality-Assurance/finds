@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useSession } from 'next-auth/react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -26,6 +26,8 @@ import {
   User,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { formatBidderDisplay } from '@/services/bidder-number.service'
+import { BidVerificationModal } from './bid-verification-modal'
 
 type BidPanelProps = {
   auction: {
@@ -47,7 +49,9 @@ type BidPanelProps = {
     id: string
     amount: number
     createdAt: string
-    bidder: { id: string; name: string | null }
+    bidderNumber: number
+    bidderCountry: string | null
+    bidder: { id: string }
   }>
 }
 
@@ -55,6 +59,8 @@ export function BidPanel({ auction: initialAuction, bids: initialBids }: BidPane
   const { data: session } = useSession()
   const [bidAmount, setBidAmount] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [showVerificationModal, setShowVerificationModal] = useState(false)
+  const [isVerified, setIsVerified] = useState<boolean | null>(null)
 
   // Real-time auction state management
   const {
@@ -91,9 +97,37 @@ export function BidPanel({ auction: initialAuction, bids: initialBids }: BidPane
     }
   }, [suggestedBid, bidAmount])
 
+  // Check verification status when session is available
+  const checkVerificationStatus = useCallback(async () => {
+    if (!session?.user?.id) return
+
+    try {
+      const res = await fetch('/api/user/verification-status')
+      if (res.ok) {
+        const data = await res.json()
+        // User is verified if all checks pass
+        setIsVerified(
+          data.emailVerified && data.phoneVerified && data.biddingEnabled
+        )
+      }
+    } catch (error) {
+      console.error('Failed to check verification status:', error)
+    }
+  }, [session?.user?.id])
+
+  useEffect(() => {
+    checkVerificationStatus()
+  }, [checkVerificationStatus])
+
   const handleBid = async () => {
     if (!session) {
       toast.error('Please log in to place a bid')
+      return
+    }
+
+    // Check verification status before allowing bid
+    if (isVerified === false) {
+      setShowVerificationModal(true)
       return
     }
 
@@ -133,11 +167,18 @@ export function BidPanel({ auction: initialAuction, bids: initialBids }: BidPane
     }
   }
 
+  const handleVerificationComplete = () => {
+    setIsVerified(true)
+    setShowVerificationModal(false)
+    toast.success('Verification complete! You can now place bids.')
+  }
+
   const handleQuickBid = (amount: number) => {
     setBidAmount(amount.toString())
   }
 
   return (
+    <>
     <Card variant="glass" className="sticky top-20">
       <CardHeader className="px-4 pb-3 pt-4 sm:px-6 sm:pb-4 sm:pt-5">
         <div className="flex flex-wrap items-center justify-between gap-2">
@@ -326,7 +367,7 @@ export function BidPanel({ auction: initialAuction, bids: initialBids }: BidPane
                 >
                   <div className="flex min-w-0 flex-1 items-center gap-1.5 sm:gap-2">
                     <User className="h-3.5 w-3.5 flex-shrink-0 text-muted-foreground sm:h-4 sm:w-4" />
-                    <span className="truncate">{bid.bidder.name || 'Anonymous'}</span>
+                    <span className="truncate">{formatBidderDisplay(bid.bidderNumber, bid.bidderCountry)}</span>
                     {i === 0 && (
                       <Badge variant="success" className="flex-shrink-0 text-[10px] sm:text-xs">
                         Leading
@@ -343,5 +384,13 @@ export function BidPanel({ auction: initialAuction, bids: initialBids }: BidPane
         )}
       </CardContent>
     </Card>
+
+    {/* Verification Modal */}
+    <BidVerificationModal
+      open={showVerificationModal}
+      onOpenChange={setShowVerificationModal}
+      onVerificationComplete={handleVerificationComplete}
+    />
+    </>
   )
 }

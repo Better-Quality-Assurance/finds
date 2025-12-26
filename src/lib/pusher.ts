@@ -35,7 +35,8 @@ export type NewBidEvent = {
   bidId: string
   auctionId: string
   amount: number
-  bidderName: string | null
+  bidderNumber: number
+  bidderCountry: string | null
   bidCount: number
   timestamp: string
   isReserveMet: boolean

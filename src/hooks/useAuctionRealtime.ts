@@ -26,13 +26,15 @@ export type AuctionState = {
 }
 
 /**
- * Bid entry in the history
+ * Bid entry in the history (anonymous - no names)
  */
 export type BidEntry = {
   id: string
   amount: number
   createdAt: string
-  bidder: { id: string; name: string | null }
+  bidderNumber: number
+  bidderCountry: string | null
+  bidder: { id: string }
 }
 
 /**
@@ -100,13 +102,15 @@ export function useAuctionRealtime(
         reserveMet: data.isReserveMet,
       }))
 
-      // Add bid to history at the top
+      // Add bid to history at the top (anonymous - no names)
       setBids((prev) => [
         {
           id: data.bidId,
           amount: data.amount,
           createdAt: data.timestamp,
-          bidder: { id: '', name: data.bidderName },
+          bidderNumber: data.bidderNumber,
+          bidderCountry: data.bidderCountry,
+          bidder: { id: '' },
         },
         ...prev,
       ])

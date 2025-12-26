@@ -3,6 +3,7 @@ import { INotificationTransport } from './contracts/notification-transport.inter
 import { createNotificationTransport } from './pusher-notification-transport'
 import { EVENTS } from '@/lib/pusher'
 import { prisma } from '@/lib/db'
+import { formatBidderDisplay } from './bidder-number.service'
 
 export type NotificationType =
   | 'AUCTION_STARTED'
@@ -262,12 +263,14 @@ export async function notifyAuctionLost(
 
 /**
  * Notify watchers about a new bid on an auction they're watching
+ * Uses anonymous bidder display (e.g., "Bidder 3 (Romania)")
  */
 export async function notifyWatchersNewBid(
   auctionId: string,
   bidAmount: number,
   currency: string,
-  bidderName: string | null
+  bidderNumber: number,
+  bidderCountry: string | null
 ): Promise<void> {
   try {
     // Get all users watching this auction with notifyOnBid enabled
@@ -295,18 +298,20 @@ export async function notifyWatchersNewBid(
     }
 
     const listingTitle = watchers[0]?.auction.listing.title || 'Auction'
+    const bidderDisplay = formatBidderDisplay(bidderNumber, bidderCountry)
 
     // Send notification to each watcher in parallel for better performance
     const notificationPromises = watchers.map(watcher =>
       sendUserNotification(watcher.userId, {
         type: 'WATCHLIST_NEW_BID',
         title: 'New Bid on Watched Auction',
-        message: `${bidderName || 'Someone'} placed a bid of ${currency} ${bidAmount.toLocaleString()} on "${listingTitle}"`,
+        message: `${bidderDisplay} placed a bid of ${currency} ${bidAmount.toLocaleString()} on "${listingTitle}"`,
         data: {
           auctionId,
           bidAmount,
           currency,
-          bidderName,
+          bidderNumber,
+          bidderCountry,
         },
         link: `/auctions/${auctionId}`,
       }).catch(error => {

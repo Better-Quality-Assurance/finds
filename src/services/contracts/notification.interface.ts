@@ -85,12 +85,14 @@ export interface INotificationService {
 
   /**
    * Notify watchers about a new bid on an auction they're watching
+   * Uses anonymous bidder display (e.g., "Bidder 3 (Romania)")
    */
   notifyWatchersNewBid(
     auctionId: string,
     bidAmount: number,
     currency: string,
-    bidderName: string | null
+    bidderNumber: number,
+    bidderCountry: string | null
   ): Promise<void>
 
   /**

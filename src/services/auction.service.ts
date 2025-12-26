@@ -15,6 +15,7 @@ import {
 import { auctionLogger, logError } from '@/lib/logger'
 import { auctionStatusValidator } from '@/services/validators/auction-status.validator'
 import { listingStatusValidator } from '@/services/validators/listing-status.validator'
+import { getOrAssignBidderNumber } from '@/services/bidder-number.service'
 
 type AuctionWithRelations = Auction & {
   listing: Listing
@@ -303,12 +304,21 @@ export async function placeBid(
     const reservePrice = auction.listing.reservePrice ? Number(auction.listing.reservePrice) : null
     const reserveMet = isReserveMet(amount, reservePrice)
 
+    // Get or assign bidder number for anonymity
+    const { bidderNumber, bidderCountry } = await getOrAssignBidderNumber(
+      auctionId,
+      bidderId,
+      tx
+    )
+
     // Create bid
     const bid = await tx.bid.create({
       data: {
         auctionId,
         bidderId,
         amount,
+        bidderNumber,
+        bidderCountry,
         isWinning: true,
         triggeredExtension: extended,
         ipAddress: metadata?.ipAddress,

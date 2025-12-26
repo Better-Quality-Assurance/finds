@@ -503,6 +503,10 @@ export function createTestContainer(): ServiceContainer {
         mimeType: input.mimeType,
         width: null,
         height: null,
+        originalUrl: null,
+        licensePlateDetected: false,
+        licensePlateBlurred: false,
+        plateDetectionData: null,
         createdAt: new Date(),
       }),
       updateMedia: async (mediaId, sellerId, updates) => ({

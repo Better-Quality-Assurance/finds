@@ -5,6 +5,7 @@ import { LISTING_RULES, validateFileType, validateFileSize } from '@/domain/list
 import { listingStatusValidator } from '@/services/validators/listing-status.validator'
 import { z } from 'zod'
 import { MediaType } from '@prisma/client'
+import { detectLicensePlates, createStoredDetection } from '@/services/ai/license-plate.service'
 
 type RouteParams = { params: Promise<{ id: string }> }
 
@@ -147,6 +148,40 @@ export async function PUT(request: Request, { params }: RouteParams) {
         { error: 'Media not found' },
         { status: 404 }
       )
+    }
+
+    // Run license plate detection for photos (non-blocking)
+    if (media.type === 'PHOTO' && media.publicUrl) {
+      // Run detection in background - don't block the response
+      detectLicensePlates(media.publicUrl)
+        .then(async (result) => {
+          if (result.detected) {
+            console.log(`License plate detected in media ${media.id}:`, result.plates.length, 'plates')
+
+            // Update media record with detection data
+            await container.prisma.listingMedia.update({
+              where: { id: media.id },
+              data: {
+                licensePlateDetected: true,
+                plateDetectionData: JSON.parse(JSON.stringify(createStoredDetection(result))),
+                // Keep original URL for admin access, will blur for public
+                originalUrl: media.publicUrl,
+              },
+            })
+          } else {
+            // Mark as checked (no plates found)
+            await container.prisma.listingMedia.update({
+              where: { id: media.id },
+              data: {
+                licensePlateDetected: false,
+                plateDetectionData: JSON.parse(JSON.stringify(createStoredDetection(result))),
+              },
+            })
+          }
+        })
+        .catch((error) => {
+          console.error(`License plate detection failed for media ${media.id}:`, error)
+        })
     }
 
     return NextResponse.json({ media })
