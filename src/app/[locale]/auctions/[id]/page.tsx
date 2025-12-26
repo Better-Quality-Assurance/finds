@@ -5,6 +5,7 @@ import { ImageGallery } from './image-gallery'
 import { Badge } from '@/components/ui/badge'
 import { formatCurrency } from '@/lib/utils'
 import { MapPin, Calendar, Gauge, Car, Wrench, FileText } from 'lucide-react'
+import { Markdown } from '@/components/ui/markdown'
 
 type PageProps = {
   params: Promise<{ id: string; locale: string }>
@@ -253,9 +254,9 @@ export default async function AuctionDetailPage({ params }: PageProps) {
               <FileText className="h-4 w-4" />
               Description
             </h3>
-            <p className="mt-3 whitespace-pre-wrap text-sm leading-relaxed">
-              {listing.description}
-            </p>
+            <div className="mt-3">
+              <Markdown content={listing.description} />
+            </div>
           </div>
 
           {/* Condition */}
@@ -270,9 +271,9 @@ export default async function AuctionDetailPage({ params }: PageProps) {
                   <h4 className="text-sm font-medium text-muted-foreground">
                     Condition Notes
                   </h4>
-                  <p className="mt-1 whitespace-pre-wrap text-sm">
-                    {listing.conditionNotes}
-                  </p>
+                  <div className="mt-1">
+                    <Markdown content={listing.conditionNotes} />
+                  </div>
                 </div>
               )}
               {listing.knownIssues && (
@@ -280,9 +281,9 @@ export default async function AuctionDetailPage({ params }: PageProps) {
                   <h4 className="text-sm font-medium text-muted-foreground">
                     Known Issues
                   </h4>
-                  <p className="mt-1 whitespace-pre-wrap text-sm">
-                    {listing.knownIssues}
-                  </p>
+                  <div className="mt-1">
+                    <Markdown content={listing.knownIssues} />
+                  </div>
                 </div>
               )}
             </div>
