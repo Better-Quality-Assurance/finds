@@ -32,6 +32,8 @@ function getCSP() {
       'https://*.stripe.com',
       // Placeholder images for mock data
       'https://placehold.co',
+      'https://picsum.photos',
+      'https://fastly.picsum.photos',
     ],
     'font-src': ["'self'", 'data:'],
     'connect-src': [
@@ -82,6 +84,14 @@ const nextConfig = {
       {
         protocol: 'https',
         hostname: 'placehold.co',
+      },
+      {
+        protocol: 'https',
+        hostname: 'picsum.photos',
+      },
+      {
+        protocol: 'https',
+        hostname: 'fastly.picsum.photos',
       },
     ],
     formats: ['image/avif', 'image/webp'],

@@ -1157,8 +1157,9 @@ We visited this Integrale in Sighișoara. Here's the honest assessment:
       },
     })
 
-    // Create placeholder media (using placeholder images)
+    // Create placeholder media (using picsum.photos with seed for consistency)
     const mediaCategories = ['exterior', 'exterior', 'interior', 'engine', 'detail']
+    const listingSeed = listing.id.slice(-6) // Use last 6 chars of ID as seed
     await Promise.all(
       mediaCategories.map((category, index) =>
         prisma.listingMedia.create({
@@ -1166,8 +1167,8 @@ We visited this Integrale in Sighișoara. Here's the honest assessment:
             listingId: listing.id,
             type: 'PHOTO',
             storagePath: `listings/${listing.id}/${index}.jpg`,
-            publicUrl: `https://placehold.co/800x600/1a1a2e/eaeaea?text=${encodeURIComponent(car.make + ' ' + car.model)}`,
-            thumbnailUrl: `https://placehold.co/400x300/1a1a2e/eaeaea?text=${encodeURIComponent(car.make)}`,
+            publicUrl: `https://picsum.photos/seed/${listingSeed}${index}/800/600`,
+            thumbnailUrl: `https://picsum.photos/seed/${listingSeed}${index}/400/300`,
             position: index,
             isPrimary: index === 0,
             category,
