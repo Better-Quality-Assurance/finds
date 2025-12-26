@@ -20,6 +20,7 @@ import type {
   IEmailService,
   IListingService,
   IAuctionService,
+  IAIModerationService,
 } from '@/services/contracts'
 
 // Real Service Implementations
@@ -31,6 +32,7 @@ import * as r2Service from './r2'
 import * as emailService from './email'
 import * as listingService from '@/services/listing.service'
 import * as auctionService from '@/services/auction.service'
+import * as aiModerationService from '@/services/ai-moderation.service'
 
 /**
  * Service container type holding all service instances
@@ -46,6 +48,7 @@ export type ServiceContainer = {
   email: IEmailService
   listings: IListingService
   auctions: IAuctionService
+  aiModeration: IAIModerationService
   prisma: PrismaClient
 }
 
@@ -204,6 +207,42 @@ function createAuctionService(): IAuctionService {
 }
 
 /**
+ * Create AI moderation service adapter
+ */
+function createAIModerationService(): IAIModerationService {
+  return {
+    // Listing Analysis
+    analyzeListing: aiModerationService.analyzeListing,
+    getAnalysis: aiModerationService.getListingAnalysis,
+    getPendingAnalyses: aiModerationService.getPendingListingAnalyses,
+    retryFailedAnalysis: aiModerationService.analyzeListing,
+
+    // Car Reviews
+    generateReview: aiModerationService.generateCarReview,
+    getReview: aiModerationService.getCarReview,
+    getPublishedReview: aiModerationService.getPublishedCarReview,
+    publishReview: aiModerationService.publishCarReview,
+    unpublishReview: aiModerationService.unpublishCarReview,
+
+    // Comment Moderation
+    moderateComment: aiModerationService.moderateComment,
+    getModeration: aiModerationService.getCommentModeration,
+    getPendingModerations: aiModerationService.getPendingCommentModerations,
+    overrideModeration: aiModerationService.overrideCommentModeration,
+
+    // Bid Pattern Analysis
+    analyzeAuctionBids: aiModerationService.analyzeAuctionBids,
+    analyzeUserBids: aiModerationService.analyzeUserBids,
+    getRecentAnalyses: aiModerationService.getRecentBidAnalyses,
+    getSuspiciousPatterns: aiModerationService.getSuspiciousBidPatterns,
+
+    // Dashboard
+    getModerationStats: aiModerationService.getModerationStats,
+    getRecentActivity: aiModerationService.getRecentModerationActivity,
+  }
+}
+
+/**
  * Create production container with real service implementations
  */
 export function createContainer(): ServiceContainer {
@@ -218,6 +257,7 @@ export function createContainer(): ServiceContainer {
     email: createEmailService(),
     listings: createListingService(),
     auctions: createAuctionService(),
+    aiModeration: createAIModerationService(),
     prisma,
   }
 }
@@ -594,6 +634,142 @@ export function createTestContainer(): ServiceContainer {
       } as any),
       activateScheduledAuctions: async () => 0,
       endExpiredAuctions: async () => 0,
+    },
+    aiModeration: {
+      // Listing Analysis
+      analyzeListing: async (listingId) => ({
+        id: 'mock-analysis-id',
+        listingId,
+        status: 'COMPLETED',
+        decision: 'APPROVE',
+        confidenceScore: 0.95,
+        approvalReasoning: 'Mock analysis - listing appears valid',
+        titleAnalysis: {},
+        descriptionAnalysis: {},
+        imageAnalysis: {},
+        issues: [],
+        suggestions: [],
+        modelUsed: 'mock-model',
+        tokensUsed: 100,
+        processingTimeMs: 500,
+        errorMessage: null,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      } as any),
+      getAnalysis: async () => null,
+      getPendingAnalyses: async () => [],
+      retryFailedAnalysis: async (listingId) => ({
+        id: 'mock-analysis-id',
+        listingId,
+        status: 'COMPLETED',
+        decision: 'APPROVE',
+        confidenceScore: 0.95,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      } as any),
+
+      // Car Reviews
+      generateReview: async (listingId) => ({
+        id: 'mock-review-id',
+        listingId,
+        status: 'COMPLETED',
+        overallScore: 80,
+        conditionSummary: 'Mock review summary',
+        highlights: ['Good condition'],
+        concerns: [],
+        estimatedValueLow: 20000,
+        estimatedValueMid: 25000,
+        estimatedValueHigh: 30000,
+        valuationReasoning: 'Mock valuation',
+        marketComparisons: [],
+        isPublished: false,
+        publishedAt: null,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      } as any),
+      getReview: async () => null,
+      getPublishedReview: async () => null,
+      publishReview: async (listingId) => ({
+        id: 'mock-review-id',
+        listingId,
+        isPublished: true,
+        publishedAt: new Date(),
+      } as any),
+      unpublishReview: async (listingId) => ({
+        id: 'mock-review-id',
+        listingId,
+        isPublished: false,
+      } as any),
+
+      // Comment Moderation
+      moderateComment: async (commentId) => ({
+        id: 'mock-moderation-id',
+        commentId,
+        status: 'APPROVED',
+        decision: 'APPROVE',
+        confidenceScore: 0.98,
+        isSpam: false,
+        spamScore: 0.02,
+        isInappropriate: false,
+        toxicityScore: 0.01,
+        isOffTopic: false,
+        flaggedCategories: [],
+        reasoning: 'Comment appears valid',
+        autoActioned: true,
+        actionTaken: 'approved',
+        actionedAt: new Date(),
+        createdAt: new Date(),
+      } as any),
+      getModeration: async () => null,
+      getPendingModerations: async () => [],
+      overrideModeration: async (commentId, decision) => ({
+        id: 'mock-moderation-id',
+        commentId,
+        decision,
+        status: decision === 'APPROVE' ? 'APPROVED' : 'REJECTED',
+        createdAt: new Date(),
+      } as any),
+
+      // Bid Pattern Analysis
+      analyzeAuctionBids: async (auctionId) => ({
+        id: 'mock-bid-analysis-id',
+        auctionId,
+        analysisWindowStart: new Date(),
+        analysisWindowEnd: new Date(),
+        isSuspicious: false,
+        suspicionScore: 0.1,
+        patternType: null,
+        patterns: [],
+        anomalies: [],
+        bidsAnalyzed: 10,
+        avgTimeBetweenBids: 120,
+        bidVelocityScore: 0.2,
+        recommendedAction: 'none',
+        reasoning: 'No suspicious patterns detected',
+        createdAt: new Date(),
+      } as any),
+      analyzeUserBids: async (userId) => ({
+        id: 'mock-user-analysis-id',
+        userId,
+        auctionId: 'user-analysis',
+        isSuspicious: false,
+        suspicionScore: 0.05,
+        createdAt: new Date(),
+      } as any),
+      getRecentAnalyses: async () => [],
+      getSuspiciousPatterns: async () => [],
+
+      // Dashboard
+      getModerationStats: async () => ({
+        listingsAnalyzed: 0,
+        listingsPendingReview: 0,
+        commentsModerated: 0,
+        commentsAutoActioned: 0,
+        suspiciousBidPatterns: 0,
+        carReviewsGenerated: 0,
+        avgConfidenceScore: 0,
+      }),
+      getRecentActivity: async () => [],
     },
     prisma,
   }
