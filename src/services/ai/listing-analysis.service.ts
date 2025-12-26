@@ -153,7 +153,7 @@ export class ListingAnalysisService {
         imageObservations = `IMAGE OBSERVATIONS:\n${imageResult.content}`
       }
 
-      const photoCategories = [...new Set(listing.media.map((m) => m.category).filter(Boolean))]
+      const photoCategories = Array.from(new Set(listing.media.map((m) => m.category).filter((c): c is string => Boolean(c))))
 
       const prompt = LISTING_ANALYSIS_PROMPT
         .replace('{title}', listing.title)

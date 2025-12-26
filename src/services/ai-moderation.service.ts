@@ -147,7 +147,7 @@ export async function analyzeListing(listingId: string): Promise<AIListingAnalys
 
   try {
     // Prepare prompt with listing data
-    const photoCategories = [...new Set(listing.media.map((m) => m.category).filter(Boolean))]
+    const photoCategories = Array.from(new Set(listing.media.map((m) => m.category).filter((c): c is string => Boolean(c))))
 
     const prompt = LISTING_ANALYSIS_PROMPT
       .replace('{title}', listing.title)
@@ -865,9 +865,9 @@ export async function analyzeAuctionBids(
             analysisId: analysis.id,
             patternType: result.patternType,
             suspicionScore: result.suspicionScore,
-            patterns: result.patterns,
+            patterns: result.patterns.map(p => ({ ...p })),
             recommendedAction: result.recommendedAction,
-          },
+          } as object,
           status: 'OPEN',
         },
       })

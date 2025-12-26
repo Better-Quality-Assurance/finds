@@ -167,23 +167,23 @@ export function BidPanel({ auction: initialAuction, bids: initialBids }: BidPane
 
       <CardContent className="space-y-4 px-4 sm:space-y-5 sm:px-6">
         {/* Current bid */}
-        <div className="rounded-2xl bg-gradient-to-br from-muted/80 to-muted/50 p-5 backdrop-blur-sm" aria-live="polite" aria-atomic="true">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground" id="bid-label">
+        <div className="rounded-xl bg-gradient-to-br from-muted/80 to-muted/50 p-3.5 backdrop-blur-sm sm:rounded-2xl sm:p-5" aria-live="polite" aria-atomic="true">
+          <div className="flex items-start justify-between gap-2">
+            <div className="min-w-0 flex-1">
+              <p className="text-[10px] font-medium uppercase tracking-wide text-muted-foreground sm:text-xs" id="bid-label">
                 {currentBid ? 'Current Bid' : 'Starting Bid'}
               </p>
-              <p className="font-mono text-4xl font-bold text-primary">
+              <p className="font-mono text-2xl font-bold text-primary sm:text-4xl">
                 {formatCurrency(currentBid || startingPrice, currency)}
               </p>
             </div>
-            <div className="text-right">
-              <p className="flex items-center gap-1.5 rounded-full bg-background/50 px-3 py-1.5 text-sm font-medium text-muted-foreground">
-                <TrendingUp className="h-4 w-4" aria-hidden="true" />
+            <div className="flex flex-col items-end gap-1.5 text-right">
+              <p className="flex items-center gap-1 rounded-full bg-background/50 px-2 py-1 text-xs font-medium text-muted-foreground sm:gap-1.5 sm:px-3 sm:py-1.5 sm:text-sm">
+                <TrendingUp className="h-3 w-3 sm:h-4 sm:w-4" aria-hidden="true" />
                 {auction.bidCount} {auction.bidCount === 1 ? 'bid' : 'bids'}
               </p>
               {auction.extensionCount > 0 && (
-                <p className="mt-2 text-xs text-muted-foreground">
+                <p className="text-[10px] text-muted-foreground sm:text-xs">
                   Extended {auction.extensionCount}x
                 </p>
               )}
@@ -191,10 +191,10 @@ export function BidPanel({ auction: initialAuction, bids: initialBids }: BidPane
           </div>
 
           {/* Reserve status */}
-          <div className="mt-4">
+          <div className="mt-3 sm:mt-4">
             <Badge
               variant={auction.reserveMet ? 'success' : 'warning'}
-              className="w-full justify-center py-1.5 text-sm"
+              className="w-full justify-center py-1 text-xs sm:py-1.5 sm:text-sm"
             >
               {auction.listing.reservePrice
                 ? auction.reserveMet
@@ -207,9 +207,9 @@ export function BidPanel({ auction: initialAuction, bids: initialBids }: BidPane
 
         {/* Winning status */}
         {session && isWinning && isActive && (
-          <div className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-success/10 to-emerald-500/10 p-4 text-success">
-            <CheckCircle className="h-5 w-5" />
-            <span className="font-semibold">You are the high bidder!</span>
+          <div className="flex items-center gap-2 rounded-lg bg-gradient-to-r from-success/10 to-emerald-500/10 p-3 text-success sm:rounded-xl sm:p-4">
+            <CheckCircle className="h-4 w-4 flex-shrink-0 sm:h-5 sm:w-5" />
+            <span className="text-sm font-semibold sm:text-base">You are the high bidder!</span>
           </div>
         )}
 
@@ -217,10 +217,10 @@ export function BidPanel({ auction: initialAuction, bids: initialBids }: BidPane
         {isActive && !isSeller && (
           <>
             <div className="space-y-2">
-              <Label htmlFor="bidAmount">Your Bid</Label>
+              <Label htmlFor="bidAmount" className="text-sm">Your Bid</Label>
               <div className="flex gap-2">
                 <div className="relative flex-1">
-                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" aria-hidden="true">
+                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground" aria-hidden="true">
                     {currency === 'EUR' ? '€' : currency === 'USD' ? '$' : currency === 'GBP' ? '£' : ''}
                   </span>
                   <Input
@@ -230,7 +230,7 @@ export function BidPanel({ auction: initialAuction, bids: initialBids }: BidPane
                     onChange={(e) => setBidAmount(e.target.value)}
                     min={minimumBid}
                     step={10}
-                    className="pl-8"
+                    className="h-11 pl-8 text-base sm:h-12"
                     disabled={isSubmitting}
                     aria-describedby="minimum-bid-text"
                     aria-label={`Enter bid amount in ${currency}`}
@@ -241,7 +241,7 @@ export function BidPanel({ auction: initialAuction, bids: initialBids }: BidPane
                   disabled={!session || isSubmitting}
                   variant="bid"
                   size="lg"
-                  className="min-w-[120px]"
+                  className="h-11 min-w-[100px] text-sm sm:h-12 sm:min-w-[120px] sm:text-base"
                   aria-label="Submit bid"
                 >
                   {isSubmitting ? (
@@ -251,13 +251,13 @@ export function BidPanel({ auction: initialAuction, bids: initialBids }: BidPane
                   )}
                 </Button>
               </div>
-              <p id="minimum-bid-text" className="text-xs text-muted-foreground">
+              <p id="minimum-bid-text" className="text-[11px] text-muted-foreground sm:text-xs">
                 Minimum bid: {formatCurrency(minimumBid, currency)}
               </p>
             </div>
 
             {/* Quick bid buttons */}
-            <div className="flex flex-wrap gap-2" role="group" aria-label="Quick bid amounts">
+            <div className="grid grid-cols-2 gap-1.5 sm:flex sm:flex-wrap sm:gap-2" role="group" aria-label="Quick bid amounts">
               {[minimumBid, suggestedBid, suggestedBid + 100, suggestedBid + 500].map(
                 (amount, i) => (
                   <Button
@@ -266,6 +266,7 @@ export function BidPanel({ auction: initialAuction, bids: initialBids }: BidPane
                     size="sm"
                     onClick={() => handleQuickBid(amount)}
                     disabled={isSubmitting}
+                    className="h-9 text-xs sm:h-auto sm:text-sm"
                     aria-label={`Set bid to ${formatCurrency(amount, currency)}`}
                   >
                     {formatCurrency(amount, currency)}
@@ -276,16 +277,16 @@ export function BidPanel({ auction: initialAuction, bids: initialBids }: BidPane
 
             {/* Fee breakdown */}
             {bidAmount && parseFloat(bidAmount) >= minimumBid && (
-              <div className="rounded-lg border p-3 text-sm">
-                <div className="flex justify-between">
+              <div className="rounded-lg border p-2.5 text-xs sm:p-3 sm:text-sm">
+                <div className="flex justify-between gap-2">
                   <span>Your bid:</span>
                   <span>{formatCurrency(parseFloat(bidAmount), currency)}</span>
                 </div>
-                <div className="flex justify-between text-muted-foreground">
+                <div className="flex justify-between gap-2 text-muted-foreground">
                   <span>Buyer fee (5%):</span>
                   <span>+{formatCurrency(calculateBuyerFee(parseFloat(bidAmount)), currency)}</span>
                 </div>
-                <div className="mt-2 flex justify-between border-t pt-2 font-medium">
+                <div className="mt-1.5 flex justify-between gap-2 border-t pt-1.5 font-medium sm:mt-2 sm:pt-2">
                   <span>Total if you win:</span>
                   <span>{formatCurrency(calculateTotalWithFee(parseFloat(bidAmount)), currency)}</span>
                 </div>
@@ -293,7 +294,7 @@ export function BidPanel({ auction: initialAuction, bids: initialBids }: BidPane
             )}
 
             {!session && (
-              <p className="text-center text-sm text-muted-foreground">
+              <p className="text-center text-xs text-muted-foreground sm:text-sm">
                 <a href="/login" className="text-primary hover:underline">
                   Log in
                 </a>{' '}
@@ -304,35 +305,35 @@ export function BidPanel({ auction: initialAuction, bids: initialBids }: BidPane
         )}
 
         {isSeller && (
-          <div className="flex items-center gap-2 rounded-lg bg-warning/10 p-3 text-warning">
-            <AlertTriangle className="h-5 w-5" />
+          <div className="flex items-center gap-2 rounded-lg bg-warning/10 p-2.5 text-xs text-warning sm:p-3 sm:text-sm">
+            <AlertTriangle className="h-4 w-4 flex-shrink-0 sm:h-5 sm:w-5" />
             <span>You cannot bid on your own listing</span>
           </div>
         )}
 
         {/* Bid history */}
         {bids.length > 0 && (
-          <div className="space-y-2">
-            <h4 className="font-medium">Recent Bids</h4>
-            <div className="max-h-48 space-y-2 overflow-y-auto">
+          <div className="space-y-1.5 sm:space-y-2">
+            <h4 className="text-sm font-medium sm:text-base">Recent Bids</h4>
+            <div className="max-h-40 space-y-1.5 overflow-y-auto sm:max-h-48 sm:space-y-2">
               {bids.slice(0, 10).map((bid, i) => (
                 <div
                   key={bid.id}
                   className={cn(
-                    'flex items-center justify-between rounded p-2 text-sm',
+                    'flex items-center justify-between gap-2 rounded p-1.5 text-xs sm:p-2 sm:text-sm',
                     i === 0 ? 'bg-primary/10' : 'bg-muted'
                   )}
                 >
-                  <div className="flex items-center gap-2">
-                    <User className="h-4 w-4 text-muted-foreground" />
-                    <span>{bid.bidder.name || 'Anonymous'}</span>
+                  <div className="flex min-w-0 flex-1 items-center gap-1.5 sm:gap-2">
+                    <User className="h-3.5 w-3.5 flex-shrink-0 text-muted-foreground sm:h-4 sm:w-4" />
+                    <span className="truncate">{bid.bidder.name || 'Anonymous'}</span>
                     {i === 0 && (
-                      <Badge variant="success" className="text-xs">
+                      <Badge variant="success" className="flex-shrink-0 text-[10px] sm:text-xs">
                         Leading
                       </Badge>
                     )}
                   </div>
-                  <span className="font-medium">
+                  <span className="flex-shrink-0 font-medium">
                     {formatCurrency(Number(bid.amount), currency)}
                   </span>
                 </div>

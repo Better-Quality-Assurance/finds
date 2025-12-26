@@ -10,7 +10,7 @@ type MarkdownProps = {
 
 export function Markdown({ content, className }: MarkdownProps) {
   return (
-    <ReactMarkdown
+    <div
       className={cn(
         'prose prose-sm max-w-none dark:prose-invert',
         // Headings
@@ -32,7 +32,7 @@ export function Markdown({ content, className }: MarkdownProps) {
         className
       )}
     >
-      {content}
-    </ReactMarkdown>
+      <ReactMarkdown>{content}</ReactMarkdown>
+    </div>
   )
 }

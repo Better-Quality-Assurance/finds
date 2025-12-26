@@ -229,9 +229,9 @@ export class BidPatternService {
               analysisId: analysis.id,
               patternType: result.patternType,
               suspicionScore: result.suspicionScore,
-              patterns: result.patterns,
+              patterns: result.patterns.map(p => ({ ...p })),
               recommendedAction: result.recommendedAction,
-            },
+            } as object,
             status: 'OPEN',
           },
         })
@@ -319,8 +319,8 @@ export class BidPatternService {
     }
 
     // Analyze user's bidding patterns across auctions
-    const auctionIds = [...new Set(userBids.map(b => b.auctionId))]
-    const sellerIds = [...new Set(userBids.map(b => b.auction.listing.sellerId))]
+    const auctionIds = Array.from(new Set(userBids.map(b => b.auctionId)))
+    const sellerIds = Array.from(new Set(userBids.map(b => b.auction.listing.sellerId)))
 
     // Check for suspicious patterns
     const suspiciousIndicators: string[] = []
