@@ -169,12 +169,12 @@ export function AuditLogClient() {
           />
         </div>
 
-        <Select value={resourceType} onValueChange={(v) => { setResourceType(v); setPage(1) }}>
+        <Select value={resourceType || '__all__'} onValueChange={(v) => { setResourceType(v === '__all__' ? '' : v); setPage(1) }}>
           <SelectTrigger className="w-[150px]">
             <SelectValue placeholder="Resource Type" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="">All Resources</SelectItem>
+            <SelectItem value="__all__">All Resources</SelectItem>
             <SelectItem value="USER">User</SelectItem>
             <SelectItem value="LISTING">Listing</SelectItem>
             <SelectItem value="AUCTION">Auction</SelectItem>
@@ -183,12 +183,12 @@ export function AuditLogClient() {
           </SelectContent>
         </Select>
 
-        <Select value={severity} onValueChange={(v) => { setSeverity(v); setPage(1) }}>
+        <Select value={severity || '__all__'} onValueChange={(v) => { setSeverity(v === '__all__' ? '' : v); setPage(1) }}>
           <SelectTrigger className="w-[130px]">
             <SelectValue placeholder="Severity" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="">All Severity</SelectItem>
+            <SelectItem value="__all__">All Severity</SelectItem>
             <SelectItem value="CRITICAL">Critical</SelectItem>
             <SelectItem value="HIGH">High</SelectItem>
             <SelectItem value="MEDIUM">Medium</SelectItem>
@@ -196,12 +196,12 @@ export function AuditLogClient() {
           </SelectContent>
         </Select>
 
-        <Select value={status} onValueChange={(v) => { setStatus(v); setPage(1) }}>
+        <Select value={status || '__all__'} onValueChange={(v) => { setStatus(v === '__all__' ? '' : v); setPage(1) }}>
           <SelectTrigger className="w-[130px]">
             <SelectValue placeholder="Status" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="">All Status</SelectItem>
+            <SelectItem value="__all__">All Status</SelectItem>
             <SelectItem value="SUCCESS">Success</SelectItem>
             <SelectItem value="FAILURE">Failure</SelectItem>
             <SelectItem value="BLOCKED">Blocked</SelectItem>

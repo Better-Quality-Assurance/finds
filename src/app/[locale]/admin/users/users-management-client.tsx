@@ -167,12 +167,12 @@ export function UsersManagementClient({ isAdmin }: UsersManagementClientProps) {
           />
         </div>
 
-        <Select value={roleFilter} onValueChange={(v) => { setRoleFilter(v); setPage(1) }}>
+        <Select value={roleFilter || '__all__'} onValueChange={(v) => { setRoleFilter(v === '__all__' ? '' : v); setPage(1) }}>
           <SelectTrigger className="w-[150px]">
             <SelectValue placeholder="All Roles" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="">All Roles</SelectItem>
+            <SelectItem value="__all__">All Roles</SelectItem>
             <SelectItem value="USER">User</SelectItem>
             <SelectItem value="SELLER">Seller</SelectItem>
             <SelectItem value="REVIEWER">Reviewer</SelectItem>
@@ -181,12 +181,12 @@ export function UsersManagementClient({ isAdmin }: UsersManagementClientProps) {
           </SelectContent>
         </Select>
 
-        <Select value={statusFilter} onValueChange={(v) => { setStatusFilter(v); setPage(1) }}>
+        <Select value={statusFilter || '__all__'} onValueChange={(v) => { setStatusFilter(v === '__all__' ? '' : v); setPage(1) }}>
           <SelectTrigger className="w-[150px]">
             <SelectValue placeholder="All Status" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="">All Status</SelectItem>
+            <SelectItem value="__all__">All Status</SelectItem>
             <SelectItem value="active">Active</SelectItem>
             <SelectItem value="banned">Banned</SelectItem>
             <SelectItem value="suspended">Suspended</SelectItem>

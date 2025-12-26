@@ -72,14 +72,14 @@ export function AuctionFilters() {
     <div className="mb-6 flex flex-wrap items-center gap-4">
       {/* Category */}
       <Select
-        value={currentCategory}
-        onValueChange={(value) => updateFilter('category', value)}
+        value={currentCategory || '__all__'}
+        onValueChange={(value) => updateFilter('category', value === '__all__' ? '' : value)}
       >
         <SelectTrigger className="w-[180px]">
           <SelectValue placeholder="All Categories" />
         </SelectTrigger>
         <SelectContent>
-          <SelectItem value="">All Categories</SelectItem>
+          <SelectItem value="__all__">All Categories</SelectItem>
           {CATEGORIES.map((cat) => (
             <SelectItem key={cat.value} value={cat.value}>
               {cat.label}
@@ -90,14 +90,14 @@ export function AuctionFilters() {
 
       {/* Country */}
       <Select
-        value={currentCountry}
-        onValueChange={(value) => updateFilter('country', value)}
+        value={currentCountry || '__all__'}
+        onValueChange={(value) => updateFilter('country', value === '__all__' ? '' : value)}
       >
         <SelectTrigger className="w-[180px]">
           <SelectValue placeholder="All Countries" />
         </SelectTrigger>
         <SelectContent>
-          <SelectItem value="">All Countries</SelectItem>
+          <SelectItem value="__all__">All Countries</SelectItem>
           {COUNTRIES.map((country) => (
             <SelectItem key={country.code} value={country.code}>
               {country.name}

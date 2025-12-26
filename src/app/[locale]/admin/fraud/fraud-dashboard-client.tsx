@@ -175,12 +175,12 @@ export function FraudDashboardClient() {
 
       {/* Filters */}
       <div className="mb-6 flex items-center gap-4">
-        <Select value={severityFilter} onValueChange={setSeverityFilter}>
+        <Select value={severityFilter || '__all__'} onValueChange={(v) => setSeverityFilter(v === '__all__' ? '' : v)}>
           <SelectTrigger className="w-[180px]">
             <SelectValue placeholder="All Severities" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="">All Severities</SelectItem>
+            <SelectItem value="__all__">All Severities</SelectItem>
             <SelectItem value="CRITICAL">Critical</SelectItem>
             <SelectItem value="HIGH">High</SelectItem>
             <SelectItem value="MEDIUM">Medium</SelectItem>

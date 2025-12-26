@@ -228,12 +228,12 @@ export function AuctionsManagementClient() {
           />
         </div>
 
-        <Select value={statusFilter} onValueChange={(v) => { setStatusFilter(v); setPage(1) }}>
+        <Select value={statusFilter || '__all__'} onValueChange={(v) => { setStatusFilter(v === '__all__' ? '' : v); setPage(1) }}>
           <SelectTrigger className="w-[150px]">
             <SelectValue placeholder="All Status" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="">All Status</SelectItem>
+            <SelectItem value="__all__">All Status</SelectItem>
             <SelectItem value="SCHEDULED">Scheduled</SelectItem>
             <SelectItem value="ACTIVE">Active</SelectItem>
             <SelectItem value="EXTENDED">Extended</SelectItem>
