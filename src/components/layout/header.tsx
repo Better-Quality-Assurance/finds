@@ -88,7 +88,7 @@ export function Header() {
                       <p className="font-medium">{session.user.name}</p>
                     )}
                     {session.user.email && (
-                      <p className="w-[200px] truncate text-sm text-muted-foreground">
+                      <p className="max-w-[180px] truncate text-sm text-muted-foreground sm:max-w-[200px]">
                         {session.user.email}
                       </p>
                     )}
@@ -165,16 +165,16 @@ export function Header() {
       {/* Mobile Menu */}
       {mobileMenuOpen && (
         <div id="mobile-menu" className="border-t bg-background p-4 md:hidden" role="navigation" aria-label="Mobile navigation">
-          <div className="flex flex-col space-y-3">
+          <div className="flex flex-col space-y-1">
             {navigation.map((item) => (
               <Link
                 key={item.href}
                 href={item.href}
                 className={cn(
-                  'text-sm font-medium transition-colors hover:text-primary',
+                  'rounded-lg px-3 py-3 text-base font-medium transition-colors',
                   pathname === item.href
-                    ? 'text-primary'
-                    : 'text-muted-foreground'
+                    ? 'bg-primary/10 text-primary'
+                    : 'text-muted-foreground hover:bg-muted hover:text-foreground'
                 )}
                 onClick={() => setMobileMenuOpen(false)}
                 aria-current={pathname === item.href ? 'page' : undefined}
@@ -186,14 +186,14 @@ export function Header() {
               <>
                 <Link
                   href="/login"
-                  className="text-sm font-medium text-muted-foreground transition-colors hover:text-primary"
+                  className="rounded-lg px-3 py-3 text-base font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
                   onClick={() => setMobileMenuOpen(false)}
                 >
                   {t('login')}
                 </Link>
                 <Link
                   href="/register"
-                  className="text-sm font-medium text-muted-foreground transition-colors hover:text-primary"
+                  className="rounded-lg px-3 py-3 text-base font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
                   onClick={() => setMobileMenuOpen(false)}
                 >
                   {t('register')}

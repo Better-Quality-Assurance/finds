@@ -117,10 +117,10 @@ export default async function AuctionsPage({
     <div className="container py-12">
       {/* Header */}
       <div className="mb-10">
-        <h1 className="font-heading text-4xl font-bold tracking-tight md:text-5xl">
+        <h1 className="font-heading text-3xl font-bold tracking-tight sm:text-4xl md:text-5xl">
           Live Auctions
         </h1>
-        <p className="mt-3 text-lg text-muted-foreground">
+        <p className="mt-3 text-base text-muted-foreground sm:text-lg">
           Browse {pagination.total} active auctions for classic cars, barn finds, and project vehicles
         </p>
       </div>
@@ -152,7 +152,7 @@ export default async function AuctionsPage({
             </p>
           </div>
         ) : (
-          <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          <div className="grid gap-4 sm:gap-6 md:gap-8 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {auctions.map((auction) => (
               <AuctionCard
                 key={auction.id}

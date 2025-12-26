@@ -48,13 +48,13 @@ export default function HomePage() {
               Curated Classic Car Auctions
             </div>
 
-            <h1 className="font-heading text-5xl font-bold tracking-tight md:text-7xl lg:text-8xl">
+            <h1 className="font-heading text-4xl font-bold tracking-tight sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl">
               <span className="text-gradient">{t('common.appName')}</span>
             </h1>
-            <p className="mt-6 text-xl text-muted-foreground md:text-2xl lg:text-3xl">
+            <p className="mt-6 text-lg text-muted-foreground sm:text-xl md:text-2xl lg:text-3xl">
               {t('common.tagline')}
             </p>
-            <p className="mx-auto mt-8 max-w-2xl text-lg text-muted-foreground">
+            <p className="mx-auto mt-6 max-w-2xl text-base text-muted-foreground sm:mt-8 sm:text-lg">
               The curated auction platform for classic cars, retro vehicles,
               barn finds, and project cars. Based in Romania, serving
               collectors across Europe.
@@ -62,11 +62,11 @@ export default function HomePage() {
 
             {/* CTAs */}
             <div className="mt-12 flex flex-col justify-center gap-4 sm:flex-row">
-              <Link href="/auctions" className="group inline-flex h-14 items-center justify-center gap-2 rounded-xl bg-gradient-premium px-10 text-lg font-medium text-primary-foreground shadow-lg shadow-primary/25 transition-all hover:shadow-xl hover:shadow-primary/30 hover:bg-gradient-premium-hover active:scale-[0.98]">
+              <Link href="/auctions" className="group inline-flex h-12 items-center justify-center gap-2 rounded-xl bg-gradient-premium px-6 text-base font-medium text-primary-foreground shadow-lg shadow-primary/25 transition-all hover:shadow-xl hover:shadow-primary/30 hover:bg-gradient-premium-hover active:scale-[0.98] sm:h-14 sm:px-10 sm:text-lg">
                 {t('nav.auctions')}
                 <ArrowRight className="h-5 w-5 transition-transform group-hover:translate-x-1" />
               </Link>
-              <Link href="/sell" className="inline-flex h-14 items-center justify-center rounded-xl border-2 border-primary bg-background px-10 text-lg font-medium text-primary transition-all hover:bg-primary/5 hover:border-primary/80">
+              <Link href="/sell" className="inline-flex h-12 items-center justify-center rounded-xl border-2 border-primary bg-background px-6 text-base font-medium text-primary transition-all hover:bg-primary/5 hover:border-primary/80 sm:h-14 sm:px-10 sm:text-lg">
                 {t('nav.sell')}
               </Link>
             </div>

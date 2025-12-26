@@ -169,8 +169,8 @@ export default async function AuctionDetailPage({ params }: PageProps) {
 
           {/* Title and badges */}
           <div>
-            <h1 className="text-3xl font-bold">{listing.title}</h1>
-            <p className="mt-2 text-lg text-muted-foreground">
+            <h1 className="text-2xl font-bold sm:text-3xl">{listing.title}</h1>
+            <p className="mt-2 text-base text-muted-foreground sm:text-lg">
               {listing.year} {listing.make} {listing.model}
             </p>
             <div className="mt-4 flex flex-wrap gap-2">
@@ -311,7 +311,7 @@ export default async function AuctionDetailPage({ params }: PageProps) {
 
         {/* Sidebar - Bid Panel */}
         <div className="lg:col-span-1">
-          <div className="sticky top-4">
+          <div className="lg:sticky lg:top-4">
             <BidPanel
               auction={{
                 id: auction.id,

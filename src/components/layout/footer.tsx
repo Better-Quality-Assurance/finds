@@ -14,9 +14,9 @@ export function Footer() {
       <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-primary/20 to-transparent" aria-hidden="true" />
 
       <div className="container mx-auto px-4 py-16">
-        <div className="grid gap-12 md:grid-cols-4">
+        <div className="grid gap-8 sm:grid-cols-2 md:gap-12 lg:grid-cols-4">
           {/* Brand */}
-          <div className="md:col-span-1">
+          <div className="sm:col-span-2 lg:col-span-1">
             <Link
               href="/"
               className="group inline-flex items-center gap-2.5"
@@ -38,11 +38,11 @@ export function Footer() {
           {/* Navigation */}
           <nav aria-label="Footer navigation">
             <h3 className="font-heading text-sm font-semibold tracking-wide">Platform</h3>
-            <ul className="mt-4 space-y-3 text-sm">
+            <ul className="mt-4 space-y-2 text-sm">
               <li>
                 <Link
                   href="/auctions"
-                  className="text-muted-foreground transition-colors hover:text-primary"
+                  className="inline-block py-1 text-muted-foreground transition-colors hover:text-primary"
                 >
                   {t('nav.auctions')}
                 </Link>
@@ -50,7 +50,7 @@ export function Footer() {
               <li>
                 <Link
                   href="/sell"
-                  className="text-muted-foreground transition-colors hover:text-primary"
+                  className="inline-block py-1 text-muted-foreground transition-colors hover:text-primary"
                 >
                   {t('nav.sell')}
                 </Link>
@@ -61,11 +61,11 @@ export function Footer() {
           {/* Legal */}
           <nav aria-label="Legal information">
             <h3 className="font-heading text-sm font-semibold tracking-wide">Legal</h3>
-            <ul className="mt-4 space-y-3 text-sm">
+            <ul className="mt-4 space-y-2 text-sm">
               <li>
                 <Link
                   href="/legal/terms"
-                  className="text-muted-foreground transition-colors hover:text-primary"
+                  className="inline-block py-1 text-muted-foreground transition-colors hover:text-primary"
                 >
                   {t('legal.terms')}
                 </Link>
@@ -73,7 +73,7 @@ export function Footer() {
               <li>
                 <Link
                   href="/legal/privacy"
-                  className="text-muted-foreground transition-colors hover:text-primary"
+                  className="inline-block py-1 text-muted-foreground transition-colors hover:text-primary"
                 >
                   {t('legal.privacy')}
                 </Link>
@@ -81,7 +81,7 @@ export function Footer() {
               <li>
                 <Link
                   href="/legal/cookies"
-                  className="text-muted-foreground transition-colors hover:text-primary"
+                  className="inline-block py-1 text-muted-foreground transition-colors hover:text-primary"
                 >
                   {t('legal.cookies')}
                 </Link>
@@ -89,7 +89,7 @@ export function Footer() {
               <li>
                 <Link
                   href="/legal/buyer-terms"
-                  className="text-muted-foreground transition-colors hover:text-primary"
+                  className="inline-block py-1 text-muted-foreground transition-colors hover:text-primary"
                 >
                   {t('legal.buyerTerms')}
                 </Link>
@@ -97,7 +97,7 @@ export function Footer() {
               <li>
                 <Link
                   href="/legal/seller-terms"
-                  className="text-muted-foreground transition-colors hover:text-primary"
+                  className="inline-block py-1 text-muted-foreground transition-colors hover:text-primary"
                 >
                   {t('legal.sellerTerms')}
                 </Link>
@@ -108,11 +108,11 @@ export function Footer() {
           {/* Contact */}
           <nav aria-label="Contact information">
             <h3 className="font-heading text-sm font-semibold tracking-wide">Contact</h3>
-            <ul className="mt-4 space-y-3 text-sm">
+            <ul className="mt-4 space-y-2 text-sm">
               <li>
                 <a
                   href="mailto:contact@finds.ro"
-                  className="text-muted-foreground transition-colors hover:text-primary"
+                  className="inline-block py-1 text-muted-foreground transition-colors hover:text-primary"
                   aria-label="Email us at contact@finds.ro"
                 >
                   contact@finds.ro

@@ -294,7 +294,7 @@ export function ReviewStep({ form, listingId }: ReviewStepProps) {
                 </span>
               )}
             </p>
-            <div className="mt-4 grid grid-cols-4 gap-2 md:grid-cols-6">
+            <div className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6">
               {photos.slice(0, 12).map((photo, index) => (
                 <div
                   key={photo.id}

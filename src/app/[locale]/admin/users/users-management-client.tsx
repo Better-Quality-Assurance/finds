@@ -154,7 +154,7 @@ export function UsersManagementClient({ isAdmin }: UsersManagementClientProps) {
     <>
       {/* Search and Filters */}
       <div className="mb-6 flex flex-wrap items-center gap-4">
-        <div className="relative flex-1 min-w-[200px]">
+        <div className="relative w-full min-w-0 sm:flex-1 sm:min-w-[200px]">
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <Input
             placeholder="Search by email, name, or ID..."
@@ -168,7 +168,7 @@ export function UsersManagementClient({ isAdmin }: UsersManagementClientProps) {
         </div>
 
         <Select value={roleFilter || '__all__'} onValueChange={(v) => { setRoleFilter(v === '__all__' ? '' : v); setPage(1) }}>
-          <SelectTrigger className="w-[150px]">
+          <SelectTrigger className="w-full sm:w-[150px]">
             <SelectValue placeholder="All Roles" />
           </SelectTrigger>
           <SelectContent>
@@ -182,7 +182,7 @@ export function UsersManagementClient({ isAdmin }: UsersManagementClientProps) {
         </Select>
 
         <Select value={statusFilter || '__all__'} onValueChange={(v) => { setStatusFilter(v === '__all__' ? '' : v); setPage(1) }}>
-          <SelectTrigger className="w-[150px]">
+          <SelectTrigger className="w-full sm:w-[150px]">
             <SelectValue placeholder="All Status" />
           </SelectTrigger>
           <SelectContent>

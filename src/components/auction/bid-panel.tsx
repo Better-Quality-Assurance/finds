@@ -138,7 +138,7 @@ export function BidPanel({ auction: initialAuction, bids: initialBids }: BidPane
   }
 
   return (
-    <Card variant="glass" className="sticky top-20">
+    <Card variant="glass" className="sticky top-4 lg:top-20">
       <CardHeader className="pb-4">
         <div className="flex items-center justify-between">
           <CardTitle className="flex items-center gap-2 font-heading">
@@ -173,7 +173,7 @@ export function BidPanel({ auction: initialAuction, bids: initialBids }: BidPane
               <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground" id="bid-label">
                 {currentBid ? 'Current Bid' : 'Starting Bid'}
               </p>
-              <p className="font-mono text-4xl font-bold text-primary">
+              <p className="font-mono text-2xl font-bold text-primary sm:text-3xl md:text-4xl">
                 {formatCurrency(currentBid || startingPrice, currency)}
               </p>
             </div>
@@ -241,7 +241,7 @@ export function BidPanel({ auction: initialAuction, bids: initialBids }: BidPane
                   disabled={!session || isSubmitting}
                   variant="bid"
                   size="lg"
-                  className="min-w-[120px]"
+                  className="min-w-[100px] sm:min-w-[120px]"
                   aria-label="Submit bid"
                 >
                   {isSubmitting ? (
@@ -314,7 +314,7 @@ export function BidPanel({ auction: initialAuction, bids: initialBids }: BidPane
         {bids.length > 0 && (
           <div className="space-y-2">
             <h4 className="font-medium">Recent Bids</h4>
-            <div className="max-h-48 space-y-2 overflow-y-auto">
+            <div className="max-h-36 space-y-2 overflow-y-auto sm:max-h-48">
               {bids.slice(0, 10).map((bid, i) => (
                 <div
                   key={bid.id}

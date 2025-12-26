@@ -139,7 +139,7 @@ export function AuctionCard({
               <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
                 {auction.currentBid ? 'Current Bid' : 'Starting Bid'}
               </p>
-              <p className="font-mono text-xl font-bold text-primary">
+              <p className="font-mono text-lg font-bold text-primary sm:text-xl">
                 {formatCurrency(currentPrice, auction.listing.currency)}
               </p>
             </div>
