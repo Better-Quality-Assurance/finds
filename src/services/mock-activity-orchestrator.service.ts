@@ -7,8 +7,12 @@
  */
 
 import { prisma } from '@/lib/db'
-import type { Auction } from '@prisma/client'
+import type { Auction, Listing } from '@prisma/client'
 import { AuctionStatus } from '@prisma/client'
+
+type AuctionWithListing = Auction & {
+  listing: Pick<Listing, 'id' | 'title' | 'sellerId'>
+}
 import type {
   IMockActivityOrchestrator,
   MockActivityConfig,
@@ -41,7 +45,7 @@ export class MockActivityOrchestrator implements IMockActivityOrchestrator {
   /**
    * Get auctions eligible for mock activity
    */
-  async getEligibleAuctions(targetIds?: string[]): Promise<Auction[]> {
+  async getEligibleAuctions(targetIds?: string[]): Promise<AuctionWithListing[]> {
     const where: Record<string, unknown> = {
       status: { in: [AuctionStatus.ACTIVE, AuctionStatus.EXTENDED] },
       currentEndTime: { gt: new Date() },
