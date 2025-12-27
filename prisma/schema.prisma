@@ -804,3 +804,17 @@ model AIBidPatternAnalysis {
   @@index([createdAt(sort: Desc)])
   @@map("ai_bid_pattern_analysis")
 }
+
+// ============================================================================
+// SYSTEM CONFIGURATION
+// ============================================================================
+
+model SystemConfig {
+  id        String   @id @default(cuid())
+  key       String   @unique // e.g., "ai.moderation", "ai.licensePlate"
+  value     Json // Configuration values as JSON
+  updatedAt DateTime @updatedAt @map("updated_at")
+  updatedBy String?  @map("updated_by") // Admin user ID who made the change
+
+  @@map("system_config")
+}

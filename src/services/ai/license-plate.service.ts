@@ -12,6 +12,7 @@ import type { IVisionProvider } from '@/services/contracts/vision-provider.inter
 import type { IImageProcessor } from '@/services/contracts/image-processor.interface'
 import { createOpenRouterVisionProvider } from '@/services/providers/openrouter-vision.provider'
 import { LICENSE_PLATE_CONFIG } from '@/config/license-plate.config'
+import { getLicensePlateConfig } from '@/services/system-config.service'
 import { getDefaultImageProcessor } from '@/services/image/image-processor.service'
 import {
   percentageToPixelCoordinates,
@@ -112,16 +113,39 @@ interface AIPlateDetectionResponse {
  * Uses dependency injection for vision provider
  */
 export class LicensePlateDetectionService {
-  private readonly visionProvider: IVisionProvider
-  private readonly modelName: string
+  private visionProvider: IVisionProvider | null
+  private modelName: string
+  private readonly customProviderInjected: boolean
 
   constructor(visionProvider?: IVisionProvider) {
-    this.visionProvider = visionProvider || createOpenRouterVisionProvider({
-      model: LICENSE_PLATE_CONFIG.visionModel,
-      temperature: LICENSE_PLATE_CONFIG.temperature,
-      maxTokens: LICENSE_PLATE_CONFIG.maxTokens,
+    if (visionProvider) {
+      this.visionProvider = visionProvider
+      this.customProviderInjected = true
+      this.modelName = LICENSE_PLATE_CONFIG.visionModel // fallback for injected provider
+    } else {
+      this.visionProvider = null
+      this.customProviderInjected = false
+      this.modelName = LICENSE_PLATE_CONFIG.visionModel // will be updated dynamically
+    }
+  }
+
+  /**
+   * Get or create the vision provider with dynamic config
+   */
+  private async getProvider(): Promise<IVisionProvider> {
+    if (this.visionProvider) {
+      return this.visionProvider
+    }
+
+    // Fetch dynamic config and create provider
+    const config = await getLicensePlateConfig()
+    this.visionProvider = createOpenRouterVisionProvider({
+      model: config.visionModel,
+      temperature: config.temperature,
+      maxTokens: config.maxTokens,
     })
-    this.modelName = LICENSE_PLATE_CONFIG.visionModel
+    this.modelName = config.visionModel
+    return this.visionProvider
   }
 
   /**
@@ -131,7 +155,8 @@ export class LicensePlateDetectionService {
     const startTime = Date.now()
 
     try {
-      const response = await this.visionProvider.analyzeImage<AIPlateDetectionResponse>(
+      const provider = await this.getProvider()
+      const response = await provider.analyzeImage<AIPlateDetectionResponse>(
         imageUrl,
         LICENSE_PLATE_DETECTION_PROMPT
       )
@@ -171,7 +196,8 @@ export class LicensePlateDetectionService {
     imageUrls: string[],
     options: { concurrency?: number } = {}
   ): Promise<Map<string, PlateDetectionResult>> {
-    const { concurrency = LICENSE_PLATE_CONFIG.defaultConcurrency } = options
+    const config = await getLicensePlateConfig()
+    const { concurrency = config.defaultConcurrency } = options
     const results = new Map<string, PlateDetectionResult>()
 
     // Process in batches to respect rate limits
@@ -198,7 +224,7 @@ export class LicensePlateDetectionService {
    */
   async needsPlateBlurring(
     imageUrl: string,
-    confidenceThreshold: number = LICENSE_PLATE_CONFIG.confidenceThreshold
+    confidenceThreshold?: number
   ): Promise<boolean> {
     const result = await this.detectLicensePlates(imageUrl)
 
@@ -206,8 +232,11 @@ export class LicensePlateDetectionService {
       return false
     }
 
+    // Get threshold from config if not provided
+    const threshold = confidenceThreshold ?? (await getLicensePlateConfig()).confidenceThreshold
+
     // Check if any plate has high enough confidence
-    return result.plates.some((plate) => plate.confidence >= confidenceThreshold)
+    return result.plates.some((plate) => plate.confidence >= threshold)
   }
 
   /**
@@ -219,13 +248,15 @@ export class LicensePlateDetectionService {
     detection: PlateDetectionResult
     blur?: BlurResult
   }> {
+    const config = await getLicensePlateConfig()
+
     // First detect plates
     const detection = await this.detectLicensePlates(imageUrl)
 
     // If plates detected with high confidence, blur them
     if (detection.detected) {
       const highConfidencePlates = detection.plates.filter(
-        (p) => p.confidence >= LICENSE_PLATE_CONFIG.confidenceThreshold
+        (p) => p.confidence >= config.confidenceThreshold
       )
 
       if (highConfidencePlates.length > 0) {
@@ -344,7 +375,7 @@ export interface BlurResult {
 export async function blurLicensePlates(
   imageUrl: string,
   plates: PlateDetectionBox[],
-  blurRadius: number = LICENSE_PLATE_CONFIG.blurRadius,
+  blurRadius?: number,
   imageProcessor?: IImageProcessor
 ): Promise<BlurResult> {
   try {
@@ -355,6 +386,10 @@ export async function blurLicensePlates(
         platesBlurred: 0,
       }
     }
+
+    // Fetch config for defaults
+    const config = await getLicensePlateConfig()
+    const effectiveBlurRadius = blurRadius ?? config.blurRadius
 
     // Use provided processor or default singleton
     const processor = imageProcessor || getDefaultImageProcessor()
@@ -371,7 +406,7 @@ export async function blurLicensePlates(
         // Expand bounding box for full coverage
         const expandedBox = expandPercentageBox(
           plate as PercentageBox,
-          LICENSE_PLATE_CONFIG.marginExpansion
+          config.marginExpansion
         )
 
         // Convert to pixel coordinates
@@ -400,7 +435,7 @@ export async function blurLicensePlates(
     const blurredBuffer = await processor.blurRegions(
       imageBuffer,
       blurRegions,
-      blurRadius
+      effectiveBlurRadius
     )
 
     // 5. Convert to JPEG

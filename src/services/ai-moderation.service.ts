@@ -30,11 +30,8 @@ import type {
   BidPatternResult,
   ModerationStats,
   ModerationActivity,
-  AIModerationConfig,
 } from './contracts/ai-moderation.interface'
-import { DEFAULT_AI_MODERATION_CONFIG } from './contracts/ai-moderation.interface'
-
-const config: AIModerationConfig = DEFAULT_AI_MODERATION_CONFIG
+import { getAIModerationConfig } from './system-config.service'
 
 // ============================================================================
 // LISTING ANALYSIS
@@ -110,6 +107,7 @@ Respond in JSON format:
 
 export async function analyzeListing(listingId: string): Promise<AIListingAnalysis> {
   const startTime = Date.now()
+  const config = await getAIModerationConfig()
 
   // Check rate limit
   const rateCheck = checkRateLimit()
@@ -314,6 +312,7 @@ Provide detailed observations that would help a buyer understand the true condit
 
 export async function generateCarReview(listingId: string): Promise<AICarReview> {
   const startTime = Date.now()
+  const config = await getAIModerationConfig()
 
   const rateCheck = checkRateLimit()
   if (!rateCheck.allowed) {
@@ -501,6 +500,7 @@ Respond in JSON format:
 
 export async function moderateComment(commentId: string): Promise<AICommentModeration> {
   const startTime = Date.now()
+  const config = await getAIModerationConfig()
 
   const rateCheck = checkRateLimit()
   if (!rateCheck.allowed) {
@@ -739,6 +739,7 @@ export async function analyzeAuctionBids(
   windowMinutes = 60
 ): Promise<AIBidPatternAnalysis> {
   const startTime = Date.now()
+  const config = await getAIModerationConfig()
   const windowStart = new Date(Date.now() - windowMinutes * 60 * 1000)
 
   const rateCheck = checkRateLimit()
@@ -898,6 +899,7 @@ export async function analyzeUserBids(
   userId: string,
   windowMinutes = 1440 // 24 hours default
 ): Promise<AIBidPatternAnalysis> {
+  const config = await getAIModerationConfig()
   const windowStart = new Date(Date.now() - windowMinutes * 60 * 1000)
 
   // Get user's recent bids across all auctions
@@ -955,6 +957,7 @@ export async function getRecentBidAnalyses(
 }
 
 export async function getSuspiciousBidPatterns(limit = 50): Promise<AIBidPatternAnalysis[]> {
+  const config = await getAIModerationConfig()
   return prisma.aIBidPatternAnalysis.findMany({
     where: {
       isSuspicious: true,
