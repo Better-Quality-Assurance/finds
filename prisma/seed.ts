@@ -17,7 +17,14 @@ async function main() {
   await prisma.listing.deleteMany()
   await prisma.session.deleteMany()
   await prisma.account.deleteMany()
-  await prisma.user.deleteMany({ where: { email: { contains: 'mock' } } })
+  await prisma.user.deleteMany({
+    where: {
+      OR: [
+        { email: { contains: 'mock' } },
+        { email: 'reviewer@finds.ro' },
+      ]
+    }
+  })
 
   // Create mock users
   console.log('👥 Creating mock users...')
@@ -70,6 +77,7 @@ async function main() {
         emailVerified: new Date(),
         preferredLanguage: 'en',
         termsAcceptedAt: new Date(),
+        country: 'France',
       },
     }),
     prisma.user.create({
@@ -82,6 +90,7 @@ async function main() {
         emailVerified: new Date(),
         preferredLanguage: 'en',
         termsAcceptedAt: new Date(),
+        country: 'Germany',
       },
     }),
     prisma.user.create({
@@ -94,6 +103,7 @@ async function main() {
         emailVerified: new Date(),
         preferredLanguage: 'ro',
         termsAcceptedAt: new Date(),
+        country: 'Romania',
       },
     }),
     prisma.user.create({
@@ -1209,7 +1219,16 @@ We visited this Integrale in Sighișoara. Here's the honest assessment:
 
     // Create bids for this auction
     const bidders = [pierre, hans, maria].filter(b => b.id !== car.sellerId)
+    const bidderCountries: Record<string, string> = {
+      [pierre.id]: 'France',
+      [hans.id]: 'Germany',
+      [maria.id]: 'Romania',
+    }
     const bidTimes: Date[] = []
+
+    // Track bidder numbers for this auction
+    const bidderNumbers: Record<string, number> = {}
+    let nextBidderNumber = 1
 
     for (let b = 0; b < bidCount; b++) {
       // Spread bids across the auction duration
@@ -1218,6 +1237,11 @@ We visited this Integrale in Sighișoara. Here's the honest assessment:
       currentBid += bidIncrement
 
       const bidder = bidders[b % bidders.length]
+
+      // Assign bidder number if this is their first bid in this auction
+      if (!bidderNumbers[bidder.id]) {
+        bidderNumbers[bidder.id] = nextBidderNumber++
+      }
 
       await prisma.bid.create({
         data: {
@@ -1228,10 +1252,18 @@ We visited this Integrale in Sighișoara. Here's the honest assessment:
           isWinning: b === bidCount - 1, // Last bid is winning
           isValid: true,
           triggeredExtension: false,
+          bidderNumber: bidderNumbers[bidder.id],
+          bidderCountry: bidderCountries[bidder.id],
           createdAt: bidTime,
         },
       })
     }
+
+    // Update auction with next bidder number
+    await prisma.auction.update({
+      where: { id: auction.id },
+      data: { nextBidderNumber },
+    })
 
     // Update auction with final bid amount
     const finalBid = car.startingPrice + (bidCount * bidIncrement)

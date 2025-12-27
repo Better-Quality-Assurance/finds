@@ -69,13 +69,13 @@ export function AuctionFilters() {
   const hasFilters = currentCategory || currentCountry
 
   return (
-    <div className="mb-6 flex flex-wrap items-center gap-4">
+    <div className="mb-6 grid grid-cols-2 gap-3 sm:flex sm:flex-wrap sm:items-center sm:gap-4">
       {/* Category */}
       <Select
         value={currentCategory || '__all__'}
         onValueChange={(value) => updateFilter('category', value === '__all__' ? '' : value)}
       >
-        <SelectTrigger className="w-[180px]">
+        <SelectTrigger className="w-full sm:w-[180px]">
           <SelectValue placeholder="All Categories" />
         </SelectTrigger>
         <SelectContent>
@@ -93,7 +93,7 @@ export function AuctionFilters() {
         value={currentCountry || '__all__'}
         onValueChange={(value) => updateFilter('country', value === '__all__' ? '' : value)}
       >
-        <SelectTrigger className="w-[180px]">
+        <SelectTrigger className="w-full sm:w-[180px]">
           <SelectValue placeholder="All Countries" />
         </SelectTrigger>
         <SelectContent>
@@ -111,7 +111,7 @@ export function AuctionFilters() {
         value={currentSort}
         onValueChange={(value) => updateFilter('sort', value)}
       >
-        <SelectTrigger className="w-[180px]">
+        <SelectTrigger className="w-full sm:w-[180px]">
           <SelectValue placeholder="Sort by" />
         </SelectTrigger>
         <SelectContent>
@@ -125,9 +125,9 @@ export function AuctionFilters() {
 
       {/* Clear filters */}
       {hasFilters && (
-        <Button variant="ghost" size="sm" onClick={clearFilters}>
+        <Button variant="ghost" size="sm" onClick={clearFilters} className="w-full sm:w-auto">
           <X className="mr-1 h-4 w-4" />
-          Clear Filters
+          Clear
         </Button>
       )}
     </div>

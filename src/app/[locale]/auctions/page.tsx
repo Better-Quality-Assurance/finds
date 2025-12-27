@@ -114,13 +114,13 @@ export default async function AuctionsPage({
   const { auctions, pagination } = await getAuctions(params)
 
   return (
-    <div className="container py-12">
+    <div className="container px-4 py-8 sm:px-6 sm:py-12">
       {/* Header */}
-      <div className="mb-10">
-        <h1 className="font-heading text-4xl font-bold tracking-tight md:text-5xl">
+      <div className="mb-6 sm:mb-10">
+        <h1 className="font-heading text-2xl font-bold tracking-tight sm:text-4xl md:text-5xl">
           Live Auctions
         </h1>
-        <p className="mt-3 text-lg text-muted-foreground">
+        <p className="mt-2 text-sm text-muted-foreground sm:mt-3 sm:text-lg">
           Browse {pagination.total} active auctions for classic cars, barn finds, and project vehicles
         </p>
       </div>
@@ -140,19 +140,19 @@ export default async function AuctionsPage({
         }
       >
         {auctions.length === 0 ? (
-          <div className="rounded-2xl border-2 border-dashed border-border/50 bg-muted/30 p-16 text-center">
-            <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-2xl bg-muted">
-              <Loader2 className="h-10 w-10 text-muted-foreground" />
+          <div className="rounded-xl border-2 border-dashed border-border/50 bg-muted/30 p-8 text-center sm:rounded-2xl sm:p-16">
+            <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-xl bg-muted sm:mb-6 sm:h-20 sm:w-20 sm:rounded-2xl">
+              <Loader2 className="h-8 w-8 text-muted-foreground sm:h-10 sm:w-10" />
             </div>
-            <p className="text-xl font-semibold text-foreground">
+            <p className="text-lg font-semibold text-foreground sm:text-xl">
               No active auctions match your filters
             </p>
-            <p className="mt-2 text-muted-foreground">
+            <p className="mt-2 text-sm text-muted-foreground sm:text-base">
               Try adjusting your filters or check back later.
             </p>
           </div>
         ) : (
-          <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          <div className="grid gap-4 sm:grid-cols-2 sm:gap-6 lg:grid-cols-3 lg:gap-8 xl:grid-cols-4">
             {auctions.map((auction) => (
               <AuctionCard
                 key={auction.id}
@@ -185,13 +185,13 @@ export default async function AuctionsPage({
 
       {/* Pagination */}
       {pagination.totalPages > 1 && (
-        <div className="mt-12 flex justify-center gap-2">
+        <div className="mt-8 flex flex-wrap justify-center gap-2 sm:mt-12">
           {Array.from({ length: pagination.totalPages }, (_, i) => i + 1).map(
             (page) => (
               <a
                 key={page}
                 href={`?page=${page}${params.category ? `&category=${params.category}` : ''}${params.country ? `&country=${params.country}` : ''}${params.sort ? `&sort=${params.sort}` : ''}`}
-                className={`rounded-lg px-4 py-2 font-medium transition-all ${
+                className={`rounded-lg px-3 py-1.5 text-sm font-medium transition-all sm:px-4 sm:py-2 sm:text-base ${
                   page === pagination.page
                     ? 'bg-primary text-primary-foreground shadow-md shadow-primary/25'
                     : 'bg-muted hover:bg-muted/80 hover:shadow-sm'

@@ -126,6 +126,33 @@ export function formatBidderDisplay(
 }
 
 /**
+ * Format bidder display name for mobile view.
+ * Shows "Bidder Anonymous XYZ from Country" format.
+ */
+export function formatBidderDisplayMobile(
+  bidderNumber: number,
+  country?: string | null
+): string {
+  if (bidderNumber <= 0) {
+    // Legacy bid without number
+    return 'Anonymous Bidder'
+  }
+
+  // Generate a consistent pseudo-anonymous ID from bidder number (e.g., "A7K", "B2M")
+  const letters = 'ABCDEFGHJKLMNPQRSTUVWXYZ' // Excludes I and O to avoid confusion
+  const firstLetter = letters[bidderNumber % letters.length]
+  const secondChar = (bidderNumber * 7) % 10
+  const thirdLetter = letters[(bidderNumber * 3) % letters.length]
+  const anonymousId = `${firstLetter}${secondChar}${thirdLetter}`
+
+  if (country) {
+    return `Bidder Anonymous ${anonymousId} from ${country}`
+  }
+
+  return `Bidder Anonymous ${anonymousId}`
+}
+
+/**
  * Get the country display name from ISO code.
  * Uses Intl.DisplayNames for localized country names.
  */

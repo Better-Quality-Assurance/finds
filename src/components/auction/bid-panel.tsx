@@ -26,7 +26,7 @@ import {
   User,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
-import { formatBidderDisplay } from '@/services/bidder-number.service'
+import { formatBidderDisplay, formatBidderDisplayMobile } from '@/services/bidder-number.service'
 import { BidVerificationModal } from './bid-verification-modal'
 import { getCurrencySymbol } from '@/domain/currency/currency-config'
 
@@ -396,7 +396,10 @@ export function BidPanel({ auction: initialAuction, bids: initialBids }: BidPane
                   >
                     <div className="flex min-w-0 flex-1 items-center gap-1.5 md:gap-2 sm:gap-2">
                       <User className="h-3.5 w-3.5 flex-shrink-0 text-muted-foreground md:h-4 md:w-4 sm:h-4 sm:w-4" />
-                      <span className="truncate">{formatBidderDisplay(bid.bidderNumber, bid.bidderCountry)}</span>
+                      {/* Mobile format */}
+                      <span className="truncate sm:hidden">{formatBidderDisplayMobile(bid.bidderNumber, bid.bidderCountry)}</span>
+                      {/* Desktop format */}
+                      <span className="hidden truncate sm:inline">{formatBidderDisplay(bid.bidderNumber, bid.bidderCountry)}</span>
                       {i === 0 && (
                         <Badge variant="success" className="flex-shrink-0 text-[10px] md:text-[11px] sm:text-xs">
                           Leading
