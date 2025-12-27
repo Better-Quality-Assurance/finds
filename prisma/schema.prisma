@@ -816,5 +816,22 @@ model SystemConfig {
   updatedAt DateTime @updatedAt @map("updated_at")
   updatedBy String?  @map("updated_by") // Admin user ID who made the change
 
+  // Version history for rollback
+  history SystemConfigHistory[]
+
   @@map("system_config")
+}
+
+model SystemConfigHistory {
+  id        String   @id @default(cuid())
+  configId  String   @map("config_id")
+  config    SystemConfig @relation(fields: [configId], references: [id], onDelete: Cascade)
+
+  key       String   // Snapshot of key at time of change
+  value     Json     // Previous value before change
+  changedBy String?  @map("changed_by") // Who made the change
+  changedAt DateTime @default(now()) @map("changed_at")
+
+  @@index([configId, changedAt(sort: Desc)])
+  @@map("system_config_history")
 }

@@ -555,7 +555,7 @@ export async function moderateComment(commentId: string): Promise<AICommentModer
 
     const result = await chatCompletionJSON<CommentModerationResult>(
       [{ role: 'user', content: prompt }],
-      { model: 'anthropic/claude-3-haiku' as OpenRouterModel, temperature: 0.1 }
+      { model: config.defaultModel as OpenRouterModel, temperature: 0.1 }
     )
 
     // Determine auto-action based on thresholds
@@ -593,7 +593,7 @@ export async function moderateComment(commentId: string): Promise<AICommentModer
         autoActioned,
         actionTaken,
         actionedAt: autoActioned ? new Date() : null,
-        modelUsed: 'anthropic/claude-3-haiku',
+        modelUsed: config.defaultModel,
         processingTimeMs: Date.now() - startTime,
       },
     })
@@ -604,7 +604,7 @@ export async function moderateComment(commentId: string): Promise<AICommentModer
       where: { id: moderation.id },
       data: {
         status: 'FLAGGED',
-        modelUsed: 'anthropic/claude-3-haiku',
+        modelUsed: config.defaultModel,
         processingTimeMs: Date.now() - startTime,
       },
     })

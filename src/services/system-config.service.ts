@@ -68,16 +68,31 @@ export async function getConfig<T>(key: string): Promise<T | null> {
 }
 
 /**
+ * Audit metadata for tracking config changes
+ */
+export interface AuditMetadata {
+  ipAddress?: string
+  userAgent?: string
+}
+
+/**
  * Set a configuration value and log the change
+ * Saves previous value to history for rollback capability
  */
 export async function setConfig<T>(
   key: string,
   value: T,
-  userId?: string
+  userId?: string,
+  metadata?: AuditMetadata
 ): Promise<void> {
   await prisma.$transaction(async (tx) => {
+    // Get existing config to save to history
+    const existing = await tx.systemConfig.findUnique({
+      where: { key },
+    })
+
     // Upsert the config
-    await tx.systemConfig.upsert({
+    const config = await tx.systemConfig.upsert({
       where: { key },
       create: {
         key,
@@ -90,7 +105,19 @@ export async function setConfig<T>(
       },
     })
 
-    // Log to audit trail
+    // Save previous value to history if it existed
+    if (existing) {
+      await tx.systemConfigHistory.create({
+        data: {
+          configId: config.id,
+          key: existing.key,
+          value: existing.value as object,
+          changedBy: userId,
+        },
+      })
+    }
+
+    // Log to audit trail with full metadata
     if (userId) {
       await tx.auditLog.create({
         data: {
@@ -98,7 +125,12 @@ export async function setConfig<T>(
           resourceType: 'SystemConfig',
           resourceId: key,
           actorId: userId,
-          details: { newValue: value } as object,
+          actorIp: metadata?.ipAddress,
+          actorUserAgent: metadata?.userAgent,
+          details: {
+            previousValue: existing?.value,
+            newValue: value,
+          } as object,
         },
       })
     }
@@ -146,7 +178,8 @@ export async function getAIModerationConfig(): Promise<AIModerationConfig> {
  */
 export async function setAIModerationConfig(
   config: Partial<AIModerationConfig>,
-  userId?: string
+  userId?: string,
+  metadata?: AuditMetadata
 ): Promise<void> {
   // Get existing config to merge
   const existing = await getConfig<Partial<AIModerationConfig>>(AI_MODERATION_KEY) || {}
@@ -155,7 +188,7 @@ export async function setAIModerationConfig(
   await setConfig(AI_MODERATION_KEY, {
     ...existing,
     ...config,
-  }, userId)
+  }, userId, metadata)
 }
 
 // ============================================================================
@@ -189,7 +222,8 @@ export async function getLicensePlateConfig(): Promise<LicensePlateConfigType> {
  */
 export async function setLicensePlateConfig(
   config: Partial<LicensePlateConfigType>,
-  userId?: string
+  userId?: string,
+  metadata?: AuditMetadata
 ): Promise<void> {
   // Get existing config to merge
   const existing = await getConfig<Partial<LicensePlateConfigType>>(LICENSE_PLATE_KEY) || {}
@@ -198,7 +232,7 @@ export async function setLicensePlateConfig(
   await setConfig(LICENSE_PLATE_KEY, {
     ...existing,
     ...config,
-  }, userId)
+  }, userId, metadata)
 }
 
 // ============================================================================
@@ -207,17 +241,41 @@ export async function setLicensePlateConfig(
 
 /**
  * Get all AI settings for admin UI
+ * Optimized: single batch query instead of N+1 queries
  */
 export async function getAllAISettings(): Promise<AISettingsResponse> {
-  const [moderation, licensePlate, moderationRecord, licensePlateRecord] = await Promise.all([
-    getAIModerationConfig(),
-    getLicensePlateConfig(),
-    prisma.systemConfig.findUnique({ where: { key: AI_MODERATION_KEY } }),
-    prisma.systemConfig.findUnique({ where: { key: LICENSE_PLATE_KEY } }),
-  ])
+  // Single batch query for all config records
+  const records = await prisma.systemConfig.findMany({
+    where: {
+      key: { in: [AI_MODERATION_KEY, LICENSE_PLATE_KEY] }
+    }
+  })
+
+  const moderationRecord = records.find(r => r.key === AI_MODERATION_KEY)
+  const licensePlateRecord = records.find(r => r.key === LICENSE_PLATE_KEY)
+
+  // Merge with defaults (DB values take precedence)
+  const moderation: AIModerationConfig = {
+    ...DEFAULT_AI_MODERATION_CONFIG,
+    ...(moderationRecord?.value as Partial<AIModerationConfig> || {}),
+  }
+
+  const licensePlateDbConfig = licensePlateRecord?.value as Partial<LicensePlateConfigType> || {}
+  const licensePlate: LicensePlateConfigType = {
+    visionModel: licensePlateDbConfig.visionModel ?? LICENSE_PLATE_CONFIG.visionModel,
+    temperature: licensePlateDbConfig.temperature ?? LICENSE_PLATE_CONFIG.temperature,
+    maxTokens: licensePlateDbConfig.maxTokens ?? LICENSE_PLATE_CONFIG.maxTokens,
+    confidenceThreshold: licensePlateDbConfig.confidenceThreshold ?? LICENSE_PLATE_CONFIG.confidenceThreshold,
+    blurRadius: licensePlateDbConfig.blurRadius ?? LICENSE_PLATE_CONFIG.blurRadius,
+    marginExpansion: licensePlateDbConfig.marginExpansion ?? LICENSE_PLATE_CONFIG.marginExpansion,
+    maxRetries: licensePlateDbConfig.maxRetries ?? LICENSE_PLATE_CONFIG.maxRetries,
+    retryBaseDelay: licensePlateDbConfig.retryBaseDelay ?? LICENSE_PLATE_CONFIG.retryBaseDelay,
+    defaultConcurrency: licensePlateDbConfig.defaultConcurrency ?? LICENSE_PLATE_CONFIG.defaultConcurrency,
+  }
 
   // Get the most recent update timestamp
-  const updates = [moderationRecord?.updatedAt, licensePlateRecord?.updatedAt]
+  const updates = records
+    .map(r => r.updatedAt)
     .filter((d): d is Date => d !== null && d !== undefined)
     .sort((a, b) => b.getTime() - a.getTime())
 
@@ -237,13 +295,14 @@ export async function updateAllAISettings(
     moderation?: Partial<AIModerationConfig>
     licensePlate?: Partial<LicensePlateConfigType>
   },
-  userId?: string
+  userId?: string,
+  metadata?: AuditMetadata
 ): Promise<void> {
   if (settings.moderation) {
-    await setAIModerationConfig(settings.moderation, userId)
+    await setAIModerationConfig(settings.moderation, userId, metadata)
   }
   if (settings.licensePlate) {
-    await setLicensePlateConfig(settings.licensePlate, userId)
+    await setLicensePlateConfig(settings.licensePlate, userId, metadata)
   }
 }
 
@@ -358,4 +417,86 @@ export function validateLicensePlateConfig(
   }
 
   return errors
+}
+
+// ============================================================================
+// CONFIG HISTORY & ROLLBACK
+// ============================================================================
+
+export interface ConfigHistoryEntry {
+  id: string
+  key: string
+  value: unknown
+  changedBy: string | null
+  changedAt: Date
+}
+
+/**
+ * Get configuration change history for a specific key
+ */
+export async function getConfigHistory(
+  key: string,
+  limit = 10
+): Promise<ConfigHistoryEntry[]> {
+  const config = await prisma.systemConfig.findUnique({
+    where: { key },
+    include: {
+      history: {
+        orderBy: { changedAt: 'desc' },
+        take: limit,
+      },
+    },
+  })
+
+  if (!config) {
+    return []
+  }
+
+  return config.history.map((h) => ({
+    id: h.id,
+    key: h.key,
+    value: h.value,
+    changedBy: h.changedBy,
+    changedAt: h.changedAt,
+  }))
+}
+
+/**
+ * Rollback configuration to a previous version
+ */
+export async function rollbackConfig(
+  key: string,
+  historyId: string,
+  userId: string,
+  metadata?: AuditMetadata
+): Promise<void> {
+  const history = await prisma.systemConfigHistory.findUnique({
+    where: { id: historyId },
+    include: { config: true },
+  })
+
+  if (!history) {
+    throw new Error('History entry not found')
+  }
+
+  if (history.key !== key) {
+    throw new Error('History entry does not match config key')
+  }
+
+  // Use setConfig to apply the historical value (this will also save current as history)
+  await setConfig(key, history.value as object, userId, metadata)
+}
+
+/**
+ * Get all AI settings history for admin UI
+ */
+export async function getAllAISettingsHistory(
+  limit = 20
+): Promise<{ moderation: ConfigHistoryEntry[]; licensePlate: ConfigHistoryEntry[] }> {
+  const [moderation, licensePlate] = await Promise.all([
+    getConfigHistory(AI_MODERATION_KEY, limit),
+    getConfigHistory(LICENSE_PLATE_KEY, limit),
+  ])
+
+  return { moderation, licensePlate }
 }

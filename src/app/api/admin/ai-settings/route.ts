@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server'
+import { headers } from 'next/headers'
 import { auth } from '@/lib/auth'
 import { prisma } from '@/lib/db'
+import { rateLimit } from '@/lib/rate-limiter'
 import {
   getAllAISettings,
   updateAllAISettings,
@@ -11,6 +13,12 @@ import {
 } from '@/services/system-config.service'
 import { getModerationStats } from '@/services/ai-moderation.service'
 import type { AIModerationConfig } from '@/services/contracts/ai-moderation.interface'
+
+// Rate limit config: 10 updates per minute per user
+const CONFIG_UPDATE_RATE_LIMIT = {
+  windowMs: 60 * 1000, // 1 minute
+  maxRequests: 10,
+}
 
 interface AISettingsWithStats extends AISettingsResponse {
   stats: {
@@ -74,6 +82,34 @@ export async function PUT(request: Request) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
+    // CSRF protection: verify origin matches host
+    const headersList = await headers()
+    const origin = headersList.get('origin')
+    const host = headersList.get('host')
+    if (origin && host) {
+      const originUrl = new URL(origin)
+      if (originUrl.host !== host) {
+        return NextResponse.json({ error: 'Invalid origin' }, { status: 403 })
+      }
+    }
+
+    // Rate limiting: 10 updates per minute per user
+    const rateLimitKey = `ai-settings:${session.user.id}`
+    const rateLimitResult = rateLimit(rateLimitKey, CONFIG_UPDATE_RATE_LIMIT)
+    if (!rateLimitResult.success) {
+      return NextResponse.json(
+        { error: 'Too many requests', retryAfter: rateLimitResult.retryAfter },
+        {
+          status: 429,
+          headers: {
+            'Retry-After': String(rateLimitResult.retryAfter),
+            'X-RateLimit-Limit': String(rateLimitResult.limit),
+            'X-RateLimit-Remaining': String(rateLimitResult.remaining),
+          }
+        }
+      )
+    }
+
     // Check admin role only for updates
     const user = await prisma.user.findUnique({
       where: { id: session.user.id },
@@ -108,10 +144,19 @@ export async function PUT(request: Request) {
       )
     }
 
-    // Update settings
+    // Extract audit metadata from request headers (reuse headersList from above)
+    const auditMetadata = {
+      ipAddress: headersList.get('x-forwarded-for')?.split(',')[0]?.trim() ||
+                 headersList.get('x-real-ip') ||
+                 undefined,
+      userAgent: headersList.get('user-agent') || undefined,
+    }
+
+    // Update settings with audit trail
     await updateAllAISettings(
       { moderation, licensePlate },
-      session.user.id
+      session.user.id,
+      auditMetadata
     )
 
     // Return updated settings
