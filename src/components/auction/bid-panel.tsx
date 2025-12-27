@@ -220,8 +220,36 @@ export function BidPanel({ auction: initialAuction, bids: initialBids }: BidPane
           </div>
         )}
 
-        {/* Bid form */}
-        {isActive && !isSeller && (
+        {/* Not logged in - show account required message */}
+        {isActive && !isSeller && !session && (
+          <div className="space-y-4">
+            <div className="rounded-xl border-2 border-dashed border-primary/30 bg-primary/5 p-4 text-center md:p-5 sm:p-6">
+              <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-primary/10 md:h-14 md:w-14 sm:h-16 sm:w-16">
+                <User className="h-6 w-6 text-primary md:h-7 md:w-7 sm:h-8 sm:w-8" />
+              </div>
+              <h3 className="mb-2 text-base font-semibold md:text-lg sm:text-lg">
+                Account Required to Bid
+              </h3>
+              <p className="mb-4 text-xs text-muted-foreground md:text-sm sm:text-sm">
+                Create a free account to place bids, track auctions, and get notified when you&apos;re outbid.
+              </p>
+              <div className="flex flex-col gap-2 sm:flex-row sm:justify-center">
+                <Button asChild variant="bid" className="w-full sm:w-auto">
+                  <a href="/register">Create Account</a>
+                </Button>
+                <Button asChild variant="outline" className="w-full sm:w-auto">
+                  <a href="/login">Log In</a>
+                </Button>
+              </div>
+            </div>
+            <p className="text-center text-[11px] text-muted-foreground md:text-xs sm:text-xs">
+              Minimum bid: {formatCurrency(minimumBid, currency)}
+            </p>
+          </div>
+        )}
+
+        {/* Bid form - only show when logged in */}
+        {isActive && !isSeller && session && (
           <>
             <div className="space-y-2">
               <Label htmlFor="bidAmount" className="text-sm md:text-sm sm:text-sm">Your Bid</Label>
@@ -249,7 +277,7 @@ export function BidPanel({ auction: initialAuction, bids: initialBids }: BidPane
                 </div>
                 <Button
                   onClick={handleBid}
-                  disabled={!session || isSubmitting}
+                  disabled={isSubmitting}
                   variant="bid"
                   size="lg"
                   className="h-11 min-w-[100px] text-sm md:h-11 md:min-w-[110px] md:text-sm sm:h-12 sm:min-w-[120px] sm:text-base"
@@ -307,15 +335,6 @@ export function BidPanel({ auction: initialAuction, bids: initialBids }: BidPane
                   <span>{formatCurrency(calculateTotalWithFee(parseFloat(bidAmount)), currency)}</span>
                 </div>
               </div>
-            )}
-
-            {!session && (
-              <p className="text-center text-xs text-muted-foreground sm:text-sm">
-                <a href="/login" className="text-primary hover:underline">
-                  Log in
-                </a>{' '}
-                to place a bid
-              </p>
             )}
           </>
         )}
