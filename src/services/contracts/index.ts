@@ -166,6 +166,15 @@ export type {
   MediaReviewStats,
 } from './media-review.interface'
 
+// Image Processor Service
+export type {
+  IImageProcessor,
+  ImageMetadata,
+  BlurRegion,
+  JpegOptions,
+  PngOptions,
+} from './image-processor.interface'
+
 /**
  * Re-export common Prisma types for convenience
  */

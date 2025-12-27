@@ -573,6 +573,170 @@ export async function notifyLicensePlateDetected(
 }
 
 /**
+ * Broadcast a new bid to all viewers of an auction
+ * Uses the transport layer to send to auction-specific channel
+ */
+export async function broadcastNewBid(data: {
+  bidId: string
+  auctionId: string
+  amount: number
+  bidderNumber: number
+  bidderCountry: string | null
+  bidCount: number
+  timestamp: string
+  isReserveMet: boolean
+}): Promise<void> {
+  try {
+    await transport.send(`auction-${data.auctionId}`, EVENTS.NEW_BID, data)
+    console.log(`Broadcast new bid for auction ${data.auctionId}`)
+  } catch (error) {
+    console.error(`Failed to broadcast new bid for auction ${data.auctionId}:`, error)
+  }
+}
+
+/**
+ * Broadcast auction time extension
+ * Notifies all viewers that the auction end time has been extended
+ */
+export async function broadcastAuctionExtended(data: {
+  auctionId: string
+  newEndTime: string
+  extensionCount: number
+  triggeredByBidId: string
+}): Promise<void> {
+  try {
+    await transport.send(`auction-${data.auctionId}`, EVENTS.AUCTION_EXTENDED, data)
+    console.log(`Broadcast auction extended for auction ${data.auctionId}`)
+  } catch (error) {
+    console.error(`Failed to broadcast auction extended for auction ${data.auctionId}:`, error)
+  }
+}
+
+/**
+ * Broadcast auction ended
+ * Notifies all viewers that the auction has ended
+ */
+export async function broadcastAuctionEnded(data: {
+  auctionId: string
+  status: 'SOLD' | 'NO_SALE' | 'CANCELLED'
+  finalPrice: number | null
+  winnerId: string | null
+}): Promise<void> {
+  try {
+    await transport.send(`auction-${data.auctionId}`, EVENTS.AUCTION_ENDED, data)
+    console.log(`Broadcast auction ended for auction ${data.auctionId} - ${data.status}`)
+  } catch (error) {
+    console.error(`Failed to broadcast auction ended for auction ${data.auctionId}:`, error)
+  }
+}
+
+/**
+ * Notify a user they've been outbid
+ * Sends a private notification to the outbid user
+ */
+export async function notifyOutbid(
+  userId: string,
+  data: {
+    auctionId: string
+    listingTitle: string
+    newBidAmount: number
+    yourBidAmount: number
+  }
+): Promise<void> {
+  try {
+    await transport.sendToUser(userId, EVENTS.OUTBID, data)
+
+    // Also send in-app notification
+    await sendUserNotification(userId, {
+      type: 'OUTBID',
+      title: 'You\'ve Been Outbid',
+      message: `You were outbid on "${data.listingTitle}". Current bid: ${data.newBidAmount}`,
+      data: {
+        auctionId: data.auctionId,
+        newBidAmount: data.newBidAmount,
+        yourBidAmount: data.yourBidAmount,
+      },
+      link: `/auctions/${data.auctionId}`,
+    })
+
+    console.log(`Notified user ${userId} they've been outbid on auction ${data.auctionId}`)
+  } catch (error) {
+    console.error(`Failed to notify user ${userId} about being outbid:`, error)
+  }
+}
+
+/**
+ * Notify a user they're winning
+ * Sends a private notification to the current winning bidder
+ */
+export async function notifyWinning(
+  userId: string,
+  data: {
+    auctionId: string
+    amount: number
+  }
+): Promise<void> {
+  try {
+    await transport.sendToUser(userId, EVENTS.WINNING, data)
+    console.log(`Notified user ${userId} they're winning auction ${data.auctionId}`)
+  } catch (error) {
+    console.error(`Failed to notify user ${userId} about winning:`, error)
+  }
+}
+
+/**
+ * Broadcast auction starting event to the public auction channel
+ * Called when a scheduled auction becomes active
+ */
+export async function broadcastAuctionStarting(data: {
+  auctionId: string
+  listingId: string
+  listingTitle: string
+  startingPrice: number
+  currentEndTime: string
+}): Promise<void> {
+  try {
+    await transport.send(`auction-${data.auctionId}`, EVENTS.AUCTION_STARTING, data)
+    console.log(`Broadcast auction starting for auction ${data.auctionId}`)
+  } catch (error) {
+    console.error(`Failed to broadcast auction starting for auction ${data.auctionId}:`, error)
+  }
+}
+
+/**
+ * Notify winner via private channel and in-app notification
+ * Called when an auction ends with a winning bid
+ * This is a simplified version that sends both real-time and in-app notifications
+ */
+export async function notifyWinner(
+  userId: string,
+  data: {
+    auctionId: string
+    listingTitle: string
+    finalPrice: number
+    buyerFee: number
+  }
+): Promise<void> {
+  try {
+    // Send real-time notification via transport
+    await transport.sendToUser(userId, 'auction-won', data)
+
+    // Also use the standard notifyAuctionWon function for in-app + email
+    await notifyAuctionWon(
+      userId,
+      data.auctionId,
+      data.listingTitle,
+      data.finalPrice,
+      'EUR' // TODO: Get currency from auction data if needed
+    )
+
+    console.log(`Notified winner ${userId} for auction ${data.auctionId}`)
+  } catch (error) {
+    console.error(`Failed to notify winner ${userId}:`, error)
+  }
+}
+
+/**
  * Helper function to format date in human-readable format
  */
 function formatDate(date: Date): string {

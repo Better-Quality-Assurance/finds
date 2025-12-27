@@ -1,42 +1,43 @@
-import { NextResponse } from 'next/server'
+import { NextRequest } from 'next/server'
 import { auth } from '@/lib/auth'
-import { prisma } from '@/lib/db'
-import { getOpenAlerts, getFraudStats } from '@/services/fraud.service'
+import { requireAdminOrModerator } from '@/lib/admin-auth'
+import { getContainer } from '@/lib/container'
+import { withErrorHandler } from '@/lib/with-error-handler'
+import { successResponse } from '@/lib/api-response'
 import { AlertSeverity } from '@prisma/client'
 
-// GET - Get fraud alerts and stats
-export async function GET(request: Request) {
-  try {
+/**
+ * GET /api/admin/fraud
+ *
+ * Get fraud alerts and statistics with optional filtering.
+ * Admin/Moderator only.
+ */
+export const GET = withErrorHandler(
+  async (request: NextRequest) => {
     const session = await auth()
-    if (!session?.user?.id) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
 
-    // Check admin role
-    const user = await prisma.user.findUnique({
-      where: { id: session.user.id },
-      select: { role: true },
-    })
+    // Require admin or moderator role
+    await requireAdminOrModerator(session)
 
-    if (!user || !['ADMIN', 'MODERATOR'].includes(user.role)) {
-      return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
-    }
+    const container = getContainer()
 
+    // Parse query parameters
     const { searchParams } = new URL(request.url)
     const severity = searchParams.get('severity') as AlertSeverity | null
-    const page = parseInt(searchParams.get('page') || '1')
-    const limit = parseInt(searchParams.get('limit') || '50')
+    const page = parseInt(searchParams.get('page') || '1', 10)
+    const limit = Math.min(parseInt(searchParams.get('limit') || '50', 10), 100)
 
+    // Fetch alerts and stats in parallel
     const [alertsResult, stats] = await Promise.all([
-      getOpenAlerts({
+      container.fraud.getOpenAlerts({
         severity: severity || undefined,
         limit,
         offset: (page - 1) * limit,
       }),
-      getFraudStats(),
+      container.fraud.getFraudStats(),
     ])
 
-    return NextResponse.json({
+    return successResponse({
       alerts: alertsResult.alerts,
       total: alertsResult.total,
       stats,
@@ -46,11 +47,11 @@ export async function GET(request: Request) {
         totalPages: Math.ceil(alertsResult.total / limit),
       },
     })
-  } catch (error) {
-    console.error('Get fraud alerts error:', error)
-    return NextResponse.json(
-      { error: 'Failed to get fraud alerts' },
-      { status: 500 }
-    )
+  },
+  {
+    requiresAuth: true,
+    resourceType: 'fraud_alert',
+    action: 'admin.fraud.list',
+    auditLog: false,
   }
-}
+)

@@ -24,6 +24,7 @@ import type {
   ISMSProvider,
   IMediaReviewService,
   IMediaProcessingService,
+  IImageProcessor,
 } from '@/services/contracts'
 
 // Real Service Implementations
@@ -39,6 +40,7 @@ import * as aiModerationService from '@/services/ai-moderation.service'
 import { initializePhoneVerificationService } from '@/services/phone-verification.service'
 import { MediaReviewService } from '@/services/media/media-review.service'
 import { MediaProcessingService } from '@/services/media/media-processing.service'
+import { ImageProcessorService } from '@/services/image/image-processor.service'
 
 // SMS Provider Implementations
 import { MockSMSProvider, TwilioSMSProvider } from '@/services/providers'
@@ -63,6 +65,7 @@ export type ServiceContainer = {
   aiModeration: IAIModerationService
   mediaReview: IMediaReviewService
   mediaProcessing: IMediaProcessingService
+  imageProcessor: IImageProcessor
   sms: ISMSProvider
   roleValidator: RoleValidator
   prisma: PrismaClient
@@ -304,6 +307,9 @@ export function createContainer(): ServiceContainer {
   // Create media processing service with dependencies
   const mediaProcessing = new MediaProcessingService(prisma, storage)
 
+  // Create image processor service
+  const imageProcessor = new ImageProcessorService()
+
   return {
     notifications: createNotificationService(),
     audit,
@@ -318,6 +324,7 @@ export function createContainer(): ServiceContainer {
     aiModeration: createAIModerationService(),
     mediaReview,
     mediaProcessing,
+    imageProcessor,
     sms: smsProvider,
     roleValidator: new RoleValidator(),
     prisma,
@@ -869,6 +876,20 @@ export function createTestContainer(): ServiceContainer {
     },
     mediaProcessing: {
       processUploadedMedia: async () => {},
+    },
+    imageProcessor: {
+      fetchImage: async (url) => Buffer.from('mock-image'),
+      getMetadata: async () => ({
+        width: 1000,
+        height: 800,
+        format: 'jpeg',
+        hasAlpha: false,
+        channels: 3,
+        size: 1024,
+      }),
+      blurRegions: async (buffer) => buffer,
+      toJpeg: async (buffer) => buffer,
+      toPng: async (buffer) => buffer,
     },
     sms: mockSmsProvider,
     roleValidator: new RoleValidator(),

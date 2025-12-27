@@ -9,9 +9,17 @@
  */
 
 import type { IVisionProvider } from '@/services/contracts/vision-provider.interface'
+import type { IImageProcessor } from '@/services/contracts/image-processor.interface'
 import { createOpenRouterVisionProvider } from '@/services/providers/openrouter-vision.provider'
 import { LICENSE_PLATE_CONFIG } from '@/config/license-plate.config'
-import sharp from 'sharp'
+import { getDefaultImageProcessor } from '@/services/image/image-processor.service'
+import {
+  percentageToPixelCoordinates,
+  expandPercentageBox,
+  clampToImageBounds,
+  isValidBox,
+  type PercentageBox,
+} from '@/services/image/coordinate-transformer'
 
 /**
  * Bounding box for a detected license plate
@@ -281,37 +289,32 @@ export function createStoredDetection(
 
 /**
  * Calculate pixel coordinates from percentage-based bounding box
+ * @deprecated Use percentageToPixelCoordinates from coordinate-transformer instead
  */
 export function calculatePixelCoordinates(
   box: PlateDetectionBox,
   imageWidth: number,
   imageHeight: number
 ): { x: number; y: number; width: number; height: number } {
-  return {
-    x: Math.round((box.x / 100) * imageWidth),
-    y: Math.round((box.y / 100) * imageHeight),
-    width: Math.round((box.width / 100) * imageWidth),
-    height: Math.round((box.height / 100) * imageHeight),
-  }
+  return percentageToPixelCoordinates(box as PercentageBox, {
+    width: imageWidth,
+    height: imageHeight,
+  })
 }
 
 /**
  * Expand bounding box by a margin (to ensure full plate coverage)
  * Margin is a percentage (e.g., 10 = 10% expansion on each side)
+ * @deprecated Use expandPercentageBox from coordinate-transformer instead
  */
 export function expandBoundingBox(
   box: PlateDetectionBox,
   marginPercent: number = 10
 ): PlateDetectionBox {
-  const expandX = (box.width * marginPercent) / 100
-  const expandY = (box.height * marginPercent) / 100
-
+  const expanded = expandPercentageBox(box as PercentageBox, marginPercent)
   return {
     ...box,
-    x: Math.max(0, box.x - expandX),
-    y: Math.max(0, box.y - expandY),
-    width: Math.min(100 - (box.x - expandX), box.width + 2 * expandX),
-    height: Math.min(100 - (box.y - expandY), box.height + 2 * expandY),
+    ...expanded,
   }
 }
 
@@ -327,31 +330,25 @@ export interface BlurResult {
 }
 
 /**
- * Fetch image from URL as buffer
- */
-async function fetchImageBuffer(imageUrl: string): Promise<Buffer> {
-  const response = await fetch(imageUrl)
-  if (!response.ok) {
-    throw new Error(`Failed to fetch image: ${response.status}`)
-  }
-  const arrayBuffer = await response.arrayBuffer()
-  return Buffer.from(arrayBuffer)
-}
-
-/**
  * Blur license plates in an image
  *
+ * Orchestrator function that coordinates image processing operations.
+ * Delegates specific tasks to specialized services following SRP.
+ *
  * @param imageUrl - URL of the image to blur
- * @param plates - Array of detected plate bounding boxes
- * @param blurRadius - Blur intensity (default 30)
- * @returns Buffer of the blurred image
+ * @param plates - Array of detected plate bounding boxes (percentage coordinates)
+ * @param blurRadius - Blur intensity (default from config)
+ * @param imageProcessor - Optional image processor (uses default if not provided)
+ * @returns Result with blurred image buffer or error
  */
 export async function blurLicensePlates(
   imageUrl: string,
   plates: PlateDetectionBox[],
-  blurRadius: number = LICENSE_PLATE_CONFIG.blurRadius
+  blurRadius: number = LICENSE_PLATE_CONFIG.blurRadius,
+  imageProcessor?: IImageProcessor
 ): Promise<BlurResult> {
   try {
+    // Early return if no plates to blur
     if (plates.length === 0) {
       return {
         success: true,
@@ -359,54 +356,55 @@ export async function blurLicensePlates(
       }
     }
 
-    // Fetch the image
-    const imageBuffer = await fetchImageBuffer(imageUrl)
+    // Use provided processor or default singleton
+    const processor = imageProcessor || getDefaultImageProcessor()
 
-    // Get image metadata for calculating pixel coordinates
-    const metadata = await sharp(imageBuffer).metadata()
-    if (!metadata.width || !metadata.height) {
-      throw new Error('Could not get image dimensions')
-    }
+    // 1. Fetch the image
+    const imageBuffer = await processor.fetchImage(imageUrl)
 
-    const { width, height } = metadata
+    // 2. Get image metadata
+    const metadata = await processor.getMetadata(imageBuffer)
 
-    // Start with the original image
-    let processedImage = sharp(imageBuffer)
+    // 3. Transform percentage coordinates to pixel coordinates
+    const blurRegions = plates
+      .map((plate) => {
+        // Expand bounding box for full coverage
+        const expandedBox = expandPercentageBox(
+          plate as PercentageBox,
+          LICENSE_PLATE_CONFIG.marginExpansion
+        )
 
-    // Process each plate
-    for (const plate of plates) {
-      // Expand bounding box slightly to ensure full coverage
-      const expandedBox = expandBoundingBox(plate, LICENSE_PLATE_CONFIG.marginExpansion)
-      const pixelBox = calculatePixelCoordinates(expandedBox, width, height)
+        // Convert to pixel coordinates
+        const pixelBox = percentageToPixelCoordinates(expandedBox, {
+          width: metadata.width,
+          height: metadata.height,
+        })
 
-      // Ensure coordinates are within bounds
-      const x = Math.max(0, Math.min(pixelBox.x, width - 1))
-      const y = Math.max(0, Math.min(pixelBox.y, height - 1))
-      const boxWidth = Math.min(pixelBox.width, width - x)
-      const boxHeight = Math.min(pixelBox.height, height - y)
+        // Clamp to image bounds
+        return clampToImageBounds(pixelBox, {
+          width: metadata.width,
+          height: metadata.height,
+        })
+      })
+      .filter(isValidBox) // Remove invalid regions
 
-      if (boxWidth <= 0 || boxHeight <= 0) {
-        continue
+    // Early return if no valid regions
+    if (blurRegions.length === 0) {
+      return {
+        success: true,
+        platesBlurred: 0,
       }
-
-      // Extract the plate region, blur it, and composite back
-      const plateRegion = await sharp(imageBuffer)
-        .extract({ left: x, top: y, width: boxWidth, height: boxHeight })
-        .blur(blurRadius)
-        .toBuffer()
-
-      // Composite the blurred region back onto the image
-      processedImage = sharp(await processedImage.toBuffer()).composite([
-        {
-          input: plateRegion,
-          left: x,
-          top: y,
-        },
-      ])
     }
 
-    // Output as JPEG (or PNG if needed)
-    const outputBuffer = await processedImage.jpeg({ quality: 90 }).toBuffer()
+    // 4. Blur the regions
+    const blurredBuffer = await processor.blurRegions(
+      imageBuffer,
+      blurRegions,
+      blurRadius
+    )
+
+    // 5. Convert to JPEG
+    const outputBuffer = await processor.toJpeg(blurredBuffer, { quality: 90 })
 
     return {
       success: true,

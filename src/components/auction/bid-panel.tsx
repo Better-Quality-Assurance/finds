@@ -1,15 +1,15 @@
 'use client'
 
-import { useState, useEffect, useCallback, useRef } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useSession } from 'next-auth/react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { toast } from 'sonner'
 import { formatCurrency } from '@/lib/utils'
 import { useAuctionRealtime } from '@/hooks/useAuctionRealtime'
+import { useBidding } from '@/hooks/useBidding'
 import {
   calculateMinimumBid,
   calculateSuggestedBid,
@@ -58,10 +58,14 @@ type BidPanelProps = {
 
 export function BidPanel({ auction: initialAuction, bids: initialBids }: BidPanelProps) {
   const { data: session } = useSession()
-  const [bidAmount, setBidAmount] = useState('')
-  const [isSubmitting, setIsSubmitting] = useState(false)
-  const [showVerificationModal, setShowVerificationModal] = useState(false)
-  const [isVerified, setIsVerified] = useState<boolean | null>(null)
+
+  // Calculate bid values
+  const currentBid = initialAuction.currentBid
+  const startingPrice = initialAuction.listing.startingPrice
+  const currency = initialAuction.listing.currency
+
+  const minimumBid = calculateMinimumBid(currentBid, startingPrice)
+  const suggestedBid = calculateSuggestedBid(currentBid, startingPrice)
 
   // Real-time auction state management
   const {
@@ -75,18 +79,35 @@ export function BidPanel({ auction: initialAuction, bids: initialBids }: BidPane
     updateEndTime,
   } = useAuctionRealtime(initialAuction, initialBids, {
     showToasts: true,
-    onNewBid: () => {
-      // Clear bid input when new bid arrives
-      setBidAmount('')
-    },
   })
 
-  const currentBid = auction.currentBid
-  const startingPrice = auction.listing.startingPrice
-  const currency = auction.listing.currency
-
-  const minimumBid = calculateMinimumBid(currentBid, startingPrice)
-  const suggestedBid = calculateSuggestedBid(currentBid, startingPrice)
+  // Bidding logic and verification
+  const {
+    bidAmount,
+    setBidAmount,
+    clearBidAmount,
+    isSubmitting,
+    isVerified,
+    showVerificationModal,
+    setShowVerificationModal,
+    setVerificationComplete,
+    submitBid,
+    handleQuickBid,
+  } = useBidding(auction.id, minimumBid, currency, {
+    onBidSuccess: (result) => {
+      // Optimistic update - Pusher will also send updates
+      if (result.auction) {
+        updateAuctionState({
+          currentBid: result.auction.currentBid,
+          bidCount: result.auction.bidCount,
+          reserveMet: result.auction.reserveMet,
+          currentEndTime: result.auction.currentEndTime,
+        })
+      }
+      // Clear bid input after successful submission
+      clearBidAmount()
+    },
+  })
 
   const isSeller = session?.user?.id === auction.listing.sellerId
   const isWinning = bids[0]?.bidder.id === session?.user?.id
@@ -98,86 +119,12 @@ export function BidPanel({ auction: initialAuction, bids: initialBids }: BidPane
       setBidAmount(suggestedBid.toString())
       isInitialized.current = true
     }
-  }, [])
+  }, [suggestedBid, setBidAmount])
 
-  // Check verification status when session is available
-  const checkVerificationStatus = useCallback(async () => {
-    if (!session?.user?.id) return
-
-    try {
-      const res = await fetch('/api/user/verification-status')
-      if (res.ok) {
-        const data = await res.json()
-        // User is verified if all checks pass
-        setIsVerified(
-          data.emailVerified && data.phoneVerified && data.biddingEnabled
-        )
-      }
-    } catch (error) {
-      console.error('Failed to check verification status:', error)
-    }
-  }, [session?.user?.id])
-
-  useEffect(() => {
-    checkVerificationStatus()
-  }, [checkVerificationStatus])
-
+  // Handler for bid submission
   const handleBid = async () => {
-    if (!session) {
-      toast.error('Please log in to place a bid')
-      return
-    }
-
-    // Check verification status before allowing bid
-    if (isVerified === false) {
-      setShowVerificationModal(true)
-      return
-    }
-
     const amount = parseFloat(bidAmount)
-    if (isNaN(amount) || amount < minimumBid) {
-      toast.error(`Minimum bid is ${formatCurrency(minimumBid, currency)}`)
-      return
-    }
-
-    setIsSubmitting(true)
-    try {
-      const response = await fetch(`/api/auctions/${auction.id}/bids`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ amount }),
-      })
-
-      if (!response.ok) {
-        const error = await response.json()
-        throw new Error(error.error || 'Failed to place bid')
-      }
-
-      const result = await response.json()
-      toast.success('Bid placed successfully!')
-
-      // Optimistic update - Pusher will also send updates
-      updateAuctionState({
-        currentBid: result.auction.currentBid,
-        bidCount: result.auction.bidCount,
-        reserveMet: result.auction.reserveMet,
-        currentEndTime: result.auction.currentEndTime,
-      })
-    } catch (error) {
-      toast.error(error instanceof Error ? error.message : 'Failed to place bid')
-    } finally {
-      setIsSubmitting(false)
-    }
-  }
-
-  const handleVerificationComplete = () => {
-    setIsVerified(true)
-    setShowVerificationModal(false)
-    toast.success('Verification complete! You can now place bids.')
-  }
-
-  const handleQuickBid = (amount: number) => {
-    setBidAmount(amount.toString())
+    await submitBid(amount)
   }
 
   return (
@@ -426,7 +373,7 @@ export function BidPanel({ auction: initialAuction, bids: initialBids }: BidPane
     <BidVerificationModal
       open={showVerificationModal}
       onOpenChange={setShowVerificationModal}
-      onVerificationComplete={handleVerificationComplete}
+      onVerificationComplete={setVerificationComplete}
     />
     </>
   )

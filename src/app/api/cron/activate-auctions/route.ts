@@ -2,7 +2,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getContainer } from '@/lib/container'
 import { AUDIT_ACTIONS } from '@/services/audit.service'
-import { broadcastAuctionStarting } from '@/lib/pusher-cron'
+import { broadcastAuctionStarting } from '@/services/notification.service'
 
 /**
  * Cron job that activates SCHEDULED auctions whose startTime has passed

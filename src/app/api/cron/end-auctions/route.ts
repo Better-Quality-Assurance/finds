@@ -5,8 +5,8 @@ import { endAuction } from '@/services/auction.service'
 import {
   broadcastAuctionEnded,
   notifyWinner,
-  notifyWatchlistUsers,
-} from '@/lib/pusher-cron'
+  notifyWatchersAuctionEnded,
+} from '@/services/notification.service'
 import { prisma } from '@/lib/db'
 
 /**
@@ -150,21 +150,15 @@ export async function GET(request: NextRequest) {
           console.log(`[CRON] Notified winner ${winnerId} for auction ${auction.id}`)
         }
 
-        // Notify watchlist users
-        const watchlistUserIds = auction.watchlist
-          .filter(w => w.notifyOnEnd && w.userId !== winnerId)
-          .map(w => w.userId)
+        // Notify watchlist users using the consolidated notification service
+        await notifyWatchersAuctionEnded(
+          auction.id,
+          finalPrice,
+          auction.currency,
+          endedAuction.status as 'SOLD' | 'NO_SALE'
+        )
 
-        if (watchlistUserIds.length > 0) {
-          await notifyWatchlistUsers(watchlistUserIds, {
-            auctionId: auction.id,
-            listingTitle: auction.listing.title,
-            status: endedAuction.status as 'SOLD' | 'NO_SALE' | 'CANCELLED',
-            finalPrice,
-          })
-
-          console.log(`[CRON] Notified ${watchlistUserIds.length} watchlist users for auction ${auction.id}`)
-        }
+        console.log(`[CRON] Notified watchlist users for auction ${auction.id}`)
 
         results.push({
           auctionId: auction.id,

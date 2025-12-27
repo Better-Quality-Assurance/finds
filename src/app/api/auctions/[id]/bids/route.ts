@@ -3,7 +3,11 @@ import { headers } from 'next/headers'
 import { auth } from '@/lib/auth'
 import { getContainer } from '@/lib/container'
 import { placeBid, getAuctionById, getBidHistory } from '@/services/auction.service'
-import { broadcastNewBid, broadcastAuctionExtended, notifyOutbid } from '@/lib/pusher'
+import {
+  broadcastNewBid,
+  broadcastAuctionExtended,
+  notifyOutbid,
+} from '@/services/notification.service'
 import { prisma } from '@/lib/db'
 import { z } from 'zod'
 import { withErrorHandler } from '@/lib/with-error-handler'

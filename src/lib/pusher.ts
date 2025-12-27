@@ -63,41 +63,13 @@ export type OutbidEvent = {
   yourBidAmount: number
 }
 
-// Broadcast functions
-
 /**
- * Broadcast a new bid to all viewers of an auction
+ * Get Pusher server instance
+ * Use this for low-level Pusher operations if needed
+ * For business logic, use notification.service.ts instead
  */
-export async function broadcastNewBid(data: NewBidEvent) {
-  await pusher.trigger(CHANNELS.auction(data.auctionId), EVENTS.NEW_BID, data)
-}
-
-/**
- * Broadcast auction time extension
- */
-export async function broadcastAuctionExtended(data: AuctionExtendedEvent) {
-  await pusher.trigger(CHANNELS.auction(data.auctionId), EVENTS.AUCTION_EXTENDED, data)
-}
-
-/**
- * Broadcast auction ended
- */
-export async function broadcastAuctionEnded(data: AuctionEndedEvent) {
-  await pusher.trigger(CHANNELS.auction(data.auctionId), EVENTS.AUCTION_ENDED, data)
-}
-
-/**
- * Notify a user they've been outbid (private channel)
- */
-export async function notifyOutbid(userId: string, data: OutbidEvent) {
-  await pusher.trigger(CHANNELS.userBids(userId), EVENTS.OUTBID, data)
-}
-
-/**
- * Notify a user they're winning (private channel)
- */
-export async function notifyWinning(userId: string, data: { auctionId: string; amount: number }) {
-  await pusher.trigger(CHANNELS.userBids(userId), EVENTS.WINNING, data)
+export function getPusherServer() {
+  return pusher
 }
 
 /**

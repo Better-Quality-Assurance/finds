@@ -1,34 +1,35 @@
-import { NextResponse } from 'next/server'
+import { NextRequest } from 'next/server'
 import { auth } from '@/lib/auth'
-import { prisma } from '@/lib/db'
-import { reviewFraudAlert, getUserFraudHistory } from '@/services/fraud.service'
+import { requireAdminOrModerator } from '@/lib/admin-auth'
+import { getContainer } from '@/lib/container'
+import { withErrorHandler } from '@/lib/with-error-handler'
+import { successResponse } from '@/lib/api-response'
+import { NotFoundError } from '@/lib/errors'
+import { ERROR_CODES } from '@/lib/error-codes'
 import { z } from 'zod'
 
 type RouteContext = {
   params: Promise<{ id: string }>
 }
 
-// GET - Get fraud alert details
-export async function GET(request: Request, context: RouteContext) {
-  try {
+/**
+ * GET /api/admin/fraud/[id]
+ *
+ * Get detailed information about a specific fraud alert.
+ * Admin/Moderator only.
+ */
+export const GET = withErrorHandler(
+  async (request: NextRequest, context: RouteContext) => {
     const session = await auth()
-    if (!session?.user?.id) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
 
-    // Check admin role
-    const user = await prisma.user.findUnique({
-      where: { id: session.user.id },
-      select: { role: true },
-    })
+    // Require admin or moderator role
+    await requireAdminOrModerator(session)
 
-    if (!user || !['ADMIN', 'MODERATOR'].includes(user.role)) {
-      return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
-    }
-
+    const container = getContainer()
     const { id } = await context.params
 
-    const alert = await prisma.fraudAlert.findUnique({
+    // Fetch alert details
+    const alert = await container.prisma.fraudAlert.findUnique({
       where: { id },
       include: {
         user: {
@@ -44,19 +45,23 @@ export async function GET(request: Request, context: RouteContext) {
     })
 
     if (!alert) {
-      return NextResponse.json({ error: 'Alert not found' }, { status: 404 })
+      throw new NotFoundError(
+        'Fraud alert not found',
+        ERROR_CODES.RESOURCE_NOT_FOUND,
+        { alertId: id }
+      )
     }
 
     // Get user's fraud history if there's a user
     let userHistory = null
     if (alert.userId) {
-      userHistory = await getUserFraudHistory(alert.userId)
+      userHistory = await container.fraud.getUserFraudHistory(alert.userId)
     }
 
     // Get related bids if this is about an auction
     let relatedBids = null
     if (alert.auctionId) {
-      relatedBids = await prisma.bid.findMany({
+      relatedBids = await container.prisma.bid.findMany({
         where: { auctionId: alert.auctionId },
         orderBy: { createdAt: 'desc' },
         take: 20,
@@ -68,62 +73,59 @@ export async function GET(request: Request, context: RouteContext) {
       })
     }
 
-    return NextResponse.json({
+    return successResponse({
       alert,
       userHistory,
       relatedBids,
     })
-  } catch (error) {
-    console.error('Get fraud alert error:', error)
-    return NextResponse.json(
-      { error: 'Failed to get fraud alert' },
-      { status: 500 }
-    )
+  },
+  {
+    requiresAuth: true,
+    resourceType: 'fraud_alert',
+    action: 'admin.fraud.get_details',
+    auditLog: false,
   }
-}
+)
 
 const reviewSchema = z.object({
   status: z.enum(['INVESTIGATING', 'RESOLVED', 'FALSE_POSITIVE']),
   notes: z.string().optional(),
 })
 
-// PUT - Review/update fraud alert
-export async function PUT(request: Request, context: RouteContext) {
-  try {
+/**
+ * PUT /api/admin/fraud/[id]
+ *
+ * Review and update the status of a fraud alert.
+ * Admin/Moderator only.
+ */
+export const PUT = withErrorHandler(
+  async (request: NextRequest, context: RouteContext) => {
     const session = await auth()
-    if (!session?.user?.id) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
 
-    // Check admin role
-    const user = await prisma.user.findUnique({
-      where: { id: session.user.id },
-      select: { role: true },
-    })
+    // Require admin or moderator role
+    const user = await requireAdminOrModerator(session)
 
-    if (!user || !['ADMIN', 'MODERATOR'].includes(user.role)) {
-      return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
-    }
-
+    const container = getContainer()
     const { id } = await context.params
+
+    // Parse and validate request body
     const body = await request.json()
     const { status, notes } = reviewSchema.parse(body)
 
-    const alert = await reviewFraudAlert(id, session.user.id, status, notes)
-
-    return NextResponse.json({ alert })
-  } catch (error) {
-    if (error instanceof z.ZodError) {
-      return NextResponse.json(
-        { error: 'Invalid request data' },
-        { status: 400 }
-      )
-    }
-
-    console.error('Review fraud alert error:', error)
-    return NextResponse.json(
-      { error: 'Failed to review fraud alert' },
-      { status: 500 }
+    // Review the fraud alert
+    const alert = await container.fraud.reviewFraudAlert(
+      id,
+      user.id,
+      status,
+      notes
     )
+
+    return successResponse({ alert })
+  },
+  {
+    requiresAuth: true,
+    resourceType: 'fraud_alert',
+    action: 'admin.fraud.review',
+    auditLog: true,
   }
-}
+)
