@@ -169,8 +169,9 @@ export default async function AuctionDetailPage({ params }: PageProps) {
       <div className="container px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
         <div className="grid gap-6 lg:grid-cols-3 lg:gap-8">
           {/* Main content */}
-          <div className="lg:col-span-2 space-y-6 lg:space-y-8">
+          <div className="min-w-0 lg:col-span-2 space-y-6 lg:space-y-8">
           {/* Image Gallery */}
+          <div className="overflow-hidden">
           <ImageGallery
             images={photos.map((p) => ({
               id: p.id,
@@ -178,6 +179,7 @@ export default async function AuctionDetailPage({ params }: PageProps) {
               category: p.category,
             }))}
           />
+          </div>
 
           {/* Mobile Bid Summary - Shows above content on mobile */}
           <div className="lg:hidden">
@@ -315,10 +317,10 @@ export default async function AuctionDetailPage({ params }: PageProps) {
                 </svg>
               </div>
               <div className="min-w-0">
-                <p className="flex items-center gap-1.5 text-sm font-medium sm:text-base">
+                <div className="flex items-center gap-1.5 text-sm font-medium sm:text-base">
                   Verified Seller
                   <Badge variant="success" className="text-[10px]">Verified</Badge>
-                </p>
+                </div>
                 <p className="text-xs text-muted-foreground sm:text-sm">
                   Member since{' '}
                   {new Date(listing.seller.createdAt).toLocaleDateString('en-US', {
