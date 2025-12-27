@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { headers } from 'next/headers'
+import { z } from 'zod'
 import { auth } from '@/lib/auth'
 import { prisma } from '@/lib/db'
 import { rateLimit } from '@/lib/rate-limiter'
@@ -9,16 +10,39 @@ import {
   validateAIModerationConfig,
   validateLicensePlateConfig,
   type AISettingsResponse,
-  type LicensePlateConfigType,
 } from '@/services/system-config.service'
 import { getModerationStats } from '@/services/ai-moderation.service'
-import type { AIModerationConfig } from '@/services/contracts/ai-moderation.interface'
 
 // Rate limit config: 10 updates per minute per user
 const CONFIG_UPDATE_RATE_LIMIT = {
   windowMs: 60 * 1000, // 1 minute
   maxRequests: 10,
 }
+
+// Zod schema for runtime validation of AI settings updates
+const AISettingsUpdateSchema = z.object({
+  moderation: z.object({
+    commentAutoApproveThreshold: z.number().min(0).max(1).optional(),
+    commentAutoRejectThreshold: z.number().min(0).max(1).optional(),
+    listingFlagThreshold: z.number().min(0).max(1).optional(),
+    suspicionScoreThreshold: z.number().min(0).max(1).optional(),
+    bidAnalysisWindowMinutes: z.number().int().min(15).max(1440).optional(),
+    defaultModel: z.string().optional(),
+    visionModel: z.string().optional(),
+    maxRequestsPerMinute: z.number().int().min(10).max(200).optional(),
+  }).partial().optional(),
+  licensePlate: z.object({
+    visionModel: z.string().optional(),
+    temperature: z.number().min(0).max(1).optional(),
+    maxTokens: z.number().int().min(256).max(4096).optional(),
+    confidenceThreshold: z.number().min(0).max(1).optional(),
+    blurRadius: z.number().int().min(10).max(100).optional(),
+    marginExpansion: z.number().int().min(0).max(50).optional(),
+    maxRetries: z.number().int().min(1).max(10).optional(),
+    retryBaseDelay: z.number().int().min(100).max(10000).optional(),
+    defaultConcurrency: z.number().int().min(1).max(10).optional(),
+  }).partial().optional(),
+}).strict() // Reject unknown fields
 
 interface AISettingsWithStats extends AISettingsResponse {
   stats: {
@@ -120,13 +144,26 @@ export async function PUT(request: Request) {
       return NextResponse.json({ error: 'Forbidden - Admin only' }, { status: 403 })
     }
 
+    // Parse and validate request body with Zod schema
     const body = await request.json()
-    const { moderation, licensePlate } = body as {
-      moderation?: Partial<AIModerationConfig>
-      licensePlate?: Partial<LicensePlateConfigType>
+    const parseResult = AISettingsUpdateSchema.safeParse(body)
+
+    if (!parseResult.success) {
+      return NextResponse.json(
+        {
+          error: 'Invalid request body',
+          errors: parseResult.error.errors.map((e) => ({
+            field: e.path.join('.'),
+            message: e.message,
+          })),
+        },
+        { status: 400 }
+      )
     }
 
-    // Validate inputs
+    const { moderation, licensePlate } = parseResult.data
+
+    // Additional business logic validation (model availability, etc.)
     const errors: { field: string; message: string }[] = []
 
     if (moderation) {
@@ -145,10 +182,12 @@ export async function PUT(request: Request) {
     }
 
     // Extract audit metadata from request headers (reuse headersList from above)
+    // Use last IP in X-Forwarded-For chain (most trustworthy, added by our proxy)
+    const forwardedFor = headersList.get('x-forwarded-for')
     const auditMetadata = {
-      ipAddress: headersList.get('x-forwarded-for')?.split(',')[0]?.trim() ||
-                 headersList.get('x-real-ip') ||
-                 undefined,
+      ipAddress: forwardedFor
+        ? forwardedFor.split(',').pop()?.trim()
+        : headersList.get('x-real-ip') || undefined,
       userAgent: headersList.get('user-agent') || undefined,
     }
 

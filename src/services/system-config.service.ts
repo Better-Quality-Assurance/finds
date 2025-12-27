@@ -463,6 +463,7 @@ export async function getConfigHistory(
 
 /**
  * Rollback configuration to a previous version
+ * Uses transaction to prevent race conditions
  */
 export async function rollbackConfig(
   key: string,
@@ -470,21 +471,76 @@ export async function rollbackConfig(
   userId: string,
   metadata?: AuditMetadata
 ): Promise<void> {
-  const history = await prisma.systemConfigHistory.findUnique({
-    where: { id: historyId },
-    include: { config: true },
+  await prisma.$transaction(async (tx) => {
+    const history = await tx.systemConfigHistory.findUnique({
+      where: { id: historyId },
+      include: { config: true },
+    })
+
+    if (!history) {
+      throw new Error('History entry not found')
+    }
+
+    if (history.key !== key) {
+      throw new Error('History entry does not match config key')
+    }
+
+    // Get current config to check for concurrent modifications
+    const currentConfig = await tx.systemConfig.findUnique({
+      where: { key },
+    })
+
+    // Warn if config was modified after this history entry
+    if (currentConfig && currentConfig.updatedAt > history.changedAt) {
+      // Still allow rollback but log the warning
+      console.warn(
+        `Rolling back config "${key}" to version from ${history.changedAt.toISOString()}, ` +
+        `but config was modified at ${currentConfig.updatedAt.toISOString()}`
+      )
+    }
+
+    // Save current value to history before rollback
+    if (currentConfig) {
+      await tx.systemConfigHistory.create({
+        data: {
+          configId: currentConfig.id,
+          key: currentConfig.key,
+          value: currentConfig.value as object,
+          changedBy: userId,
+        },
+      })
+    }
+
+    // Apply the historical value
+    await tx.systemConfig.update({
+      where: { key },
+      data: {
+        value: history.value as object,
+        updatedBy: userId,
+      },
+    })
+
+    // Log to audit trail
+    await tx.auditLog.create({
+      data: {
+        action: 'ROLLBACK_CONFIG',
+        resourceType: 'SystemConfig',
+        resourceId: key,
+        actorId: userId,
+        actorIp: metadata?.ipAddress,
+        actorUserAgent: metadata?.userAgent,
+        details: {
+          rolledBackTo: historyId,
+          rolledBackToDate: history.changedAt.toISOString(),
+          previousValue: currentConfig?.value,
+          restoredValue: history.value,
+        } as object,
+      },
+    })
   })
 
-  if (!history) {
-    throw new Error('History entry not found')
-  }
-
-  if (history.key !== key) {
-    throw new Error('History entry does not match config key')
-  }
-
-  // Use setConfig to apply the historical value (this will also save current as history)
-  await setConfig(key, history.value as object, userId, metadata)
+  // Invalidate cache after successful rollback
+  cache.delete(key)
 }
 
 /**
