@@ -224,6 +224,73 @@ export class AuctionStateError extends AppError {
 }
 
 /**
+ * Thrown when auction is not active
+ * HTTP Status: 400 Bad Request
+ */
+export class AuctionNotActiveError extends AppError {
+  constructor(
+    message: string = ERROR_MESSAGES[ERROR_CODES.AUCTION_NOT_ACTIVE],
+    details?: Record<string, unknown>
+  ) {
+    super(message, ERROR_CODES.AUCTION_NOT_ACTIVE, 400, details)
+  }
+}
+
+/**
+ * Thrown when auction has ended
+ * HTTP Status: 400 Bad Request
+ */
+export class AuctionEndedError extends AppError {
+  constructor(
+    message: string = ERROR_MESSAGES[ERROR_CODES.AUCTION_ENDED],
+    details?: Record<string, unknown>
+  ) {
+    super(message, ERROR_CODES.AUCTION_ENDED, 400, details)
+  }
+}
+
+/**
+ * Thrown when auction has not started yet
+ * HTTP Status: 400 Bad Request
+ */
+export class AuctionNotStartedError extends AppError {
+  constructor(
+    message: string = ERROR_MESSAGES[ERROR_CODES.AUCTION_NOT_STARTED],
+    details?: Record<string, unknown>
+  ) {
+    super(message, ERROR_CODES.AUCTION_NOT_STARTED, 400, details)
+  }
+}
+
+/**
+ * Thrown when bid amount is too low
+ * HTTP Status: 400 Bad Request
+ */
+export class BidTooLowError extends AppError {
+  public readonly minimumBid: number
+
+  constructor(minimumBid: number, message?: string) {
+    super(
+      message || `Bid must be at least ${minimumBid}`,
+      ERROR_CODES.BID_TOO_LOW,
+      400,
+      { minimumBid }
+    )
+    this.minimumBid = minimumBid
+  }
+}
+
+/**
+ * Thrown when user tries to bid on their own auction
+ * HTTP Status: 400 Bad Request
+ */
+export class SelfBidError extends AppError {
+  constructor(message: string = 'Sellers cannot bid on their own listings') {
+    super(message, ERROR_CODES.BID_OWN_AUCTION, 400)
+  }
+}
+
+/**
  * Thrown when bid validation fails
  * HTTP Status: 400 Bad Request
  */

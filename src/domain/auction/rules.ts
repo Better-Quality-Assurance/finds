@@ -1,21 +1,23 @@
 // Auction business rules
+import { AUCTION_CONFIG } from '@/config/auction.config'
 
 export const AUCTION_RULES = {
-  // Timing
-  DEFAULT_DURATION_DAYS: 7,
-  MIN_DURATION_DAYS: 3,
-  MAX_DURATION_DAYS: 14,
+  // Timing (uses config values)
+  DEFAULT_DURATION_DAYS: AUCTION_CONFIG.defaultDurationDays,
+  MIN_DURATION_DAYS: AUCTION_CONFIG.minDurationDays,
+  MAX_DURATION_DAYS: AUCTION_CONFIG.maxDurationDays,
 
-  // Anti-sniping
-  ANTI_SNIPE_WINDOW_MINUTES: 2, // Bids in last 2 minutes trigger extension
-  ANTI_SNIPE_EXTENSION_MINUTES: 2, // Extend by 2 minutes
-  MAX_EXTENSIONS: 10, // Maximum number of anti-snipe extensions
+  // Anti-sniping (uses config values)
+  ANTI_SNIPE_WINDOW_MINUTES: AUCTION_CONFIG.antiSnipingWindowMinutes,
+  ANTI_SNIPE_EXTENSION_MINUTES: AUCTION_CONFIG.antiSnipingExtensionMinutes,
+  MAX_EXTENSIONS: AUCTION_CONFIG.maxExtensions,
 
-  // Bidding
-  MIN_BID_INCREMENT_PERCENT: 1, // Minimum 1% increase
-  MIN_BID_INCREMENT_AMOUNT: 10, // Minimum €10 increase
+  // Bidding (uses config values)
+  MIN_BID_INCREMENT_PERCENT: AUCTION_CONFIG.minBidIncrementPercent,
+  MIN_BID_INCREMENT_AMOUNT: AUCTION_CONFIG.minBidIncrementAmount,
 
   // Bid increments by price tier (for suggested next bid)
+  // These are fixed business rules, not configurable
   BID_INCREMENTS: [
     { maxPrice: 1000, increment: 50 },
     { maxPrice: 5000, increment: 100 },
@@ -27,11 +29,11 @@ export const AUCTION_RULES = {
     { maxPrice: Infinity, increment: 10000 },
   ],
 
-  // Buyer fee
-  BUYER_FEE_PERCENT: 5,
+  // Buyer fee (uses config value)
+  BUYER_FEE_PERCENT: AUCTION_CONFIG.buyerFeePercent,
 
-  // Payment
-  PAYMENT_DEADLINE_DAYS: 5, // 5 business days to complete payment
+  // Payment (uses config value)
+  PAYMENT_DEADLINE_DAYS: AUCTION_CONFIG.paymentDeadlineDays,
 } as const
 
 export type AuctionStatus = 'SCHEDULED' | 'ACTIVE' | 'ENDED' | 'SOLD' | 'NO_SALE' | 'CANCELLED'
@@ -129,17 +131,19 @@ export function calculateExtendedEndTime(currentEndTime: Date): Date {
 }
 
 /**
- * Calculate buyer fee
+ * Calculate buyer fee (uses config with min/max limits)
  */
 export function calculateBuyerFee(hammerPrice: number): number {
-  return Math.round(hammerPrice * (AUCTION_RULES.BUYER_FEE_PERCENT / 100) * 100) / 100
+  // Delegate to config version which handles min/max limits
+  return AUCTION_CONFIG.calculateBuyerFee(hammerPrice)
 }
 
 /**
  * Calculate total buyer pays (hammer price + fee)
  */
 export function calculateTotalWithFee(hammerPrice: number): number {
-  return hammerPrice + calculateBuyerFee(hammerPrice)
+  // Delegate to config version for consistency
+  return AUCTION_CONFIG.calculateTotalWithFee(hammerPrice)
 }
 
 /**

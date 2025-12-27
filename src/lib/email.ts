@@ -300,3 +300,558 @@ The Finds Team`,
     throw new Error('Failed to send license plate detection email')
   }
 }
+
+/**
+ * Send auction won email to the winning bidder
+ * @param to - The winner's email address
+ * @param name - The winner's name
+ * @param auctionTitle - The title of the auction
+ * @param finalPrice - The final hammer price
+ * @param currency - The currency code (e.g., 'EUR')
+ * @param auctionUrl - URL to view the auction and complete payment
+ * @returns Promise resolving to the Resend API response
+ */
+export async function sendAuctionWonEmail(
+  to: string,
+  name: string,
+  auctionTitle: string,
+  finalPrice: number,
+  currency: string,
+  auctionUrl: string
+) {
+  const buyerFee = finalPrice * 0.05
+  const totalAmount = finalPrice + buyerFee
+
+  const formatCurrency = (amount: number) => {
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: currency,
+    }).format(amount)
+  }
+
+  try {
+    const data = await getResendClient().emails.send({
+      from: getFromEmail(),
+      to,
+      subject: `Congratulations! You Won: ${auctionTitle} - Finds`,
+      html: `
+        <!DOCTYPE html>
+        <html>
+          <head>
+            <meta charset="utf-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>You Won the Auction!</title>
+          </head>
+          <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
+            <div style="background-color: #f8f9fa; padding: 30px; border-radius: 10px;">
+              <h1 style="color: #1a1a1a; margin-bottom: 20px;">Congratulations, ${name}!</h1>
+
+              <p style="font-size: 16px; margin-bottom: 20px;">
+                You are the winning bidder for:
+              </p>
+
+              <p style="font-size: 18px; margin-bottom: 30px; font-weight: 600; color: #1a1a1a;">
+                "${auctionTitle}"
+              </p>
+
+              <div style="background-color: #e8f5e9; border-left: 4px solid #4caf50; padding: 20px; margin: 20px 0; border-radius: 4px;">
+                <table style="width: 100%; border-collapse: collapse;">
+                  <tr>
+                    <td style="padding: 8px 0; font-size: 15px; color: #2e7d32;">Winning Bid:</td>
+                    <td style="padding: 8px 0; font-size: 15px; color: #2e7d32; text-align: right; font-weight: 600;">${formatCurrency(finalPrice)}</td>
+                  </tr>
+                  <tr>
+                    <td style="padding: 8px 0; font-size: 15px; color: #2e7d32;">Buyer Fee (5%):</td>
+                    <td style="padding: 8px 0; font-size: 15px; color: #2e7d32; text-align: right; font-weight: 600;">${formatCurrency(buyerFee)}</td>
+                  </tr>
+                  <tr style="border-top: 2px solid #4caf50;">
+                    <td style="padding: 12px 0 8px 0; font-size: 17px; color: #1a1a1a; font-weight: 700;">Total Amount:</td>
+                    <td style="padding: 12px 0 8px 0; font-size: 17px; color: #1a1a1a; text-align: right; font-weight: 700;">${formatCurrency(totalAmount)}</td>
+                  </tr>
+                </table>
+              </div>
+
+              <p style="font-size: 15px; margin: 20px 0;">
+                Please complete your payment within the next 7 days to secure your winning purchase. We'll connect you with the seller to arrange collection or delivery.
+              </p>
+
+              <div style="text-align: center; margin: 30px 0;">
+                <a href="${auctionUrl}"
+                   style="background-color: #4caf50; color: #fff; padding: 14px 28px; text-decoration: none; border-radius: 6px; font-weight: 600; display: inline-block;">
+                  Complete Payment
+                </a>
+              </div>
+
+              <hr style="border: none; border-top: 1px solid #ddd; margin: 30px 0;">
+
+              <p style="font-size: 13px; color: #999;">
+                Questions? Our team is here to help with the payment and collection process. Simply reply to this email or contact us through your account dashboard.
+              </p>
+
+              <p style="font-size: 13px; color: #999; margin-top: 20px;">
+                Best regards,<br>
+                The Finds Team
+              </p>
+            </div>
+          </body>
+        </html>
+      `,
+      text: `Congratulations, ${name}!
+
+You are the winning bidder for: "${auctionTitle}"
+
+Winning Bid: ${formatCurrency(finalPrice)}
+Buyer Fee (5%): ${formatCurrency(buyerFee)}
+Total Amount: ${formatCurrency(totalAmount)}
+
+Please complete your payment within the next 7 days to secure your winning purchase. We'll connect you with the seller to arrange collection or delivery.
+
+Complete payment here: ${auctionUrl}
+
+Questions? Our team is here to help with the payment and collection process.
+
+Best regards,
+The Finds Team`,
+    })
+
+    return { success: true, data }
+  } catch (error) {
+    console.error('Failed to send auction won email:', error)
+    throw new Error('Failed to send auction won email')
+  }
+}
+
+/**
+ * Send auction lost email to unsuccessful bidder
+ * @param to - The bidder's email address
+ * @param name - The bidder's name
+ * @param auctionTitle - The title of the auction
+ * @param finalPrice - The final hammer price
+ * @param currency - The currency code (e.g., 'EUR')
+ * @returns Promise resolving to the Resend API response
+ */
+export async function sendAuctionLostEmail(
+  to: string,
+  name: string,
+  auctionTitle: string,
+  finalPrice: number,
+  currency: string
+) {
+  const formatCurrency = (amount: number) => {
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: currency,
+    }).format(amount)
+  }
+
+  try {
+    const data = await getResendClient().emails.send({
+      from: getFromEmail(),
+      to,
+      subject: `Auction Ended: ${auctionTitle} - Finds`,
+      html: `
+        <!DOCTYPE html>
+        <html>
+          <head>
+            <meta charset="utf-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>Auction Ended</title>
+          </head>
+          <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
+            <div style="background-color: #f8f9fa; padding: 30px; border-radius: 10px;">
+              <h1 style="color: #1a1a1a; margin-bottom: 20px;">Thanks for Bidding, ${name}</h1>
+
+              <p style="font-size: 16px; margin-bottom: 20px;">
+                The auction for <strong>"${auctionTitle}"</strong> has ended.
+              </p>
+
+              <p style="font-size: 15px; margin-bottom: 20px;">
+                Unfortunately, you were not the winning bidder this time. The auction closed at <strong>${formatCurrency(finalPrice)}</strong>.
+              </p>
+
+              <div style="background-color: #e3f2fd; border-left: 4px solid #2196f3; padding: 15px; margin: 20px 0;">
+                <p style="margin: 0; font-size: 15px; color: #1565c0;">
+                  <strong>Don't give up!</strong> New classic cars and collector vehicles are listed daily on Finds. Your perfect find might be just around the corner.
+                </p>
+              </div>
+
+              <p style="font-size: 15px; margin: 20px 0;">
+                We appreciate your participation and hope to see you bidding again soon. Keep an eye on our latest auctions to discover more incredible vehicles.
+              </p>
+
+              <div style="text-align: center; margin: 30px 0;">
+                <a href="${getAppUrl()}/auctions"
+                   style="background-color: #000; color: #fff; padding: 14px 28px; text-decoration: none; border-radius: 6px; font-weight: 600; display: inline-block;">
+                  Browse Active Auctions
+                </a>
+              </div>
+
+              <hr style="border: none; border-top: 1px solid #ddd; margin: 30px 0;">
+
+              <p style="font-size: 13px; color: #999;">
+                Thank you for being part of the Finds community. Happy hunting!
+              </p>
+
+              <p style="font-size: 13px; color: #999; margin-top: 20px;">
+                Best regards,<br>
+                The Finds Team
+              </p>
+            </div>
+          </body>
+        </html>
+      `,
+      text: `Thanks for Bidding, ${name}
+
+The auction for "${auctionTitle}" has ended.
+
+Unfortunately, you were not the winning bidder this time. The auction closed at ${formatCurrency(finalPrice)}.
+
+Don't give up! New classic cars and collector vehicles are listed daily on Finds. Your perfect find might be just around the corner.
+
+We appreciate your participation and hope to see you bidding again soon.
+
+Browse active auctions: ${getAppUrl()}/auctions
+
+Thank you for being part of the Finds community. Happy hunting!
+
+Best regards,
+The Finds Team`,
+    })
+
+    return { success: true, data }
+  } catch (error) {
+    console.error('Failed to send auction lost email:', error)
+    throw new Error('Failed to send auction lost email')
+  }
+}
+
+/**
+ * Send listing approved email to seller
+ * @param to - The seller's email address
+ * @param name - The seller's name
+ * @param listingTitle - The title of the listing
+ * @param auctionUrl - URL to view the live auction
+ * @returns Promise resolving to the Resend API response
+ */
+export async function sendListingApprovedEmail(
+  to: string,
+  name: string,
+  listingTitle: string,
+  auctionUrl: string
+) {
+  try {
+    const data = await getResendClient().emails.send({
+      from: getFromEmail(),
+      to,
+      subject: `Your Listing is Live: ${listingTitle} - Finds`,
+      html: `
+        <!DOCTYPE html>
+        <html>
+          <head>
+            <meta charset="utf-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>Your Listing is Live!</title>
+          </head>
+          <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
+            <div style="background-color: #f8f9fa; padding: 30px; border-radius: 10px;">
+              <h1 style="color: #1a1a1a; margin-bottom: 20px;">Great News, ${name}!</h1>
+
+              <p style="font-size: 16px; margin-bottom: 20px;">
+                Your listing has been approved and is now live on Finds:
+              </p>
+
+              <p style="font-size: 18px; margin-bottom: 30px; font-weight: 600; color: #1a1a1a;">
+                "${listingTitle}"
+              </p>
+
+              <div style="background-color: #e8f5e9; border-left: 4px solid #4caf50; padding: 15px; margin: 20px 0;">
+                <p style="margin: 0; font-size: 15px; color: #2e7d32;">
+                  <strong>Your auction is now visible to buyers!</strong> Interested bidders can view your listing, ask questions, and place bids.
+                </p>
+              </div>
+
+              <p style="font-size: 15px; margin: 20px 0;">
+                Watch your auction come to life as collectors and enthusiasts discover your vehicle. You'll receive notifications for new bids and questions from potential buyers.
+              </p>
+
+              <div style="text-align: center; margin: 30px 0;">
+                <a href="${auctionUrl}"
+                   style="background-color: #000; color: #fff; padding: 14px 28px; text-decoration: none; border-radius: 6px; font-weight: 600; display: inline-block;">
+                  View Your Live Auction
+                </a>
+              </div>
+
+              <hr style="border: none; border-top: 1px solid #ddd; margin: 30px 0;">
+
+              <p style="font-size: 14px; color: #666; margin-bottom: 15px;">
+                <strong>What happens next?</strong>
+              </p>
+              <ul style="font-size: 14px; color: #666; margin: 0; padding-left: 20px;">
+                <li style="margin-bottom: 8px;">Monitor bidding activity in real-time</li>
+                <li style="margin-bottom: 8px;">Respond to buyer questions promptly</li>
+                <li style="margin-bottom: 8px;">After the auction ends, we'll connect you with the winning bidder</li>
+                <li style="margin-bottom: 8px;">No seller fees - you keep your full hammer price</li>
+              </ul>
+
+              <p style="font-size: 13px; color: #999; margin-top: 30px;">
+                Questions? We're here to help. Reply to this email or contact us through your seller dashboard.
+              </p>
+
+              <p style="font-size: 13px; color: #999; margin-top: 20px;">
+                Best regards,<br>
+                The Finds Team
+              </p>
+            </div>
+          </body>
+        </html>
+      `,
+      text: `Great News, ${name}!
+
+Your listing has been approved and is now live on Finds:
+
+"${listingTitle}"
+
+Your auction is now visible to buyers! Interested bidders can view your listing, ask questions, and place bids.
+
+Watch your auction come to life as collectors and enthusiasts discover your vehicle. You'll receive notifications for new bids and questions from potential buyers.
+
+View your live auction: ${auctionUrl}
+
+What happens next?
+- Monitor bidding activity in real-time
+- Respond to buyer questions promptly
+- After the auction ends, we'll connect you with the winning bidder
+- No seller fees - you keep your full hammer price
+
+Questions? We're here to help.
+
+Best regards,
+The Finds Team`,
+    })
+
+    return { success: true, data }
+  } catch (error) {
+    console.error('Failed to send listing approved email:', error)
+    throw new Error('Failed to send listing approved email')
+  }
+}
+
+/**
+ * Send listing rejected email to seller
+ * @param to - The seller's email address
+ * @param name - The seller's name
+ * @param listingTitle - The title of the listing
+ * @param reason - The reason for rejection
+ * @returns Promise resolving to the Resend API response
+ */
+export async function sendListingRejectedEmail(
+  to: string,
+  name: string,
+  listingTitle: string,
+  reason: string
+) {
+  try {
+    const data = await getResendClient().emails.send({
+      from: getFromEmail(),
+      to,
+      subject: `Listing Not Approved: ${listingTitle} - Finds`,
+      html: `
+        <!DOCTYPE html>
+        <html>
+          <head>
+            <meta charset="utf-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>Listing Not Approved</title>
+          </head>
+          <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
+            <div style="background-color: #f8f9fa; padding: 30px; border-radius: 10px;">
+              <h1 style="color: #1a1a1a; margin-bottom: 20px;">Listing Update</h1>
+
+              <p style="font-size: 16px; margin-bottom: 20px;">
+                Dear ${name},
+              </p>
+
+              <p style="font-size: 16px; margin-bottom: 20px;">
+                Thank you for submitting your listing for:
+              </p>
+
+              <p style="font-size: 18px; margin-bottom: 30px; font-weight: 600; color: #1a1a1a;">
+                "${listingTitle}"
+              </p>
+
+              <p style="font-size: 15px; margin-bottom: 20px;">
+                After careful review, we're unable to approve this listing for auction at this time.
+              </p>
+
+              <div style="background-color: #fff3cd; border-left: 4px solid #ffc107; padding: 15px; margin: 20px 0;">
+                <p style="margin: 0 0 8px 0; font-size: 14px; color: #856404; font-weight: 600;">
+                  Reason for rejection:
+                </p>
+                <p style="margin: 0; font-size: 15px; color: #856404;">
+                  ${reason}
+                </p>
+              </div>
+
+              <p style="font-size: 15px; margin: 20px 0;">
+                Our goal is to maintain the highest quality standards for all listings on Finds. If you have questions about this decision or would like guidance on resubmitting, please don't hesitate to reach out.
+              </p>
+
+              <div style="text-align: center; margin: 30px 0;">
+                <a href="${getAppUrl()}/sell"
+                   style="background-color: #000; color: #fff; padding: 14px 28px; text-decoration: none; border-radius: 6px; font-weight: 600; display: inline-block;">
+                  Submit Another Listing
+                </a>
+              </div>
+
+              <hr style="border: none; border-top: 1px solid #ddd; margin: 30px 0;">
+
+              <p style="font-size: 13px; color: #999;">
+                We appreciate your interest in selling with Finds. If you'd like to discuss this decision or need assistance, please reply to this email or contact our support team.
+              </p>
+
+              <p style="font-size: 13px; color: #999; margin-top: 20px;">
+                Best regards,<br>
+                The Finds Team
+              </p>
+            </div>
+          </body>
+        </html>
+      `,
+      text: `Listing Update
+
+Dear ${name},
+
+Thank you for submitting your listing for: "${listingTitle}"
+
+After careful review, we're unable to approve this listing for auction at this time.
+
+Reason for rejection:
+${reason}
+
+Our goal is to maintain the highest quality standards for all listings on Finds. If you have questions about this decision or would like guidance on resubmitting, please don't hesitate to reach out.
+
+Submit another listing: ${getAppUrl()}/sell
+
+We appreciate your interest in selling with Finds.
+
+Best regards,
+The Finds Team`,
+    })
+
+    return { success: true, data }
+  } catch (error) {
+    console.error('Failed to send listing rejected email:', error)
+    throw new Error('Failed to send listing rejected email')
+  }
+}
+
+/**
+ * Send listing changes requested email to seller
+ * @param to - The seller's email address
+ * @param name - The seller's name
+ * @param listingTitle - The title of the listing
+ * @param changes - The requested changes
+ * @param editUrl - URL to edit the listing
+ * @returns Promise resolving to the Resend API response
+ */
+export async function sendListingChangesRequestedEmail(
+  to: string,
+  name: string,
+  listingTitle: string,
+  changes: string,
+  editUrl: string
+) {
+  try {
+    const data = await getResendClient().emails.send({
+      from: getFromEmail(),
+      to,
+      subject: `Changes Requested: ${listingTitle} - Finds`,
+      html: `
+        <!DOCTYPE html>
+        <html>
+          <head>
+            <meta charset="utf-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>Changes Requested</title>
+          </head>
+          <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
+            <div style="background-color: #f8f9fa; padding: 30px; border-radius: 10px;">
+              <h1 style="color: #1a1a1a; margin-bottom: 20px;">Action Required: Update Your Listing</h1>
+
+              <p style="font-size: 16px; margin-bottom: 20px;">
+                Dear ${name},
+              </p>
+
+              <p style="font-size: 16px; margin-bottom: 20px;">
+                We've reviewed your listing for:
+              </p>
+
+              <p style="font-size: 18px; margin-bottom: 30px; font-weight: 600; color: #1a1a1a;">
+                "${listingTitle}"
+              </p>
+
+              <p style="font-size: 15px; margin-bottom: 20px;">
+                Your listing is almost ready to go live! We just need you to make a few updates before we can approve it.
+              </p>
+
+              <div style="background-color: #e3f2fd; border-left: 4px solid #2196f3; padding: 15px; margin: 20px 0;">
+                <p style="margin: 0 0 8px 0; font-size: 14px; color: #1565c0; font-weight: 600;">
+                  Requested changes:
+                </p>
+                <p style="margin: 0; font-size: 15px; color: #1565c0; white-space: pre-line;">
+                  ${changes}
+                </p>
+              </div>
+
+              <p style="font-size: 15px; margin: 20px 0;">
+                Once you've made these updates, our team will review your listing again. We aim to review resubmissions within 24 hours.
+              </p>
+
+              <div style="text-align: center; margin: 30px 0;">
+                <a href="${editUrl}"
+                   style="background-color: #2196f3; color: #fff; padding: 14px 28px; text-decoration: none; border-radius: 6px; font-weight: 600; display: inline-block;">
+                  Edit Your Listing
+                </a>
+              </div>
+
+              <hr style="border: none; border-top: 1px solid #ddd; margin: 30px 0;">
+
+              <p style="font-size: 13px; color: #999;">
+                Questions about the requested changes? Reply to this email and our team will be happy to help clarify.
+              </p>
+
+              <p style="font-size: 13px; color: #999; margin-top: 20px;">
+                Best regards,<br>
+                The Finds Team
+              </p>
+            </div>
+          </body>
+        </html>
+      `,
+      text: `Action Required: Update Your Listing
+
+Dear ${name},
+
+We've reviewed your listing for: "${listingTitle}"
+
+Your listing is almost ready to go live! We just need you to make a few updates before we can approve it.
+
+Requested changes:
+${changes}
+
+Once you've made these updates, our team will review your listing again. We aim to review resubmissions within 24 hours.
+
+Edit your listing: ${editUrl}
+
+Questions about the requested changes? Reply to this email and our team will be happy to help clarify.
+
+Best regards,
+The Finds Team`,
+    })
+
+    return { success: true, data }
+  } catch (error) {
+    console.error('Failed to send listing changes requested email:', error)
+    throw new Error('Failed to send listing changes requested email')
+  }
+}

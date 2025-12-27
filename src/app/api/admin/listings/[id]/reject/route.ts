@@ -1,36 +1,23 @@
 import { NextRequest } from 'next/server'
 import { auth } from '@/lib/auth'
+import { requireReviewer } from '@/lib/admin-auth'
+import { getContainer } from '@/lib/container'
 import { rejectListing } from '@/services/listing.service'
 import { prisma } from '@/lib/db'
 import { withErrorHandler } from '@/lib/with-error-handler'
 import { successResponse } from '@/lib/api-response'
-import { UnauthorizedError, ForbiddenError, ValidationError } from '@/lib/errors'
+import { ValidationError } from '@/lib/errors'
 import { ERROR_CODES } from '@/lib/error-codes'
+import { sendListingRejectedEmail } from '@/lib/email'
 
 type RouteParams = { params: Promise<{ id: string }> }
 
 export const POST = withErrorHandler<{ id: string }>(
   async (request: NextRequest, { params }: { params: Promise<{ id: string }> }) => {
     const session = await auth()
-    if (!session?.user) {
-      throw new UnauthorizedError(
-        'You must be logged in',
-        ERROR_CODES.AUTH_REQUIRED
-      )
-    }
 
-    // Check if user has admin/moderator role
-    const user = await prisma.user.findUnique({
-      where: { id: session.user.id },
-      select: { role: true },
-    })
-
-    if (!user || !['ADMIN', 'MODERATOR'].includes(user.role)) {
-      throw new ForbiddenError(
-        'You do not have permission to reject listings',
-        ERROR_CODES.AUTH_INSUFFICIENT_PERMISSIONS
-      )
-    }
+    // Require reviewer role (ADMIN, MODERATOR, or REVIEWER)
+    const user = await requireReviewer(session)
 
     const { id } = await params
     const body = await request.json()
@@ -44,7 +31,51 @@ export const POST = withErrorHandler<{ id: string }>(
       )
     }
 
-    const listing = await rejectListing(id, session.user.id, reason)
+    // Get service container
+    const container = getContainer()
+
+    // Reject listing
+    const listing = await rejectListing(id, user.id, reason)
+
+    // Log listing rejection
+    await container.audit.logAuditEvent({
+      actorId: user.id,
+      action: 'LISTING_REJECTED',
+      resourceType: 'LISTING',
+      resourceId: listing.id,
+      severity: 'MEDIUM',
+      status: 'SUCCESS',
+      details: {
+        listingTitle: listing.title,
+        sellerId: listing.sellerId,
+        reason,
+      },
+    })
+
+    console.log(`Listing ${listing.id} rejected by ${user.id}`)
+
+    // Send notification to seller
+    await container.notifications.notifyListingRejected(
+      listing.sellerId,
+      listing.id,
+      listing.title,
+      reason
+    ).catch(err => console.error('Failed to notify seller:', err))
+
+    // Get seller email and send email notification
+    const seller = await prisma.user.findUnique({
+      where: { id: listing.sellerId },
+      select: { email: true, name: true },
+    })
+
+    if (seller?.email) {
+      await sendListingRejectedEmail(
+        seller.email,
+        seller.name || 'Seller',
+        listing.title,
+        reason
+      ).catch(err => console.error('Failed to send rejection email:', err))
+    }
 
     return successResponse(listing)
   },

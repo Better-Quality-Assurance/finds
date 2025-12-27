@@ -16,6 +16,15 @@ import { auctionLogger, logError } from '@/lib/logger'
 import { auctionStatusValidator } from '@/services/validators/auction-status.validator'
 import { listingStatusValidator } from '@/services/validators/listing-status.validator'
 import { getOrAssignBidderNumber } from '@/services/bidder-number.service'
+import {
+  AuctionNotActiveError,
+  AuctionEndedError,
+  AuctionNotStartedError,
+  BidTooLowError,
+  SelfBidError,
+  NotFoundError,
+} from '@/lib/errors'
+import { ERROR_CODES } from '@/lib/error-codes'
 
 type AuctionWithRelations = Auction & {
   listing: Listing
@@ -262,24 +271,24 @@ export async function placeBid(
     })
 
     if (!auction) {
-      throw new Error('Auction not found')
+      throw new NotFoundError('Auction not found', ERROR_CODES.AUCTION_NOT_FOUND)
     }
 
     // Validate auction is active
     const now = new Date()
     if (!auctionStatusValidator.canPlaceBid(auction.status)) {
-      throw new Error('Auction is not accepting bids')
+      throw new AuctionNotActiveError('Auction is not accepting bids')
     }
     if (now < auction.startTime) {
-      throw new Error('Auction has not started yet')
+      throw new AuctionNotStartedError()
     }
     if (now >= auction.currentEndTime) {
-      throw new Error('Auction has ended')
+      throw new AuctionEndedError()
     }
 
     // Validate bidder is not the seller
     if (auction.listing.sellerId === bidderId) {
-      throw new Error('Sellers cannot bid on their own listings')
+      throw new SelfBidError()
     }
 
     // Validate bid amount
@@ -288,7 +297,7 @@ export async function placeBid(
     const validation = validateBidAmount(amount, currentBid, startingPrice)
 
     if (!validation.valid) {
-      throw new Error(validation.error)
+      throw new BidTooLowError(validation.minimumBid, validation.error)
     }
 
     // Check for anti-sniping extension

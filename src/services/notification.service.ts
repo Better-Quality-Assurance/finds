@@ -4,6 +4,7 @@ import { createNotificationTransport } from './pusher-notification-transport'
 import { EVENTS } from '@/lib/pusher'
 import { prisma } from '@/lib/db'
 import { formatBidderDisplay } from './bidder-number.service'
+import * as emailService from '@/lib/email'
 
 export type NotificationType =
   | 'AUCTION_STARTED'
@@ -84,6 +85,7 @@ export async function notifyListingApproved(
   auctionId: string,
   auctionEndTime: Date
 ): Promise<void> {
+  // Send in-app notification
   await sendUserNotification(sellerId, {
     type: 'LISTING_APPROVED',
     title: 'Listing Approved!',
@@ -95,6 +97,27 @@ export async function notifyListingApproved(
     },
     link: `/auctions/${auctionId}`,
   })
+
+  // Send email notification
+  try {
+    const seller = await prisma.user.findUnique({
+      where: { id: sellerId },
+      select: { email: true, name: true },
+    })
+
+    if (seller?.email) {
+      const auctionUrl = `${process.env.NEXTAUTH_URL || 'http://localhost:3000'}/auctions/${auctionId}`
+      await emailService.sendListingApprovedEmail(
+        seller.email,
+        seller.name || 'Seller',
+        listingTitle,
+        auctionUrl
+      )
+    }
+  } catch (emailError) {
+    console.error('Failed to send listing approved email:', emailError)
+    // Don't throw - email failure shouldn't block the notification
+  }
 }
 
 /**
@@ -211,6 +234,7 @@ export async function notifyAuctionWon(
   finalPrice: number,
   currency: string
 ): Promise<void> {
+  // Send in-app notification
   await sendUserNotification(winnerId, {
     type: 'AUCTION_WON',
     title: 'Congratulations! You Won!',
@@ -222,6 +246,29 @@ export async function notifyAuctionWon(
     },
     link: `/auctions/${auctionId}/checkout`,
   })
+
+  // Send email notification
+  try {
+    const winner = await prisma.user.findUnique({
+      where: { id: winnerId },
+      select: { email: true, name: true },
+    })
+
+    if (winner?.email) {
+      const checkoutUrl = `${process.env.NEXTAUTH_URL || 'http://localhost:3000'}/auctions/${auctionId}/checkout`
+      await emailService.sendAuctionWonEmail(
+        winner.email,
+        winner.name || 'Winner',
+        listingTitle,
+        finalPrice,
+        currency,
+        checkoutUrl
+      )
+    }
+  } catch (emailError) {
+    console.error('Failed to send auction won email:', emailError)
+    // Don't throw - email failure shouldn't block the notification
+  }
 }
 
 /**
@@ -240,11 +287,26 @@ export async function notifyAuctionLost(
         ...(excludeWinnerId && { bidderId: { not: excludeWinnerId } }),
       },
       distinct: ['bidderId'],
-      select: { bidderId: true },
+      select: {
+        bidderId: true,
+        bidder: {
+          select: {
+            email: true,
+            name: true,
+          },
+        },
+      },
+    })
+
+    // Get auction details for email
+    const auction = await prisma.auction.findUnique({
+      where: { id: auctionId },
+      select: { finalPrice: true, currency: true },
     })
 
     // Send notification to each losing bidder
     for (const bid of bids) {
+      // Send in-app notification
       await sendUserNotification(bid.bidderId, {
         type: 'AUCTION_LOST',
         title: 'Auction Ended',
@@ -254,6 +316,22 @@ export async function notifyAuctionLost(
         },
         link: `/auctions/${auctionId}`,
       })
+
+      // Send email notification
+      try {
+        if (bid.bidder.email && auction?.finalPrice) {
+          await emailService.sendAuctionLostEmail(
+            bid.bidder.email,
+            bid.bidder.name || 'Bidder',
+            listingTitle,
+            Number(auction.finalPrice),
+            auction.currency
+          )
+        }
+      } catch (emailError) {
+        console.error(`Failed to send auction lost email to ${bid.bidderId}:`, emailError)
+        // Continue with other bidders even if one email fails
+      }
     }
 
     console.log(`Notified ${bids.length} losing bidders for auction ${auctionId}`)

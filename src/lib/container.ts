@@ -22,6 +22,8 @@ import type {
   IAuctionService,
   IAIModerationService,
   ISMSProvider,
+  IMediaReviewService,
+  IMediaProcessingService,
 } from '@/services/contracts'
 
 // Real Service Implementations
@@ -35,9 +37,14 @@ import * as listingService from '@/services/listing.service'
 import * as auctionService from '@/services/auction.service'
 import * as aiModerationService from '@/services/ai-moderation.service'
 import { initializePhoneVerificationService } from '@/services/phone-verification.service'
+import { MediaReviewService } from '@/services/media/media-review.service'
+import { MediaProcessingService } from '@/services/media/media-processing.service'
 
 // SMS Provider Implementations
 import { MockSMSProvider, TwilioSMSProvider } from '@/services/providers'
+
+// Validators
+import { RoleValidator } from '@/services/validators/role.validator'
 
 /**
  * Service container type holding all service instances
@@ -54,7 +61,10 @@ export type ServiceContainer = {
   listings: IListingService
   auctions: IAuctionService
   aiModeration: IAIModerationService
+  mediaReview: IMediaReviewService
+  mediaProcessing: IMediaProcessingService
   sms: ISMSProvider
+  roleValidator: RoleValidator
   prisma: PrismaClient
 }
 
@@ -282,19 +292,34 @@ export function createContainer(): ServiceContainer {
   // Initialize phone verification service with the provider
   initializePhoneVerificationService(smsProvider)
 
+  // Create audit service first as it's needed by media review service
+  const audit = createAuditService()
+
+  // Create storage service
+  const storage = createStorageService()
+
+  // Create media review service with dependencies
+  const mediaReview = new MediaReviewService(prisma, audit)
+
+  // Create media processing service with dependencies
+  const mediaProcessing = new MediaProcessingService(prisma, storage)
+
   return {
     notifications: createNotificationService(),
-    audit: createAuditService(),
+    audit,
     deposits: createBidDepositService(),
     fees: createBuyerFeeService(),
     payouts: createSellerPayoutService(),
     fraud: createFraudService(),
-    storage: createStorageService(),
+    storage,
     email: createEmailService(),
     listings: createListingService(),
     auctions: createAuctionService(),
     aiModeration: createAIModerationService(),
+    mediaReview,
+    mediaProcessing,
     sms: smsProvider,
+    roleValidator: new RoleValidator(),
     prisma,
   }
 }
@@ -819,7 +844,34 @@ export function createTestContainer(): ServiceContainer {
       }),
       getRecentActivity: async () => [],
     },
+    mediaReview: {
+      getMediaNeedingReview: async (page, limit) => ({
+        media: [],
+        pagination: {
+          page,
+          limit,
+          totalCount: 0,
+          totalPages: 0,
+          hasNext: false,
+          hasPrev: false,
+        },
+      }),
+      approveMedia: async () => {},
+      rejectMedia: async () => {},
+      markAsBlurred: async () => {},
+      getMediaReviewStats: async () => ({
+        totalNeedingReview: 0,
+        withLicensePlates: 0,
+        listingsAffected: 0,
+        topListingsByCount: [],
+      }),
+      getMediaNeedsReviewCount: async () => 0,
+    },
+    mediaProcessing: {
+      processUploadedMedia: async () => {},
+    },
     sms: mockSmsProvider,
+    roleValidator: new RoleValidator(),
     prisma,
   }
 }

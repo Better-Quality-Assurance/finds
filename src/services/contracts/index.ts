@@ -153,6 +153,19 @@ export type {
   VisionAnalysisOptions,
 } from './vision-provider.interface'
 
+// Media Processing Service
+export type {
+  IMediaProcessingService,
+} from './media-processing.interface'
+
+// Media Review Service
+export type {
+  IMediaReviewService,
+  MediaReviewItem,
+  MediaReviewPagination,
+  MediaReviewStats,
+} from './media-review.interface'
+
 /**
  * Re-export common Prisma types for convenience
  */

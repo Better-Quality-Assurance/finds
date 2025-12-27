@@ -2,168 +2,278 @@
  * Media Review Service
  *
  * Handles media items flagged for manual review due to automated processing failures.
+ * Implements IMediaReviewService interface for dependency injection.
  */
 
-import { PrismaClient, ListingMedia } from '@prisma/client'
-
-export interface MediaNeedsReviewQuery {
-  page?: number
-  limit?: number
-  listingId?: string
-}
-
-export interface MediaNeedsReviewResult {
-  media: ListingMedia[]
-  totalCount: number
-  page: number
-  totalPages: number
-}
+import { PrismaClient } from '@prisma/client'
+import type {
+  IMediaReviewService,
+  MediaReviewItem,
+  MediaReviewPagination,
+  MediaReviewStats,
+} from '@/services/contracts/media-review.interface'
+import type { IAuditService } from '@/services/contracts/audit.interface'
 
 /**
- * Fetches all media items that need manual review
+ * Media Review Service Implementation
  */
-export async function getMediaNeedingReview(
-  prisma: PrismaClient,
-  query: MediaNeedsReviewQuery = {}
-): Promise<MediaNeedsReviewResult> {
-  const { page = 1, limit = 50, listingId } = query
-  const skip = (page - 1) * limit
+export class MediaReviewService implements IMediaReviewService {
+  constructor(
+    private readonly prisma: PrismaClient,
+    private readonly auditService: IAuditService
+  ) {}
 
-  const where: any = {
-    needsManualReview: true,
-  }
+  /**
+   * Get paginated list of media items needing manual review
+   */
+  async getMediaNeedingReview(
+    page: number = 1,
+    limit: number = 50
+  ): Promise<{
+    media: MediaReviewItem[]
+    pagination: MediaReviewPagination
+  }> {
+    const skip = (page - 1) * limit
 
-  if (listingId) {
-    where.listingId = listingId
-  }
-
-  const [media, totalCount] = await Promise.all([
-    prisma.listingMedia.findMany({
-      where,
-      orderBy: {
-        createdAt: 'desc',
-      },
-      skip,
-      take: limit,
-    }),
-    prisma.listingMedia.count({ where }),
-  ])
-
-  const totalPages = Math.ceil(totalCount / limit)
-
-  return {
-    media,
-    totalCount,
-    page,
-    totalPages,
-  }
-}
-
-/**
- * Gets count of media items needing manual review
- */
-export async function getMediaNeedsReviewCount(
-  prisma: PrismaClient,
-  listingId?: string
-): Promise<number> {
-  const where: any = {
-    needsManualReview: true,
-  }
-
-  if (listingId) {
-    where.listingId = listingId
-  }
-
-  return prisma.listingMedia.count({ where })
-}
-
-/**
- * Marks a media item as reviewed and approved
- */
-export async function approveMediaAfterReview(
-  prisma: PrismaClient,
-  mediaId: string
-): Promise<ListingMedia> {
-  return prisma.listingMedia.update({
-    where: { id: mediaId },
-    data: {
-      needsManualReview: false,
-    },
-  })
-}
-
-/**
- * Updates media with manually blurred version
- */
-export async function updateMediaWithManualBlur(
-  prisma: PrismaClient,
-  mediaId: string,
-  blurredUrl: string
-): Promise<ListingMedia> {
-  const media = await prisma.listingMedia.findUnique({
-    where: { id: mediaId },
-  })
-
-  if (!media) {
-    throw new Error('Media not found')
-  }
-
-  return prisma.listingMedia.update({
-    where: { id: mediaId },
-    data: {
-      needsManualReview: false,
-      licensePlateBlurred: true,
-      originalUrl: media.publicUrl,
-      publicUrl: blurredUrl,
-    },
-  })
-}
-
-/**
- * Gets statistics about media requiring review
- */
-export async function getMediaReviewStats(prisma: PrismaClient) {
-  const [
-    totalNeedingReview,
-    withLicensePlates,
-    byListing,
-  ] = await Promise.all([
-    // Total count
-    prisma.listingMedia.count({
-      where: { needsManualReview: true },
-    }),
-
-    // Count with detected license plates
-    prisma.listingMedia.count({
-      where: {
-        needsManualReview: true,
-        licensePlateDetected: true,
-      },
-    }),
-
-    // Group by listing to find problematic listings
-    prisma.listingMedia.groupBy({
-      by: ['listingId'],
-      where: { needsManualReview: true },
-      _count: {
-        id: true,
-      },
-      orderBy: {
-        _count: {
-          id: 'desc',
+    const [media, totalCount] = await Promise.all([
+      this.prisma.listingMedia.findMany({
+        where: {
+          needsManualReview: true,
         },
-      },
-      take: 10,
-    }),
-  ])
+        include: {
+          listing: {
+            select: {
+              id: true,
+              title: true,
+              status: true,
+              sellerId: true,
+              seller: {
+                select: {
+                  id: true,
+                  name: true,
+                  email: true,
+                },
+              },
+            },
+          },
+        },
+        orderBy: {
+          createdAt: 'desc',
+        },
+        skip,
+        take: limit,
+      }),
+      this.prisma.listingMedia.count({
+        where: {
+          needsManualReview: true,
+        },
+      }),
+    ])
 
-  return {
-    totalNeedingReview,
-    withLicensePlates,
-    listingsAffected: byListing.length,
-    topListingsByCount: byListing.map((item) => ({
-      listingId: item.listingId,
-      count: item._count.id,
-    })),
+    const totalPages = Math.ceil(totalCount / limit)
+
+    return {
+      media: media as MediaReviewItem[],
+      pagination: {
+        page,
+        limit,
+        totalCount,
+        totalPages,
+        hasNext: page < totalPages,
+        hasPrev: page > 1,
+      },
+    }
+  }
+
+  /**
+   * Approve a media item after review (no changes needed)
+   */
+  async approveMedia(mediaId: string, adminId: string): Promise<void> {
+    const media = await this.prisma.listingMedia.findUnique({
+      where: { id: mediaId },
+      select: { listingId: true, publicUrl: true, needsManualReview: true },
+    })
+
+    if (!media) {
+      throw new Error('Media not found')
+    }
+
+    if (!media.needsManualReview) {
+      throw new Error('Media does not need manual review')
+    }
+
+    await this.prisma.listingMedia.update({
+      where: { id: mediaId },
+      data: {
+        needsManualReview: false,
+      },
+    })
+
+    // Log audit event
+    await this.auditService.logAuditEvent({
+      actorId: adminId,
+      action: 'media.manual_review_approved',
+      resourceType: 'ListingMedia',
+      resourceId: mediaId,
+      details: {
+        listingId: media.listingId,
+        action: 'approve',
+      },
+      severity: 'LOW',
+      status: 'SUCCESS',
+    })
+  }
+
+  /**
+   * Reject a media item (mark as reviewed but not approved)
+   */
+  async rejectMedia(mediaId: string, adminId: string): Promise<void> {
+    const media = await this.prisma.listingMedia.findUnique({
+      where: { id: mediaId },
+      select: { listingId: true, publicUrl: true, needsManualReview: true },
+    })
+
+    if (!media) {
+      throw new Error('Media not found')
+    }
+
+    if (!media.needsManualReview) {
+      throw new Error('Media does not need manual review')
+    }
+
+    await this.prisma.listingMedia.update({
+      where: { id: mediaId },
+      data: {
+        needsManualReview: false,
+        // Could add a 'rejected' flag or soft delete if needed in the future
+      },
+    })
+
+    // Log audit event
+    await this.auditService.logAuditEvent({
+      actorId: adminId,
+      action: 'media.manual_review_rejected',
+      resourceType: 'ListingMedia',
+      resourceId: mediaId,
+      details: {
+        listingId: media.listingId,
+        action: 'reject',
+      },
+      severity: 'MEDIUM',
+      status: 'SUCCESS',
+    })
+  }
+
+  /**
+   * Mark media as manually blurred with new URL
+   */
+  async markAsBlurred(
+    mediaId: string,
+    adminId: string,
+    blurredUrl: string
+  ): Promise<void> {
+    const media = await this.prisma.listingMedia.findUnique({
+      where: { id: mediaId },
+      select: {
+        listingId: true,
+        publicUrl: true,
+        needsManualReview: true,
+      },
+    })
+
+    if (!media) {
+      throw new Error('Media not found')
+    }
+
+    if (!media.needsManualReview) {
+      throw new Error('Media does not need manual review')
+    }
+
+    await this.prisma.listingMedia.update({
+      where: { id: mediaId },
+      data: {
+        needsManualReview: false,
+        licensePlateBlurred: true,
+        originalUrl: media.publicUrl,
+        publicUrl: blurredUrl,
+      },
+    })
+
+    // Log audit event
+    await this.auditService.logAuditEvent({
+      actorId: adminId,
+      action: 'media.manual_blur_applied',
+      resourceType: 'ListingMedia',
+      resourceId: mediaId,
+      details: {
+        listingId: media.listingId,
+        action: 'blur_manually',
+        originalUrl: media.publicUrl,
+        blurredUrl,
+      },
+      severity: 'MEDIUM',
+      status: 'SUCCESS',
+    })
+  }
+
+  /**
+   * Get statistics about media needing review
+   */
+  async getMediaReviewStats(): Promise<MediaReviewStats> {
+    const [totalNeedingReview, withLicensePlates, byListing] =
+      await Promise.all([
+        // Total count
+        this.prisma.listingMedia.count({
+          where: { needsManualReview: true },
+        }),
+
+        // Count with detected license plates
+        this.prisma.listingMedia.count({
+          where: {
+            needsManualReview: true,
+            licensePlateDetected: true,
+          },
+        }),
+
+        // Group by listing to find problematic listings
+        this.prisma.listingMedia.groupBy({
+          by: ['listingId'],
+          where: { needsManualReview: true },
+          _count: {
+            id: true,
+          },
+          orderBy: {
+            _count: {
+              id: 'desc',
+            },
+          },
+          take: 10,
+        }),
+      ])
+
+    return {
+      totalNeedingReview,
+      withLicensePlates,
+      listingsAffected: byListing.length,
+      topListingsByCount: byListing.map((item) => ({
+        listingId: item.listingId,
+        count: item._count.id,
+      })),
+    }
+  }
+
+  /**
+   * Get count of media items needing review
+   */
+  async getMediaNeedsReviewCount(listingId?: string): Promise<number> {
+    const where: any = {
+      needsManualReview: true,
+    }
+
+    if (listingId) {
+      where.listingId = listingId
+    }
+
+    return this.prisma.listingMedia.count({ where })
   }
 }

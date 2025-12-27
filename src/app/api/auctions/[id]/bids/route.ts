@@ -17,6 +17,11 @@ import {
   InsufficientDepositError,
   BidValidationError,
   AuctionStateError,
+  AuctionNotActiveError,
+  AuctionEndedError,
+  AuctionNotStartedError,
+  BidTooLowError,
+  SelfBidError,
 } from '@/lib/errors'
 import { ERROR_CODES } from '@/lib/error-codes'
 import { checkRateLimit, userRateLimitKey, createRateLimitResponse } from '@/middleware/rate-limit'
@@ -155,38 +160,11 @@ export const POST = withErrorHandler<{ id: string }>(
     const auctionBefore = await getAuctionById(id)
     const previousWinningBid = auctionBefore?.bids.find(b => b.isWinning)
 
-    // Place the bid - wrap in try-catch to convert error messages to typed errors
-    let bid, auction, extended
-    try {
-      const result = await placeBid(id, session.user.id, amount, {
-        ipAddress,
-        userAgent,
-      })
-      bid = result.bid
-      auction = result.auction
-      extended = result.extended
-    } catch (error) {
-      if (error instanceof Error) {
-        // Convert service error messages to typed errors
-        if (error.message.includes('not active')) {
-          throw new AuctionStateError(error.message, ERROR_CODES.AUCTION_NOT_ACTIVE)
-        }
-        if (error.message.includes('has ended')) {
-          throw new AuctionStateError(error.message, ERROR_CODES.AUCTION_ENDED)
-        }
-        if (error.message.includes('not started')) {
-          throw new AuctionStateError(error.message, ERROR_CODES.AUCTION_NOT_STARTED)
-        }
-        if (error.message.includes('Bid must be at least')) {
-          throw new BidValidationError(error.message, ERROR_CODES.BID_TOO_LOW)
-        }
-        if (error.message.includes('cannot bid on their own')) {
-          throw new BidValidationError(error.message, ERROR_CODES.BID_OWN_AUCTION)
-        }
-      }
-      // Re-throw if not a known business rule error
-      throw error
-    }
+    // Place the bid - service layer now throws typed errors, so we just need to handle them
+    const { bid, auction, extended } = await placeBid(id, session.user.id, amount, {
+      ipAddress,
+      userAgent,
+    })
 
     // Broadcast new bid to all watchers (anonymous - no names)
     await broadcastNewBid({

@@ -1,5 +1,6 @@
 import { NextRequest } from 'next/server'
 import { auth } from '@/lib/auth'
+import { requireReviewer } from '@/lib/admin-auth'
 import { getContainer } from '@/lib/container'
 import { approveListing } from '@/services/listing.service'
 import { createAuction } from '@/services/auction.service'
@@ -7,7 +8,7 @@ import { prisma } from '@/lib/db'
 import { AUCTION_RULES } from '@/domain/auction/rules'
 import { withErrorHandler } from '@/lib/with-error-handler'
 import { successResponse } from '@/lib/api-response'
-import { UnauthorizedError, ForbiddenError, ValidationError, AppError } from '@/lib/errors'
+import { ValidationError, AppError } from '@/lib/errors'
 import { ERROR_CODES } from '@/lib/error-codes'
 
 type RouteParams = { params: Promise<{ id: string }> }
@@ -15,25 +16,9 @@ type RouteParams = { params: Promise<{ id: string }> }
 export const POST = withErrorHandler<{ id: string }>(
   async (request: NextRequest, { params }: { params: Promise<{ id: string }> }) => {
     const session = await auth()
-    if (!session?.user) {
-      throw new UnauthorizedError(
-        'You must be logged in',
-        ERROR_CODES.AUTH_REQUIRED
-      )
-    }
 
-    // Check if user has admin/moderator/reviewer role
-    const user = await prisma.user.findUnique({
-      where: { id: session.user.id },
-      select: { role: true },
-    })
-
-    if (!user || !['ADMIN', 'MODERATOR', 'REVIEWER'].includes(user.role)) {
-      throw new ForbiddenError(
-        'You do not have permission to approve listings',
-        ERROR_CODES.AUTH_INSUFFICIENT_PERMISSIONS
-      )
-    }
+    // Require reviewer role (ADMIN, MODERATOR, or REVIEWER)
+    const user = await requireReviewer(session)
 
     const { id } = await params
 
@@ -55,7 +40,7 @@ export const POST = withErrorHandler<{ id: string }>(
     const container = getContainer()
 
     // Approve listing
-    const listing = await approveListing(id, session.user.id)
+    const listing = await approveListing(id, user.id)
 
     // Create auction automatically
     let auction
@@ -64,7 +49,7 @@ export const POST = withErrorHandler<{ id: string }>(
 
       // Log auction creation in audit log
       await container.audit.logAuditEvent({
-        actorId: session.user.id,
+        actorId: user.id,
         action: 'AUCTION_CREATED',
         resourceType: 'AUCTION',
         resourceId: auction.id,
@@ -84,7 +69,7 @@ export const POST = withErrorHandler<{ id: string }>(
 
       // Log listing approval
       await container.audit.logAuditEvent({
-        actorId: session.user.id,
+        actorId: user.id,
         action: 'LISTING_APPROVED',
         resourceType: 'LISTING',
         resourceId: listing.id,
@@ -131,7 +116,7 @@ export const POST = withErrorHandler<{ id: string }>(
       console.error('Failed to create auction after approval:', auctionError)
 
       await container.audit.logAuditEvent({
-        actorId: session.user.id,
+        actorId: user.id,
         action: 'AUCTION_CREATED',
         resourceType: 'AUCTION',
         resourceId: listing.id,

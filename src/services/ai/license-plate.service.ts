@@ -10,6 +10,7 @@
 
 import type { IVisionProvider } from '@/services/contracts/vision-provider.interface'
 import { createOpenRouterVisionProvider } from '@/services/providers/openrouter-vision.provider'
+import { LICENSE_PLATE_CONFIG } from '@/config/license-plate.config'
 import sharp from 'sharp'
 
 /**
@@ -108,11 +109,11 @@ export class LicensePlateDetectionService {
 
   constructor(visionProvider?: IVisionProvider) {
     this.visionProvider = visionProvider || createOpenRouterVisionProvider({
-      model: 'anthropic/claude-3.5-sonnet',
-      temperature: 0.1,
-      maxTokens: 1024,
+      model: LICENSE_PLATE_CONFIG.visionModel,
+      temperature: LICENSE_PLATE_CONFIG.temperature,
+      maxTokens: LICENSE_PLATE_CONFIG.maxTokens,
     })
-    this.modelName = 'anthropic/claude-3.5-sonnet'
+    this.modelName = LICENSE_PLATE_CONFIG.visionModel
   }
 
   /**
@@ -162,7 +163,7 @@ export class LicensePlateDetectionService {
     imageUrls: string[],
     options: { concurrency?: number } = {}
   ): Promise<Map<string, PlateDetectionResult>> {
-    const { concurrency = 3 } = options
+    const { concurrency = LICENSE_PLATE_CONFIG.defaultConcurrency } = options
     const results = new Map<string, PlateDetectionResult>()
 
     // Process in batches to respect rate limits
@@ -189,7 +190,7 @@ export class LicensePlateDetectionService {
    */
   async needsPlateBlurring(
     imageUrl: string,
-    confidenceThreshold: number = 0.7
+    confidenceThreshold: number = LICENSE_PLATE_CONFIG.confidenceThreshold
   ): Promise<boolean> {
     const result = await this.detectLicensePlates(imageUrl)
 
@@ -216,7 +217,7 @@ export class LicensePlateDetectionService {
     // If plates detected with high confidence, blur them
     if (detection.detected) {
       const highConfidencePlates = detection.plates.filter(
-        (p) => p.confidence >= 0.7
+        (p) => p.confidence >= LICENSE_PLATE_CONFIG.confidenceThreshold
       )
 
       if (highConfidencePlates.length > 0) {
@@ -259,7 +260,7 @@ export async function batchDetectLicensePlates(
  */
 export async function needsPlateBlurring(
   imageUrl: string,
-  confidenceThreshold: number = 0.7
+  confidenceThreshold: number = LICENSE_PLATE_CONFIG.confidenceThreshold
 ): Promise<boolean> {
   return defaultService.needsPlateBlurring(imageUrl, confidenceThreshold)
 }
@@ -348,7 +349,7 @@ async function fetchImageBuffer(imageUrl: string): Promise<Buffer> {
 export async function blurLicensePlates(
   imageUrl: string,
   plates: PlateDetectionBox[],
-  blurRadius: number = 30
+  blurRadius: number = LICENSE_PLATE_CONFIG.blurRadius
 ): Promise<BlurResult> {
   try {
     if (plates.length === 0) {
@@ -375,7 +376,7 @@ export async function blurLicensePlates(
     // Process each plate
     for (const plate of plates) {
       // Expand bounding box slightly to ensure full coverage
-      const expandedBox = expandBoundingBox(plate, 15)
+      const expandedBox = expandBoundingBox(plate, LICENSE_PLATE_CONFIG.marginExpansion)
       const pixelBox = calculatePixelCoordinates(expandedBox, width, height)
 
       // Ensure coordinates are within bounds

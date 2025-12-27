@@ -1,18 +1,10 @@
 import { NextResponse } from 'next/server'
 import { auth } from '@/lib/auth'
 import { getContainer } from '@/lib/container'
-import { LISTING_RULES, validateFileType, validateFileSize } from '@/domain/listing/rules'
+import { LISTING_RULES, validateFileType } from '@/domain/listing/rules'
 import { listingStatusValidator } from '@/services/validators/listing-status.validator'
 import { z } from 'zod'
 import { MediaType } from '@prisma/client'
-import {
-  detectLicensePlates,
-  createStoredDetection,
-  blurLicensePlates,
-} from '@/services/ai/license-plate.service'
-import { withRetrySafe } from '@/utils/retry'
-import { notifyLicensePlateDetected } from '@/services/notification.service'
-import { sendLicensePlateDetectionEmail } from '@/lib/email'
 
 type RouteParams = { params: Promise<{ id: string }> }
 
@@ -159,188 +151,11 @@ export async function PUT(request: Request, { params }: RouteParams) {
 
     // Run license plate detection for photos (non-blocking)
     if (media.type === 'PHOTO' && media.publicUrl) {
-      // Run detection in background - don't block the response
-      detectLicensePlates(media.publicUrl)
-        .then(async (result) => {
-          if (result.detected) {
-            console.log(`License plate detected in media ${media.id}:`, result.plates.length, 'plates')
-
-            // Filter for high-confidence plates
-            const highConfidencePlates = result.plates.filter(p => p.confidence >= 0.7)
-
-            if (highConfidencePlates.length > 0) {
-              // Retry blur operation with exponential backoff
-              const retryResult = await withRetrySafe(
-                async () => {
-                  const blurResult = await blurLicensePlates(media.publicUrl!, highConfidencePlates)
-
-                  if (!blurResult.success || !blurResult.blurredBuffer) {
-                    throw new Error(blurResult.error || 'Blur operation failed')
-                  }
-
-                  return blurResult
-                },
-                {
-                  maxRetries: 3,
-                  baseDelay: 1000, // 1s, 2s, 4s delays
-                  onRetry: (attempt, error) => {
-                    console.log(
-                      `Retrying blur operation for media ${media.id} (attempt ${attempt}/3):`,
-                      error.message
-                    )
-                  },
-                }
-              )
-
-              if (retryResult.success && retryResult.value) {
-                const blurResult = retryResult.value
-
-                // Generate key for blurred version
-                const blurredKey = media.storagePath.replace(/(\.[^.]+)$/, '-blurred$1')
-
-                // Upload blurred image to R2 via container
-                const uploadResult = await container.storage.uploadToR2(
-                  blurResult.blurredBuffer!,
-                  blurredKey,
-                  blurResult.blurredMimeType || 'image/jpeg'
-                )
-
-                console.log(
-                  `Blurred image uploaded for media ${media.id} after ${retryResult.attempts} attempt(s): ${uploadResult.url}`
-                )
-
-                // Update media record with blurred URL as public, keep original for admin
-                await container.prisma.listingMedia.update({
-                  where: { id: media.id },
-                  data: {
-                    licensePlateDetected: true,
-                    licensePlateBlurred: true,
-                    plateDetectionData: JSON.parse(JSON.stringify(createStoredDetection(result))),
-                    originalUrl: media.publicUrl, // Keep original for admin access
-                    publicUrl: uploadResult.url,  // Replace public URL with blurred version
-                    needsManualReview: false, // Successfully blurred
-                  },
-                })
-
-                // Send notifications to seller (non-blocking)
-                const plateCount = highConfidencePlates.length
-                const listingUrl = `${process.env.NEXTAUTH_URL}/sell/listings/${id}`
-
-                // Send Pusher notification
-                notifyLicensePlateDetected(
-                  listing.sellerId,
-                  id,
-                  listing.title,
-                  media.id,
-                  plateCount,
-                  true
-                ).catch(error => {
-                  console.error(`Failed to send notification for media ${media.id}:`, error)
-                })
-
-                // Get seller email and send email notification
-                container.prisma.user.findUnique({
-                  where: { id: listing.sellerId },
-                  select: { email: true },
-                }).then(seller => {
-                  if (seller?.email) {
-                    sendLicensePlateDetectionEmail(
-                      seller.email,
-                      listing.title,
-                      plateCount,
-                      true,
-                      listingUrl
-                    ).catch(error => {
-                      console.error(`Failed to send email notification for media ${media.id}:`, error)
-                    })
-                  }
-                }).catch(error => {
-                  console.error(`Failed to fetch seller for notification:`, error)
-                })
-              } else {
-                // All retries failed, mark for manual review
-                console.error(
-                  `Failed to blur plates for media ${media.id} after ${retryResult.attempts} attempt(s):`,
-                  retryResult.error?.message
-                )
-
-                await container.prisma.listingMedia.update({
-                  where: { id: media.id },
-                  data: {
-                    licensePlateDetected: true,
-                    licensePlateBlurred: false,
-                    needsManualReview: true, // Flag for manual review
-                    plateDetectionData: JSON.parse(JSON.stringify(createStoredDetection(result))),
-                    originalUrl: media.publicUrl,
-                  },
-                })
-
-                // Log error for monitoring/alerting
-                console.error(
-                  `MANUAL REVIEW REQUIRED: License plate blur failed for media ${media.id} in listing ${id}. ` +
-                  `Error: ${retryResult.error?.message}. High-confidence plates detected: ${highConfidencePlates.length}`
-                )
-
-                // Send notifications to seller about manual review needed (non-blocking)
-                const plateCount = highConfidencePlates.length
-                const listingUrl = `${process.env.NEXTAUTH_URL}/sell/listings/${id}`
-
-                // Send Pusher notification
-                notifyLicensePlateDetected(
-                  listing.sellerId,
-                  id,
-                  listing.title,
-                  media.id,
-                  plateCount,
-                  false
-                ).catch(error => {
-                  console.error(`Failed to send notification for media ${media.id}:`, error)
-                })
-
-                // Get seller email and send email notification
-                container.prisma.user.findUnique({
-                  where: { id: listing.sellerId },
-                  select: { email: true },
-                }).then(seller => {
-                  if (seller?.email) {
-                    sendLicensePlateDetectionEmail(
-                      seller.email,
-                      listing.title,
-                      plateCount,
-                      false,
-                      listingUrl
-                    ).catch(error => {
-                      console.error(`Failed to send email notification for media ${media.id}:`, error)
-                    })
-                  }
-                }).catch(error => {
-                  console.error(`Failed to fetch seller for notification:`, error)
-                })
-              }
-            } else {
-              // Plates detected but low confidence, just mark as detected
-              await container.prisma.listingMedia.update({
-                where: { id: media.id },
-                data: {
-                  licensePlateDetected: true,
-                  plateDetectionData: JSON.parse(JSON.stringify(createStoredDetection(result))),
-                  originalUrl: media.publicUrl,
-                },
-              })
-            }
-          } else {
-            // Mark as checked (no plates found)
-            await container.prisma.listingMedia.update({
-              where: { id: media.id },
-              data: {
-                licensePlateDetected: false,
-                plateDetectionData: JSON.parse(JSON.stringify(createStoredDetection(result))),
-              },
-            })
-          }
-        })
+      // Fire and forget - process in background using the media processing service
+      container.mediaProcessing
+        .processUploadedMedia(media.id, media.publicUrl, id, listing.sellerId)
         .catch((error) => {
-          console.error(`License plate detection failed for media ${media.id}:`, error)
+          console.error(`Media processing failed for media ${media.id}:`, error)
         })
     }
 

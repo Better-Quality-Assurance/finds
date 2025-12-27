@@ -1,5 +1,6 @@
 import { type ClassValue, clsx } from 'clsx'
 import { twMerge } from 'tailwind-merge'
+import { AUCTION_CONFIG } from '@/config/auction.config'
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
@@ -34,10 +35,18 @@ export function formatDateTime(date: Date | string, locale = 'en'): string {
   }).format(d)
 }
 
+/**
+ * Calculate buyer fee (delegates to auction config)
+ * @deprecated Import from @/config/auction.config or @/domain/auction/rules instead
+ */
 export function calculateBuyerFee(hammerPrice: number): number {
-  return Math.round(hammerPrice * 0.05 * 100) / 100
+  return AUCTION_CONFIG.calculateBuyerFee(hammerPrice)
 }
 
+/**
+ * Calculate total with fee (delegates to auction config)
+ * @deprecated Import from @/config/auction.config or @/domain/auction/rules instead
+ */
 export function calculateTotalWithFee(hammerPrice: number): number {
-  return hammerPrice + calculateBuyerFee(hammerPrice)
+  return AUCTION_CONFIG.calculateTotalWithFee(hammerPrice)
 }
