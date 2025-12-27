@@ -66,6 +66,11 @@ export type {
   EmailResult,
 } from './email.interface'
 
+// SMS Provider
+export type {
+  ISMSProvider,
+} from './sms-provider.interface'
+
 // Listing Service
 export type {
   IListingService,
@@ -141,6 +146,12 @@ export type {
 export {
   DEFAULT_AI_PROVIDER_CONFIG,
 } from './ai-provider.interface'
+
+// Vision Provider Interface
+export type {
+  IVisionProvider,
+  VisionAnalysisOptions,
+} from './vision-provider.interface'
 
 /**
  * Re-export common Prisma types for convenience

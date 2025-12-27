@@ -42,6 +42,15 @@ export default async function AdminListingsPage() {
         where: { type: 'PHOTO' },
         take: 4,
         orderBy: { position: 'asc' },
+        select: {
+          id: true,
+          publicUrl: true,
+          originalUrl: true,
+          type: true,
+          category: true,
+          licensePlateDetected: true,
+          licensePlateBlurred: true,
+        },
       },
       _count: {
         select: { media: true },

@@ -27,6 +27,7 @@ import {
   User,
   MapPin,
   Camera,
+  ShieldAlert,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import type { AdminListing, ListingStatusFilter } from '@/types'
@@ -209,6 +210,12 @@ export function AdminListingsClient({
                     <div className="bg-muted px-3 py-2 text-center text-sm">
                       <Camera className="mr-1 inline h-4 w-4" />
                       {listing._count.media} photos
+                      {listing.media.some((m) => m.licensePlateDetected) && (
+                        <Badge variant="destructive" className="ml-2 gap-1 text-xs">
+                          <ShieldAlert className="h-3 w-3" />
+                          Plate
+                        </Badge>
+                      )}
                     </div>
                   </div>
 
@@ -284,9 +291,11 @@ export function AdminListingsClient({
 
                     {/* Actions */}
                     <div className="mt-6 flex flex-wrap gap-2">
-                      <Button size="sm" variant="outline">
-                        <Eye className="mr-1 h-4 w-4" />
-                        View Full Details
+                      <Button size="sm" variant="outline" asChild>
+                        <a href={`/admin/listings/${listing.id}`}>
+                          <Eye className="mr-1 h-4 w-4" />
+                          View Full Details
+                        </a>
                       </Button>
 
                       {canApprove && listing.status === 'PENDING_REVIEW' && (

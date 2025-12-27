@@ -3,10 +3,11 @@
  *
  * Handles SMS verification for user phone numbers.
  * Required as part of KYC process before placing first bid.
- * Uses Twilio for SMS delivery.
+ * Uses dependency injection for SMS providers (mock or Twilio).
  */
 
 import { prisma } from '@/lib/db'
+import type { ISMSProvider } from '@/services/contracts'
 
 // Verification code settings
 const CODE_LENGTH = 6
@@ -52,51 +53,44 @@ function generateVerificationCode(): string {
 }
 
 /**
- * SMS Provider interface
+ * Phone verification service instance
+ * Uses dependency injection to get SMS provider from container
  */
-interface SMSProvider {
-  sendSMS(to: string, body: string): Promise<void>
+class PhoneVerificationService {
+  constructor(private smsProvider: ISMSProvider) {}
+
+  /**
+   * Get the configured SMS provider
+   */
+  getSMSProvider(): ISMSProvider {
+    return this.smsProvider
+  }
 }
 
 /**
- * Get SMS provider (mock for now - Twilio integration to be added)
- *
- * To enable real SMS:
- * 1. Install Twilio: npm install twilio
- * 2. Set environment variables: TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN, TWILIO_PHONE_NUMBER
- * 3. Implement the Twilio client in this function
+ * Global service instance (will be initialized by container)
  */
-async function getSMSProvider(): Promise<SMSProvider> {
-  const accountSid = process.env.TWILIO_ACCOUNT_SID
-  const authToken = process.env.TWILIO_AUTH_TOKEN
-  const fromNumber = process.env.TWILIO_PHONE_NUMBER
+let serviceInstance: PhoneVerificationService | null = null
 
-  // Check if Twilio is configured
-  if (accountSid && authToken && fromNumber) {
-    // In production with Twilio configured, we'd use the real client
-    // For now, log that we would send a real SMS
-    console.log('Twilio configured - would send real SMS in production')
-    return {
-      async sendSMS(to: string, body: string) {
-        // TODO: Uncomment when Twilio is installed:
-        // const twilio = require('twilio')
-        // const client = twilio(accountSid, authToken)
-        // await client.messages.create({ body, from: fromNumber, to })
-        console.log(`[SMS READY] To: ${to}`)
-        console.log(`[SMS READY] Body: ${body}`)
-        console.log('[SMS READY] Install twilio package to enable real SMS')
-      },
-    }
-  }
+/**
+ * Initialize the phone verification service with an SMS provider
+ * Called by the DI container during setup
+ */
+export function initializePhoneVerificationService(provider: ISMSProvider): void {
+  serviceInstance = new PhoneVerificationService(provider)
+}
 
-  // Mock provider for development
-  console.warn('Twilio not configured. Using mock SMS provider.')
-  return {
-    async sendSMS(to: string, body: string) {
-      console.log(`[MOCK SMS] To: ${to}`)
-      console.log(`[MOCK SMS] Body: ${body}`)
-    },
+/**
+ * Get the current SMS provider
+ * Returns the provider from the service instance or throws if not initialized
+ */
+function getSMSProvider(): ISMSProvider {
+  if (!serviceInstance) {
+    throw new Error(
+      'PhoneVerificationService not initialized. Call initializePhoneVerificationService first.'
+    )
   }
+  return serviceInstance.getSMSProvider()
 }
 
 /**
@@ -153,7 +147,7 @@ export async function sendVerificationCode(
 
     // Send SMS
     try {
-      const smsProvider = await getSMSProvider()
+      const smsProvider = getSMSProvider()
       await smsProvider.sendSMS(
         normalizedPhone,
         `Your Finds verification code is: ${code}. Valid for ${CODE_EXPIRY_MINUTES} minutes.`

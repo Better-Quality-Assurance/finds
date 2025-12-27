@@ -16,6 +16,7 @@ export const ERROR_CODES = {
   // Authorization errors (403)
   AUTH_INSUFFICIENT_PERMISSIONS: 'AUTH_INSUFFICIENT_PERMISSIONS',
   AUTH_EMAIL_NOT_VERIFIED: 'AUTH_EMAIL_NOT_VERIFIED',
+  AUTH_PHONE_NOT_VERIFIED: 'AUTH_PHONE_NOT_VERIFIED',
   AUTH_ACCOUNT_SUSPENDED: 'AUTH_ACCOUNT_SUSPENDED',
   AUTH_BIDDING_DISABLED: 'AUTH_BIDDING_DISABLED',
 
@@ -107,6 +108,7 @@ export const ERROR_MESSAGES: Record<ErrorCode, string> = {
   // Authorization
   [ERROR_CODES.AUTH_INSUFFICIENT_PERMISSIONS]: 'You do not have permission to perform this action',
   [ERROR_CODES.AUTH_EMAIL_NOT_VERIFIED]: 'Please verify your email address before continuing',
+  [ERROR_CODES.AUTH_PHONE_NOT_VERIFIED]: 'Phone verification is required to place bids',
   [ERROR_CODES.AUTH_ACCOUNT_SUSPENDED]: 'Your account has been suspended',
   [ERROR_CODES.AUTH_BIDDING_DISABLED]: 'Bidding is not enabled for your account. Please add a payment method',
 

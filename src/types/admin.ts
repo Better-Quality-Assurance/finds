@@ -56,8 +56,11 @@ export type AdminListing = {
   media: {
     id: string
     publicUrl: string
+    originalUrl: string | null
     type: string
     category: string | null
+    licensePlateDetected: boolean
+    licensePlateBlurred: boolean
   }[]
   _count: {
     media: number

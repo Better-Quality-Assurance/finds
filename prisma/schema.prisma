@@ -235,6 +235,7 @@ model ListingMedia {
   licensePlateDetected Boolean @default(false) @map("license_plate_detected")
   licensePlateBlurred  Boolean @default(false) @map("license_plate_blurred")
   plateDetectionData   Json?   @map("plate_detection_data") // Bounding boxes, confidence
+  needsManualReview    Boolean @default(false) @map("needs_manual_review") // Flagged when blur fails after retries
 
   createdAt DateTime @default(now()) @map("created_at")
 

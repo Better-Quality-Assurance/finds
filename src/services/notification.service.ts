@@ -16,6 +16,7 @@ export type NotificationType =
   | 'LISTING_CHANGES_REQUESTED'
   | 'WATCHLIST_NEW_BID'
   | 'WATCHLIST_AUCTION_ENDED'
+  | 'LICENSE_PLATE_DETECTED'
 
 export type NotificationPayload = {
   type: NotificationType
@@ -461,6 +462,36 @@ export async function notifyWatchersAuctionEndingSoon(
   } catch (error) {
     console.error(`Failed to notify watchers for auction ${auctionId} ending soon:`, error)
   }
+}
+
+/**
+ * Notify seller that a license plate was detected and auto-blurred in their listing photo
+ */
+export async function notifyLicensePlateDetected(
+  sellerId: string,
+  listingId: string,
+  listingTitle: string,
+  mediaId: string,
+  plateCount: number,
+  wasBlurred: boolean
+): Promise<void> {
+  const action = wasBlurred ? 'automatically blurred' : 'detected'
+  const message = wasBlurred
+    ? `We detected ${plateCount} license plate${plateCount > 1 ? 's' : ''} in a photo for "${listingTitle}" and automatically blurred ${plateCount > 1 ? 'them' : 'it'} for privacy.`
+    : `We detected ${plateCount} license plate${plateCount > 1 ? 's' : ''} in a photo for "${listingTitle}". Please review the image.`
+
+  await sendUserNotification(sellerId, {
+    type: 'LICENSE_PLATE_DETECTED',
+    title: `License Plate ${wasBlurred ? 'Auto-Blurred' : 'Detected'}`,
+    message,
+    data: {
+      listingId,
+      mediaId,
+      plateCount,
+      wasBlurred,
+    },
+    link: `/sell/listings/${listingId}`,
+  })
 }
 
 /**

@@ -21,6 +21,7 @@ import type {
   IListingService,
   IAuctionService,
   IAIModerationService,
+  ISMSProvider,
 } from '@/services/contracts'
 
 // Real Service Implementations
@@ -33,6 +34,10 @@ import * as emailService from './email'
 import * as listingService from '@/services/listing.service'
 import * as auctionService from '@/services/auction.service'
 import * as aiModerationService from '@/services/ai-moderation.service'
+import { initializePhoneVerificationService } from '@/services/phone-verification.service'
+
+// SMS Provider Implementations
+import { MockSMSProvider, TwilioSMSProvider } from '@/services/providers'
 
 /**
  * Service container type holding all service instances
@@ -49,6 +54,7 @@ export type ServiceContainer = {
   listings: IListingService
   auctions: IAuctionService
   aiModeration: IAIModerationService
+  sms: ISMSProvider
   prisma: PrismaClient
 }
 
@@ -243,9 +249,39 @@ function createAIModerationService(): IAIModerationService {
 }
 
 /**
+ * Create SMS provider based on environment configuration
+ * Uses Twilio if configured, falls back to mock provider for development
+ */
+function createSMSProvider(): ISMSProvider {
+  const accountSid = process.env.TWILIO_ACCOUNT_SID
+  const authToken = process.env.TWILIO_AUTH_TOKEN
+  const fromNumber = process.env.TWILIO_PHONE_NUMBER
+
+  // If Twilio credentials are configured, use Twilio provider
+  if (accountSid && authToken && fromNumber) {
+    console.log('[Container] Initializing Twilio SMS provider')
+    return new TwilioSMSProvider({
+      accountSid,
+      authToken,
+      fromNumber,
+    })
+  }
+
+  // Otherwise use mock provider for development
+  console.log('[Container] Initializing Mock SMS provider (Twilio not configured)')
+  return new MockSMSProvider()
+}
+
+/**
  * Create production container with real service implementations
  */
 export function createContainer(): ServiceContainer {
+  // Create SMS provider first
+  const smsProvider = createSMSProvider()
+
+  // Initialize phone verification service with the provider
+  initializePhoneVerificationService(smsProvider)
+
   return {
     notifications: createNotificationService(),
     audit: createAuditService(),
@@ -258,6 +294,7 @@ export function createContainer(): ServiceContainer {
     listings: createListingService(),
     auctions: createAuctionService(),
     aiModeration: createAIModerationService(),
+    sms: smsProvider,
     prisma,
   }
 }
@@ -266,6 +303,12 @@ export function createContainer(): ServiceContainer {
  * Create test container with mock implementations
  */
 export function createTestContainer(): ServiceContainer {
+  // Create mock SMS provider for tests
+  const mockSmsProvider = new MockSMSProvider()
+
+  // Initialize phone verification service with mock provider
+  initializePhoneVerificationService(mockSmsProvider)
+
   return {
     notifications: {
       sendUserNotification: async () => {},
@@ -507,6 +550,7 @@ export function createTestContainer(): ServiceContainer {
         licensePlateDetected: false,
         licensePlateBlurred: false,
         plateDetectionData: null,
+        needsManualReview: false,
         createdAt: new Date(),
       }),
       updateMedia: async (mediaId, sellerId, updates) => ({
@@ -775,6 +819,7 @@ export function createTestContainer(): ServiceContainer {
       }),
       getRecentActivity: async () => [],
     },
+    sms: mockSmsProvider,
     prisma,
   }
 }

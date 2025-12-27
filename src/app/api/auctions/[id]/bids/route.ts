@@ -21,6 +21,7 @@ import {
 import { ERROR_CODES } from '@/lib/error-codes'
 import { checkRateLimit, userRateLimitKey, createRateLimitResponse } from '@/middleware/rate-limit'
 import { BID_RATE_LIMIT } from '@/lib/rate-limit-config'
+import { isPhoneVerified } from '@/services/phone-verification.service'
 
 type RouteParams = { params: Promise<{ id: string }> }
 
@@ -74,6 +75,16 @@ export const POST = withErrorHandler<{ id: string }>(
       throw new ForbiddenError(
         'Please verify your email before bidding',
         ERROR_CODES.AUTH_EMAIL_NOT_VERIFIED
+      )
+    }
+
+    // Check phone verification (required for KYC)
+    const phoneVerified = await isPhoneVerified(session.user.id)
+    if (!phoneVerified) {
+      throw new ForbiddenError(
+        'Phone verification required to place bids',
+        ERROR_CODES.AUTH_PHONE_NOT_VERIFIED,
+        { nextStep: 'verify-phone' }
       )
     }
 

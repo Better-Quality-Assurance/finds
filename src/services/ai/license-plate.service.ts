@@ -1,13 +1,15 @@
 /**
  * AI License Plate Detection Service
  *
- * Detects license plates in car photos using Claude 3.5 Sonnet vision.
+ * Detects license plates in car photos using vision AI.
  * Returns bounding box coordinates for blurring.
  * Respects user privacy by auto-blurring plates in public photos.
+ *
+ * Uses dependency injection to follow Open/Closed Principle.
  */
 
-import { chatCompletionJSON } from '@/lib/openrouter'
-import type { ChatMessage } from '@/lib/openrouter'
+import type { IVisionProvider } from '@/services/contracts/vision-provider.interface'
+import { createOpenRouterVisionProvider } from '@/services/providers/openrouter-vision.provider'
 import sharp from 'sharp'
 
 /**
@@ -97,111 +99,169 @@ interface AIPlateDetectionResponse {
 }
 
 /**
- * Detect license plates in a single image
+ * License Plate Detection Service
+ * Uses dependency injection for vision provider
+ */
+export class LicensePlateDetectionService {
+  private readonly visionProvider: IVisionProvider
+  private readonly modelName: string
+
+  constructor(visionProvider?: IVisionProvider) {
+    this.visionProvider = visionProvider || createOpenRouterVisionProvider({
+      model: 'anthropic/claude-3.5-sonnet',
+      temperature: 0.1,
+      maxTokens: 1024,
+    })
+    this.modelName = 'anthropic/claude-3.5-sonnet'
+  }
+
+  /**
+   * Detect license plates in a single image
+   */
+  async detectLicensePlates(imageUrl: string): Promise<PlateDetectionResult> {
+    const startTime = Date.now()
+
+    try {
+      const response = await this.visionProvider.analyzeImage<AIPlateDetectionResponse>(
+        imageUrl,
+        LICENSE_PLATE_DETECTION_PROMPT
+      )
+
+      const plates: PlateDetectionBox[] = response.plates.map((plate) => ({
+        x: Math.max(0, Math.min(100, plate.x)),
+        y: Math.max(0, Math.min(100, plate.y)),
+        width: Math.max(0, Math.min(100, plate.width)),
+        height: Math.max(0, Math.min(100, plate.height)),
+        confidence: Math.max(0, Math.min(1, plate.confidence)),
+        plateType: (plate.plateType as PlateDetectionBox['plateType']) || 'unknown',
+      }))
+
+      return {
+        detected: response.hasLicensePlate && plates.length > 0,
+        plates,
+        processingTime: Date.now() - startTime,
+        model: this.modelName,
+      }
+    } catch (error) {
+      console.error('License plate detection error:', error)
+      return {
+        detected: false,
+        plates: [],
+        processingTime: Date.now() - startTime,
+        model: this.modelName,
+        error: error instanceof Error ? error.message : 'Unknown error',
+      }
+    }
+  }
+
+  /**
+   * Batch detect license plates in multiple images
+   * Returns a map of image URL to detection result
+   */
+  async batchDetectLicensePlates(
+    imageUrls: string[],
+    options: { concurrency?: number } = {}
+  ): Promise<Map<string, PlateDetectionResult>> {
+    const { concurrency = 3 } = options
+    const results = new Map<string, PlateDetectionResult>()
+
+    // Process in batches to respect rate limits
+    for (let i = 0; i < imageUrls.length; i += concurrency) {
+      const batch = imageUrls.slice(i, i + concurrency)
+      const batchResults = await Promise.all(
+        batch.map(async (url) => {
+          const result = await this.detectLicensePlates(url)
+          return { url, result }
+        })
+      )
+
+      for (const { url, result } of batchResults) {
+        results.set(url, result)
+      }
+    }
+
+    return results
+  }
+
+  /**
+   * Check if an image needs license plate blurring
+   * Returns true if high-confidence plates are detected
+   */
+  async needsPlateBlurring(
+    imageUrl: string,
+    confidenceThreshold: number = 0.7
+  ): Promise<boolean> {
+    const result = await this.detectLicensePlates(imageUrl)
+
+    if (!result.detected) {
+      return false
+    }
+
+    // Check if any plate has high enough confidence
+    return result.plates.some((plate) => plate.confidence >= confidenceThreshold)
+  }
+
+  /**
+   * Detect and blur license plates in one step
+   */
+  async detectAndBlurPlates(
+    imageUrl: string
+  ): Promise<{
+    detection: PlateDetectionResult
+    blur?: BlurResult
+  }> {
+    // First detect plates
+    const detection = await this.detectLicensePlates(imageUrl)
+
+    // If plates detected with high confidence, blur them
+    if (detection.detected) {
+      const highConfidencePlates = detection.plates.filter(
+        (p) => p.confidence >= 0.7
+      )
+
+      if (highConfidencePlates.length > 0) {
+        const blur = await blurLicensePlates(imageUrl, highConfidencePlates)
+        return { detection, blur }
+      }
+    }
+
+    return { detection }
+  }
+}
+
+// Default singleton instance for backward compatibility
+const defaultService = new LicensePlateDetectionService()
+
+/**
+ * Detect license plates in a single image (backward compatible)
+ * @deprecated Use LicensePlateDetectionService instance instead
  */
 export async function detectLicensePlates(
   imageUrl: string
 ): Promise<PlateDetectionResult> {
-  const startTime = Date.now()
-  const model = 'anthropic/claude-3.5-sonnet'
-
-  try {
-    const messages: ChatMessage[] = [
-      {
-        role: 'user',
-        content: [
-          {
-            type: 'image_url',
-            image_url: {
-              url: imageUrl,
-              detail: 'high',
-            },
-          },
-          {
-            type: 'text',
-            text: LICENSE_PLATE_DETECTION_PROMPT,
-          },
-        ],
-      },
-    ]
-
-    const response = await chatCompletionJSON<AIPlateDetectionResponse>(
-      messages,
-      { model, temperature: 0.1, max_tokens: 1024 }
-    )
-
-    const plates: PlateDetectionBox[] = response.plates.map((plate) => ({
-      x: Math.max(0, Math.min(100, plate.x)),
-      y: Math.max(0, Math.min(100, plate.y)),
-      width: Math.max(0, Math.min(100, plate.width)),
-      height: Math.max(0, Math.min(100, plate.height)),
-      confidence: Math.max(0, Math.min(1, plate.confidence)),
-      plateType: (plate.plateType as PlateDetectionBox['plateType']) || 'unknown',
-    }))
-
-    return {
-      detected: response.hasLicensePlate && plates.length > 0,
-      plates,
-      processingTime: Date.now() - startTime,
-      model,
-    }
-  } catch (error) {
-    console.error('License plate detection error:', error)
-    return {
-      detected: false,
-      plates: [],
-      processingTime: Date.now() - startTime,
-      model,
-      error: error instanceof Error ? error.message : 'Unknown error',
-    }
-  }
+  return defaultService.detectLicensePlates(imageUrl)
 }
 
 /**
- * Batch detect license plates in multiple images
- * Returns a map of image URL to detection result
+ * Batch detect license plates in multiple images (backward compatible)
+ * @deprecated Use LicensePlateDetectionService instance instead
  */
 export async function batchDetectLicensePlates(
   imageUrls: string[],
   options: { concurrency?: number } = {}
 ): Promise<Map<string, PlateDetectionResult>> {
-  const { concurrency = 3 } = options
-  const results = new Map<string, PlateDetectionResult>()
-
-  // Process in batches to respect rate limits
-  for (let i = 0; i < imageUrls.length; i += concurrency) {
-    const batch = imageUrls.slice(i, i + concurrency)
-    const batchResults = await Promise.all(
-      batch.map(async (url) => {
-        const result = await detectLicensePlates(url)
-        return { url, result }
-      })
-    )
-
-    for (const { url, result } of batchResults) {
-      results.set(url, result)
-    }
-  }
-
-  return results
+  return defaultService.batchDetectLicensePlates(imageUrls, options)
 }
 
 /**
- * Check if an image needs license plate blurring
- * Returns true if high-confidence plates are detected
+ * Check if an image needs license plate blurring (backward compatible)
+ * @deprecated Use LicensePlateDetectionService instance instead
  */
 export async function needsPlateBlurring(
   imageUrl: string,
   confidenceThreshold: number = 0.7
 ): Promise<boolean> {
-  const result = await detectLicensePlates(imageUrl)
-
-  if (!result.detected) {
-    return false
-  }
-
-  // Check if any plate has high enough confidence
-  return result.plates.some((plate) => plate.confidence >= confidenceThreshold)
+  return defaultService.needsPlateBlurring(imageUrl, confidenceThreshold)
 }
 
 /**
@@ -364,10 +424,8 @@ export async function blurLicensePlates(
 }
 
 /**
- * Detect and blur license plates in one step
- *
- * @param imageUrl - URL of the image to process
- * @returns Detection result and optionally the blurred image buffer
+ * Detect and blur license plates in one step (backward compatible)
+ * @deprecated Use LicensePlateDetectionService instance instead
  */
 export async function detectAndBlurPlates(
   imageUrl: string
@@ -375,20 +433,5 @@ export async function detectAndBlurPlates(
   detection: PlateDetectionResult
   blur?: BlurResult
 }> {
-  // First detect plates
-  const detection = await detectLicensePlates(imageUrl)
-
-  // If plates detected with high confidence, blur them
-  if (detection.detected) {
-    const highConfidencePlates = detection.plates.filter(
-      (p) => p.confidence >= 0.7
-    )
-
-    if (highConfidencePlates.length > 0) {
-      const blur = await blurLicensePlates(imageUrl, highConfidencePlates)
-      return { detection, blur }
-    }
-  }
-
-  return { detection }
+  return defaultService.detectAndBlurPlates(imageUrl)
 }

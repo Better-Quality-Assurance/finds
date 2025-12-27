@@ -186,3 +186,117 @@ The Finds Team`,
     throw new Error('Failed to send password reset email')
   }
 }
+
+/**
+ * Send license plate detection notification email
+ * @param email - The seller's email address
+ * @param listingTitle - The title of the listing
+ * @param plateCount - Number of license plates detected
+ * @param wasBlurred - Whether the plates were automatically blurred
+ * @param listingUrl - URL to view the listing
+ * @returns Promise resolving to the Resend API response
+ */
+export async function sendLicensePlateDetectionEmail(
+  email: string,
+  listingTitle: string,
+  plateCount: number,
+  wasBlurred: boolean,
+  listingUrl: string
+) {
+  const subject = wasBlurred
+    ? 'License Plates Auto-Blurred in Your Listing - Finds'
+    : 'License Plates Detected in Your Listing - Finds'
+
+  const pluralPlate = plateCount > 1 ? 'plates' : 'plate'
+  const pluralThem = plateCount > 1 ? 'them' : 'it'
+
+  try {
+    const data = await getResendClient().emails.send({
+      from: getFromEmail(),
+      to: email,
+      subject,
+      html: `
+        <!DOCTYPE html>
+        <html>
+          <head>
+            <meta charset="utf-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>${subject}</title>
+          </head>
+          <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
+            <div style="background-color: #f8f9fa; padding: 30px; border-radius: 10px;">
+              <h1 style="color: #1a1a1a; margin-bottom: 20px;">License ${pluralPlate === 'plates' ? 'Plates' : 'Plate'} ${wasBlurred ? 'Auto-Blurred' : 'Detected'}</h1>
+
+              <p style="font-size: 16px; margin-bottom: 20px;">
+                We detected <strong>${plateCount} license ${pluralPlate}</strong> in one of the photos for your listing:
+              </p>
+
+              <p style="font-size: 16px; margin-bottom: 20px; font-weight: 600;">
+                "${listingTitle}"
+              </p>
+
+              ${wasBlurred ? `
+              <div style="background-color: #e8f5e9; border-left: 4px solid #4caf50; padding: 15px; margin: 20px 0;">
+                <p style="margin: 0; font-size: 15px; color: #2e7d32;">
+                  <strong>Privacy Protection:</strong> We've automatically blurred the license ${pluralPlate} to protect privacy. The blurred version is now displayed to all buyers.
+                </p>
+              </div>
+
+              <p style="font-size: 15px; margin-bottom: 20px;">
+                The original unblurred image is safely stored and only accessible to you and our administrators. No action is required on your part.
+              </p>
+              ` : `
+              <div style="background-color: #fff3cd; border-left: 4px solid #ffc107; padding: 15px; margin: 20px 0;">
+                <p style="margin: 0; font-size: 15px; color: #856404;">
+                  <strong>Please Review:</strong> We detected license ${pluralPlate} but couldn't automatically blur ${pluralThem}. Please review your listing and consider updating the image.
+                </p>
+              </div>
+              `}
+
+              <div style="text-align: center; margin: 30px 0;">
+                <a href="${listingUrl}"
+                   style="background-color: #000; color: #fff; padding: 14px 28px; text-decoration: none; border-radius: 6px; font-weight: 600; display: inline-block;">
+                  View Your Listing
+                </a>
+              </div>
+
+              <hr style="border: none; border-top: 1px solid #ddd; margin: 30px 0;">
+
+              <p style="font-size: 13px; color: #999;">
+                This is an automated notification to help you maintain privacy and comply with data protection regulations. We use AI-powered license plate detection to protect both sellers and buyers.
+              </p>
+
+              <p style="font-size: 13px; color: #999; margin-top: 20px;">
+                Best regards,<br>
+                The Finds Team
+              </p>
+            </div>
+          </body>
+        </html>
+      `,
+      text: `License ${pluralPlate === 'plates' ? 'Plates' : 'Plate'} ${wasBlurred ? 'Auto-Blurred' : 'Detected'}
+
+We detected ${plateCount} license ${pluralPlate} in one of the photos for your listing:
+
+"${listingTitle}"
+
+${wasBlurred
+  ? `Privacy Protection: We've automatically blurred the license ${pluralPlate} to protect privacy. The blurred version is now displayed to all buyers.
+
+The original unblurred image is safely stored and only accessible to you and our administrators. No action is required on your part.`
+  : `Please Review: We detected license ${pluralPlate} but couldn't automatically blur ${pluralThem}. Please review your listing and consider updating the image.`}
+
+View your listing: ${listingUrl}
+
+This is an automated notification to help you maintain privacy and comply with data protection regulations.
+
+Best regards,
+The Finds Team`,
+    })
+
+    return { success: true, data }
+  } catch (error) {
+    console.error('Failed to send license plate detection email:', error)
+    throw new Error('Failed to send license plate detection email')
+  }
+}
