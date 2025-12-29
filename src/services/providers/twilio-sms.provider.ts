@@ -39,7 +39,8 @@ export class TwilioSMSProvider implements ISMSProvider {
    */
   private initializeClient(): void {
     try {
-      // Try to load Twilio SDK
+      // Try to load Twilio SDK (optional dependency)
+      // eslint-disable-next-line @typescript-eslint/no-require-imports
       const twilio = require('twilio')
       this.client = twilio(this.config.accountSid, this.config.authToken)
       console.log('[TwilioSMSProvider] Initialized with real Twilio client')
