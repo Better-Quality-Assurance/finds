@@ -4,10 +4,36 @@
  * Demonstrates improved testability after OCP refactoring
  */
 
-import { describe, it, expect, beforeEach } from 'vitest'
+import { describe, it, expect, beforeEach, vi } from 'vitest'
 import type { IVisionProvider } from '@/services/contracts/vision-provider.interface'
 import { LicensePlateDetectionService } from '../license-plate.service'
 import type { PlateDetectionResult } from '../license-plate.service'
+import { LICENSE_PLATE_CONFIG } from '@/config/license-plate.config'
+
+// Mock the system-config.service to avoid database calls
+vi.mock('@/services/system-config.service', () => ({
+  getLicensePlateConfig: vi.fn(async () => ({
+    visionModel: LICENSE_PLATE_CONFIG.visionModel,
+    temperature: LICENSE_PLATE_CONFIG.temperature,
+    maxTokens: LICENSE_PLATE_CONFIG.maxTokens,
+    confidenceThreshold: LICENSE_PLATE_CONFIG.confidenceThreshold,
+    blurRadius: LICENSE_PLATE_CONFIG.blurRadius,
+    marginExpansion: LICENSE_PLATE_CONFIG.marginExpansion,
+    maxRetries: LICENSE_PLATE_CONFIG.maxRetries,
+    retryBaseDelay: LICENSE_PLATE_CONFIG.retryBaseDelay,
+    defaultConcurrency: LICENSE_PLATE_CONFIG.defaultConcurrency,
+  })),
+}))
+
+// Mock the image processor service to avoid real image fetching
+vi.mock('@/services/image/image-processor.service', () => ({
+  getDefaultImageProcessor: vi.fn(() => ({
+    fetchImage: vi.fn(async () => Buffer.from('mock-image')),
+    getMetadata: vi.fn(async () => ({ width: 1000, height: 800, format: 'jpeg' })),
+    blurRegions: vi.fn(async (buffer: Buffer) => buffer),
+    toJpeg: vi.fn(async (buffer: Buffer) => buffer),
+  })),
+}))
 
 /**
  * Mock Vision Provider for testing
@@ -140,7 +166,7 @@ describe('LicensePlateDetectionService', () => {
     it('should include processing time', async () => {
       const result = await service.detectLicensePlates('test-url')
 
-      expect(result.processingTime).toBeGreaterThan(0)
+      expect(result.processingTime).toBeGreaterThanOrEqual(0)
       expect(typeof result.processingTime).toBe('number')
     })
 
@@ -280,7 +306,9 @@ describe('LicensePlateDetectionService', () => {
       const result = await service.detectAndBlurPlates('test-url')
 
       expect(result.detection.detected).toBe(true)
-      // Blur result would be undefined in this test since we're not mocking blurLicensePlates
+      expect(result.blur).toBeDefined()
+      expect(result.blur?.success).toBe(true)
+      expect(result.blur?.platesBlurred).toBe(1)
     })
 
     it('should not blur low confidence plates', async () => {

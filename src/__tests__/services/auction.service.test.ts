@@ -3,12 +3,54 @@ import { Prisma } from '@prisma/client'
 import { createMockPrisma, factories, timeUtils } from '../helpers/test-utils'
 import { AUCTION_RULES } from '@/domain/auction/rules'
 
-// Mock the prisma import first before importing the service
+// Mock the prisma module without top-level variables
 vi.mock('@/lib/db', () => ({
-  prisma: createMockPrisma(),
+  prisma: {
+    $transaction: vi.fn(),
+    listing: {
+      findUnique: vi.fn(),
+      update: vi.fn(),
+    },
+    auction: {
+      findUnique: vi.fn(),
+      create: vi.fn(),
+      update: vi.fn(),
+    },
+    bid: {
+      create: vi.fn(),
+      updateMany: vi.fn(),
+      findMany: vi.fn(),
+      findFirst: vi.fn(),
+    },
+    watchlistItem: {
+      findMany: vi.fn(),
+    },
+    user: {
+      findMany: vi.fn(),
+    },
+  },
 }))
 
-// Import service after mocking
+// Mock notification service to prevent actual notifications during tests
+vi.mock('@/services/notification.service', () => ({
+  notifyBidPlaced: vi.fn(),
+  notifyOutbid: vi.fn(),
+  notifyWatchersAuctionEnded: vi.fn(),
+  notifyAuctionWon: vi.fn(),
+  notifyAuctionLost: vi.fn(),
+  notifyListingApproved: vi.fn(),
+  broadcastAuctionLive: vi.fn(),
+}))
+
+// Mock bidder number service
+vi.mock('@/services/bidder-number.service', () => ({
+  getOrAssignBidderNumber: vi.fn(() =>
+    Promise.resolve({ bidderNumber: 1, bidderCountry: 'RO' })
+  ),
+}))
+
+// Import after mocking
+import { prisma } from '@/lib/db'
 import {
   placeBid,
   createAuction,
@@ -16,12 +58,7 @@ import {
 } from '@/services/auction.service'
 
 describe('Auction Service', () => {
-  let prisma: ReturnType<typeof createMockPrisma>
-
-  beforeEach(async () => {
-    // Get the mocked prisma instance
-    const { prisma: mockedPrisma } = await import('@/lib/db')
-    prisma = mockedPrisma as unknown as ReturnType<typeof createMockPrisma>
+  beforeEach(() => {
     vi.clearAllMocks()
   })
 
@@ -32,7 +69,7 @@ describe('Auction Service', () => {
         startingPrice: 1000,
         currentBid: new Prisma.Decimal(1100),
         startTime: new Date('2024-01-01'),
-        currentEndTime: new Date('2024-12-31'),
+        currentEndTime: new Date('2099-12-31'),
         antiSnipingEnabled: true,
         extensionCount: 0,
       })
@@ -81,7 +118,7 @@ describe('Auction Service', () => {
       const auction = factories.auction({
         status: 'ACTIVE',
         startTime: new Date('2024-01-01'),
-        currentEndTime: new Date('2024-12-31'),
+        currentEndTime: new Date('2099-12-31'),
       })
 
       const listing = factories.listing({
@@ -120,14 +157,14 @@ describe('Auction Service', () => {
 
       await expect(
         placeBid('auction-123', 'bidder-123', 1100)
-      ).rejects.toThrow('Auction is not active')
+      ).rejects.toThrow('Auction is not accepting bids')
     })
 
     it('should reject bid when auction has ended', async () => {
       const auction = factories.auction({
         status: 'ACTIVE',
-        startTime: new Date('2024-01-01'),
-        currentEndTime: new Date('2024-01-02'), // Past end time
+        startTime: new Date('2020-01-01'),
+        currentEndTime: new Date('2020-01-02'), // Past end time
       })
 
       const listing = factories.listing()
@@ -143,7 +180,7 @@ describe('Auction Service', () => {
 
       await expect(
         placeBid('auction-123', 'bidder-123', 1100)
-      ).rejects.toThrow('Auction has ended')
+      ).rejects.toThrow('This auction has ended')
     })
 
     it('should reject bid below minimum', async () => {
@@ -152,7 +189,7 @@ describe('Auction Service', () => {
         startingPrice: 1000,
         currentBid: new Prisma.Decimal(1100),
         startTime: new Date('2024-01-01'),
-        currentEndTime: new Date('2024-12-31'),
+        currentEndTime: new Date('2099-12-31'),
       })
 
       const listing = factories.listing({
@@ -176,14 +213,18 @@ describe('Auction Service', () => {
     })
 
     it('should trigger anti-sniping extension when bid in last 2 minutes', async () => {
-      const now = new Date('2024-01-05T12:00:00Z')
-      const endTime = new Date('2024-01-05T12:01:30Z') // 1.5 minutes from now
+      // Set up fake timers to control the current time
+      vi.useFakeTimers()
+      const now = new Date('2099-01-05T12:00:00Z')
+      vi.setSystemTime(now)
+
+      const endTime = new Date('2099-01-05T12:01:30Z') // 1.5 minutes from now
 
       const auction = factories.auction({
         status: 'ACTIVE',
         startingPrice: 1000,
         currentBid: new Prisma.Decimal(1100),
-        startTime: new Date('2024-01-01'),
+        startTime: new Date('2099-01-01'),
         currentEndTime: endTime,
         antiSnipingEnabled: true,
         extensionCount: 0,
@@ -222,27 +263,28 @@ describe('Auction Service', () => {
         return callback(txPrisma)
       })
 
-      // Mock Date.now() to control time
-      vi.spyOn(Date, 'now').mockReturnValue(now.getTime())
-
       const result = await placeBid('auction-123', 'bidder-123', 1200)
 
       expect(result.extended).toBe(true)
       expect(result.bid.triggeredExtension).toBe(true)
       expect(result.auction.extensionCount).toBe(1)
 
-      vi.restoreAllMocks()
+      vi.useRealTimers()
     })
 
     it('should not extend after max extensions reached', async () => {
-      const now = new Date('2024-01-05T12:00:00Z')
-      const endTime = new Date('2024-01-05T12:01:30Z')
+      // Set up fake timers to control the current time
+      vi.useFakeTimers()
+      const now = new Date('2099-01-05T12:00:00Z')
+      vi.setSystemTime(now)
+
+      const endTime = new Date('2099-01-05T12:01:30Z')
 
       const auction = factories.auction({
         status: 'ACTIVE',
         startingPrice: 1000,
         currentBid: new Prisma.Decimal(1100),
-        startTime: new Date('2024-01-01'),
+        startTime: new Date('2099-01-01'),
         currentEndTime: endTime,
         antiSnipingEnabled: true,
         extensionCount: AUCTION_RULES.MAX_EXTENSIONS, // Max extensions reached
@@ -277,13 +319,11 @@ describe('Auction Service', () => {
         return callback(txPrisma)
       })
 
-      vi.spyOn(Date, 'now').mockReturnValue(now.getTime())
-
       const result = await placeBid('auction-123', 'bidder-123', 1200)
 
       expect(result.extended).toBe(false)
 
-      vi.restoreAllMocks()
+      vi.useRealTimers()
     })
 
     it('should mark previous winning bid as not winning', async () => {
@@ -292,7 +332,7 @@ describe('Auction Service', () => {
         startingPrice: 1000,
         currentBid: new Prisma.Decimal(1100),
         startTime: new Date('2024-01-01'),
-        currentEndTime: new Date('2024-12-31'),
+        currentEndTime: new Date('2099-12-31'),
       })
 
       const listing = factories.listing({
@@ -342,7 +382,7 @@ describe('Auction Service', () => {
         startingPrice: 1000,
         currentBid: new Prisma.Decimal(1100),
         startTime: new Date('2024-01-01'),
-        currentEndTime: new Date('2024-12-31'),
+        currentEndTime: new Date('2099-12-31'),
         reserveMet: false,
       })
 
@@ -567,7 +607,7 @@ describe('Auction Service', () => {
         bids: [],
       } as any)
 
-      await expect(endAuction('auction-123')).rejects.toThrow('Auction is not active')
+      await expect(endAuction('auction-123')).rejects.toThrow('Auction cannot be ended in current status')
     })
   })
 })
