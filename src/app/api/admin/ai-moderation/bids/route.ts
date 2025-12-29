@@ -30,8 +30,8 @@ export async function GET(request: Request) {
     const limit = parseInt(searchParams.get('limit') || '50')
 
     const where: Record<string, unknown> = {}
-    if (auctionId) where.auctionId = auctionId
-    if (suspicious) where.isSuspicious = true
+    if (auctionId) {where.auctionId = auctionId}
+    if (suspicious) {where.isSuspicious = true}
 
     const [analyses, total] = await Promise.all([
       prisma.aIBidPatternAnalysis.findMany({

@@ -19,14 +19,14 @@ const CONSENT_COOKIE_NAME = 'cookie-consent'
 const CONSENT_VERSION = '1'
 
 function getStoredConsent(): ConsentSettings | null {
-  if (typeof window === 'undefined') return null
+  if (typeof window === 'undefined') {return null}
 
   try {
     const stored = localStorage.getItem(CONSENT_COOKIE_NAME)
-    if (!stored) return null
+    if (!stored) {return null}
 
     const parsed = JSON.parse(stored)
-    if (parsed.version !== CONSENT_VERSION) return null
+    if (parsed.version !== CONSENT_VERSION) {return null}
 
     return parsed.settings
   } catch {
@@ -35,7 +35,7 @@ function getStoredConsent(): ConsentSettings | null {
 }
 
 function setStoredConsent(settings: ConsentSettings) {
-  if (typeof window === 'undefined') return
+  if (typeof window === 'undefined') {return}
 
   localStorage.setItem(
     CONSENT_COOKIE_NAME,
@@ -134,7 +134,7 @@ export function CookieConsent() {
     saveConsentToDatabase(settings)
   }
 
-  if (!showBanner) return null
+  if (!showBanner) {return null}
 
   return (
     <div className="fixed inset-x-0 bottom-0 z-50 p-4">

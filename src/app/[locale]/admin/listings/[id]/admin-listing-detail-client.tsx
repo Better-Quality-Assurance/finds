@@ -16,6 +16,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog'
 import { AdminMediaViewer, AdminMediaItem } from '@/components/admin/admin-media-viewer'
+import { PriceEstimatePanel } from '@/components/admin/price-estimate-panel'
 import { toast } from 'sonner'
 import { formatCurrency } from '@/lib/utils'
 import {
@@ -129,7 +130,7 @@ export function AdminListingDetailClient({ listing, userRole }: AdminListingDeta
     setIsApproving(true)
     try {
       const response = await fetch(`/api/admin/listings/${listing.id}/approve`, { method: 'POST' })
-      if (!response.ok) throw new Error('Failed to approve')
+      if (!response.ok) {throw new Error('Failed to approve')}
       toast.success('Listing approved successfully')
       window.location.reload()
     } catch {
@@ -148,7 +149,7 @@ export function AdminListingDetailClient({ listing, userRole }: AdminListingDeta
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ reason: rejectionReason }),
       })
-      if (!response.ok) throw new Error('Failed to reject')
+      if (!response.ok) {throw new Error('Failed to reject')}
       toast.success('Listing rejected')
       setShowRejectDialog(false)
       window.location.reload()
@@ -168,7 +169,7 @@ export function AdminListingDetailClient({ listing, userRole }: AdminListingDeta
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ changes: changeRequest }),
       })
-      if (!response.ok) throw new Error('Failed to request changes')
+      if (!response.ok) {throw new Error('Failed to request changes')}
       toast.success('Change request sent to seller')
       setShowChangesDialog(false)
       window.location.reload()
@@ -301,6 +302,13 @@ export function AdminListingDetailClient({ listing, userRole }: AdminListingDeta
               </dl>
             </CardContent>
           </Card>
+
+          <PriceEstimatePanel
+            listingId={listing.id}
+            currentEstimateLow={listing.estimateLow}
+            currentEstimateHigh={listing.estimateHigh}
+            currency={listing.currency}
+          />
 
           <Card>
             <CardHeader><CardTitle className="flex items-center gap-2"><MapPin className="h-5 w-5" />Location</CardTitle></CardHeader>

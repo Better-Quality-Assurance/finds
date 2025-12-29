@@ -3,7 +3,7 @@ import { Resend } from 'resend'
 // Lazy initialization to avoid build-time errors
 let resend: Resend | null = null
 let fromEmail: string | null = null
-let appUrl: string = 'http://localhost:3000'
+const appUrl: string = 'http://localhost:3000'
 
 function getResendClient(): Resend {
   if (!resend) {

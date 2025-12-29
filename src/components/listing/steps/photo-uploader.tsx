@@ -130,7 +130,7 @@ export function PhotoUploader({ listingId, onPhotoUploaded }: PhotoUploaderProps
   })
 
   const removePhoto = async (photoId: string) => {
-    if (!listingId) return
+    if (!listingId) {return}
 
     try {
       setIsLoading(true)
@@ -152,7 +152,7 @@ export function PhotoUploader({ listingId, onPhotoUploaded }: PhotoUploaderProps
   }
 
   const updatePhotoCategory = async (photoId: string, category: PhotoCategory) => {
-    if (!listingId) return
+    if (!listingId) {return}
 
     try {
       const response = await fetch(`/api/listings/${listingId}/media/${photoId}`, {

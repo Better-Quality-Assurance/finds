@@ -18,14 +18,48 @@ export type GetActiveAuctionsOptions = {
   minPrice?: number
   maxPrice?: number
   country?: string
-  sortBy?: 'ending_soon' | 'newly_listed' | 'price_low' | 'price_high' | 'most_bids'
+  sortBy?: 'ending_soon' | 'newly_listed' | 'price_low' | 'price_high' | 'most_bids' | 'relevance'
+  searchQuery?: string
+}
+
+/**
+ * Auction list item with nested listing info (for grid/list displays)
+ */
+export interface AuctionListItem {
+  id: string
+  listingId: string
+  startTime: Date
+  currentEndTime: Date
+  currentBid: number | null
+  bidCount: number
+  reserveMet: boolean
+  listing: {
+    id: string
+    title: string
+    year: number
+    make: string
+    model: string
+    startingPrice: number
+    currency: string
+    locationCity: string
+    locationCountry: string
+    isRunning: boolean
+    media: Array<{
+      id: string
+      publicUrl: string
+      thumbnailUrl: string | null
+    }>
+  }
+  _count?: {
+    bids: number
+  }
 }
 
 /**
  * Paginated auction results
  */
 export type PaginatedAuctions = {
-  auctions: Auction[]
+  auctions: AuctionListItem[]
   pagination: {
     page: number
     limit: number

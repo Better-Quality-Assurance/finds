@@ -236,7 +236,7 @@ export class BidRepository extends BaseRepository<Bid> implements IBidRepository
       select: { currentEndTime: true },
     })
 
-    if (!auction) return []
+    if (!auction) {return []}
 
     const cutoffTime = new Date(auction.currentEndTime.getTime() - minutesBeforeEnd * 60 * 1000)
 

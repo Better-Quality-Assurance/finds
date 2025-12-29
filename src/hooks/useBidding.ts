@@ -136,7 +136,7 @@ export function useBidding(
       // Check authentication
       if (!session) {
         const error = 'Please log in to place a bid'
-        if (showToasts) toast.error(error)
+        if (showToasts) {toast.error(error)}
         onBidError?.(error)
         return { success: false, error }
       }
@@ -151,7 +151,7 @@ export function useBidding(
       // Validate bid amount
       const validation = validateBid(amount)
       if (!validation.valid) {
-        if (showToasts && validation.error) toast.error(validation.error)
+        if (showToasts && validation.error) {toast.error(validation.error)}
         onBidError?.(validation.error || 'Invalid bid')
         return { success: false, error: validation.error }
       }

@@ -64,7 +64,7 @@ export function AdminListingsClient({
     try {
       const url = `/api/admin/listings?status=${status}&limit=50`
       const response = await fetch(url)
-      if (!response.ok) throw new Error('Failed to fetch listings')
+      if (!response.ok) {throw new Error('Failed to fetch listings')}
       const data = await response.json()
       setListings(data.listings)
     } catch (error) {
@@ -80,7 +80,7 @@ export function AdminListingsClient({
   }
 
   const handleAction = async () => {
-    if (!selectedListing || !actionType) return
+    if (!selectedListing || !actionType) {return}
 
     if ((actionType === 'reject' || actionType === 'request-changes') && reason.trim().length < 10) {
       toast.error('Please provide a reason (at least 10 characters)')

@@ -138,12 +138,12 @@ export class AuctionRepository extends BaseRepository<Auction> implements IAucti
     }
 
     const listingWhere: Record<string, unknown> = {}
-    if (category) listingWhere.category = category
-    if (country) listingWhere.locationCountry = country
+    if (category) {listingWhere.category = category}
+    if (country) {listingWhere.locationCountry = country}
     if (minPrice !== undefined || maxPrice !== undefined) {
       listingWhere.startingPrice = {}
-      if (minPrice !== undefined) (listingWhere.startingPrice as Record<string, number>).gte = minPrice
-      if (maxPrice !== undefined) (listingWhere.startingPrice as Record<string, number>).lte = maxPrice
+      if (minPrice !== undefined) {(listingWhere.startingPrice as Record<string, number>).gte = minPrice}
+      if (maxPrice !== undefined) {(listingWhere.startingPrice as Record<string, number>).lte = maxPrice}
     }
 
     if (Object.keys(listingWhere).length > 0) {

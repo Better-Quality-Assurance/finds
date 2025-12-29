@@ -49,14 +49,14 @@ export function AuditLogClient() {
     try {
       setLoading(true)
       const params = new URLSearchParams()
-      if (search) params.set('action', search)
-      if (resourceType) params.set('resourceType', resourceType)
-      if (severity) params.set('severity', severity)
-      if (status) params.set('status', status)
+      if (search) {params.set('action', search)}
+      if (resourceType) {params.set('resourceType', resourceType)}
+      if (severity) {params.set('severity', severity)}
+      if (status) {params.set('status', status)}
       params.set('page', page.toString())
 
       const response = await fetch(`/api/admin/audit?${params}`)
-      if (!response.ok) throw new Error('Failed to fetch logs')
+      if (!response.ok) {throw new Error('Failed to fetch logs')}
 
       const data = await response.json()
       setLogs(data.logs)
@@ -74,7 +74,7 @@ export function AuditLogClient() {
   }, [fetchLogs])
 
   const getSeverityBadge = (severity: string | null) => {
-    if (!severity) return null
+    if (!severity) {return null}
     const variants: Record<string, string> = {
       CRITICAL: 'bg-destructive text-destructive-foreground',
       HIGH: 'bg-destructive text-destructive-foreground',

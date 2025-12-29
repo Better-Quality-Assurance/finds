@@ -160,7 +160,7 @@ export function getCountryDisplayName(
   countryCode: string | null,
   locale: string = 'en'
 ): string | null {
-  if (!countryCode) return null
+  if (!countryCode) {return null}
 
   try {
     const displayNames = new Intl.DisplayNames([locale], { type: 'region' })

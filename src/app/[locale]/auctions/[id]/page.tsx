@@ -1,28 +1,39 @@
 import { notFound } from 'next/navigation'
+import Link from 'next/link'
 import { prisma } from '@/lib/db'
-import { BidPanel } from '@/components/auction/bid-panel'
+import { auth } from '@/lib/auth'
+import { AuctionDetailClient } from '@/components/auction/auction-detail-client'
 import { ImageGallery } from './image-gallery'
 import { Badge } from '@/components/ui/badge'
 import { formatCurrency } from '@/lib/utils'
-import { MapPin, Calendar, Gauge, Car, Wrench, FileText } from 'lucide-react'
+import { MapPin, Calendar, Gauge, Car, Wrench, FileText, User } from 'lucide-react'
 import { Markdown } from '@/components/ui/markdown'
-import {
-  transformAuctionForBidPanel,
-  transformBidsForBidPanel,
-} from '@/utils/auction-transformers'
+import { CommentsSection } from '@/components/listing/comments-section'
+import { SellerRatingBadge } from '@/components/seller/seller-rating-badge'
+import { SimilarAuctions } from '@/components/auction/similar-auctions'
+import { FollowButton } from '@/components/seller/follow-button'
+import { WatchlistButton } from '@/components/auction/watchlist-button'
+import { ConditionGrid } from '@/components/listing/condition-grid'
+import { PriceEstimate } from '@/components/auction/price-estimate'
 
 type PageProps = {
   params: Promise<{ id: string; locale: string }>
 }
 
-async function getAuction(id: string) {
+async function getAuction(id: string, userId?: string) {
   const auction = await prisma.auction.findUnique({
     where: { id },
     include: {
       listing: {
         include: {
           seller: {
-            select: { id: true, name: true, createdAt: true },
+            select: {
+              id: true,
+              name: true,
+              createdAt: true,
+              averageRating: true,
+              totalReviews: true,
+            },
           },
           media: {
             orderBy: { position: 'asc' },
@@ -41,6 +52,15 @@ async function getAuction(id: string) {
           bidderId: true,
         },
       },
+      _count: {
+        select: { watchlist: true },
+      },
+      watchlist: userId
+        ? {
+            where: { userId },
+            take: 1,
+          }
+        : false,
     },
   })
 
@@ -91,8 +111,9 @@ export async function generateMetadata({ params }: PageProps) {
 }
 
 export default async function AuctionDetailPage({ params }: PageProps) {
-  const { id } = await params
-  const auction = await getAuction(id)
+  const { id, locale } = await params
+  const session = await auth()
+  const auction = await getAuction(id, session?.user?.id)
 
   if (!auction) {
     notFound()
@@ -100,10 +121,8 @@ export default async function AuctionDetailPage({ params }: PageProps) {
 
   const { listing } = auction
   const photos = listing.media.filter((m) => m.type === 'PHOTO')
-
-  // Transform auction data once for BidPanel (used in both mobile and desktop)
-  const bidPanelAuction = transformAuctionForBidPanel(auction)
-  const bidPanelBids = transformBidsForBidPanel(auction.bids)
+  const watchlistCount = auction._count.watchlist
+  const isWatching = auction.watchlist && auction.watchlist.length > 0
 
   // Vehicle structured data for SEO and ML/LLM friendliness
   const structuredData = {
@@ -181,17 +200,32 @@ export default async function AuctionDetailPage({ params }: PageProps) {
           />
           </div>
 
-          {/* Mobile Bid Summary - Shows above content on mobile */}
-          <div className="lg:hidden">
-            <BidPanel auction={bidPanelAuction} bids={bidPanelBids} />
-          </div>
-
           {/* Title and badges */}
           <div>
-            <h1 className="text-2xl font-bold sm:text-3xl lg:text-4xl">{listing.title}</h1>
-            <p className="mt-1.5 text-base text-muted-foreground sm:mt-2 sm:text-lg">
-              {listing.year} {listing.make} {listing.model}
-            </p>
+            <div className="flex items-start justify-between gap-4">
+              <div className="flex-1 min-w-0">
+                <h1 className="text-2xl font-bold sm:text-3xl lg:text-4xl">{listing.title}</h1>
+                <p className="mt-1.5 text-base text-muted-foreground sm:mt-2 sm:text-lg">
+                  {listing.year} {listing.make} {listing.model}
+                </p>
+                {listing.estimateLow && listing.estimateHigh && (
+                  <div className="mt-1">
+                    <PriceEstimate
+                      estimateLow={listing.estimateLow}
+                      estimateHigh={listing.estimateHigh}
+                      currency={listing.currency}
+                    />
+                  </div>
+                )}
+              </div>
+              <WatchlistButton
+                auctionId={auction.id}
+                initialIsWatching={isWatching}
+                initialWatchlistCount={watchlistCount}
+                variant="outline"
+                size="default"
+              />
+            </div>
             <div className="mt-3 flex flex-wrap gap-1.5 sm:mt-4 sm:gap-2">
               <Badge variant={listing.isRunning ? 'success' : 'warning'}>
                 {listing.isRunning ? 'Running' : 'Non-Running'}
@@ -277,7 +311,23 @@ export default async function AuctionDetailPage({ params }: PageProps) {
             </div>
           </div>
 
-          {/* Condition */}
+          {/* Condition Grid */}
+          <div className="rounded-lg border p-3 sm:p-4">
+            <ConditionGrid
+              conditionOverall={listing.conditionOverall}
+              conditionOverallNotes={listing.conditionOverallNotes}
+              conditionPaintBody={listing.conditionPaintBody}
+              conditionPaintBodyNotes={listing.conditionPaintBodyNotes}
+              conditionInterior={listing.conditionInterior}
+              conditionInteriorNotes={listing.conditionInteriorNotes}
+              conditionFrame={listing.conditionFrame}
+              conditionFrameNotes={listing.conditionFrameNotes}
+              conditionMechanical={listing.conditionMechanical}
+              conditionMechanicalNotes={listing.conditionMechanicalNotes}
+            />
+          </div>
+
+          {/* Legacy Condition Notes (if detailed grid not available) */}
           {(listing.conditionNotes || listing.knownIssues) && (
             <div className="rounded-lg border p-3 sm:p-4">
               <h3 className="flex items-center gap-2 text-sm font-medium sm:text-base">
@@ -309,14 +359,26 @@ export default async function AuctionDetailPage({ params }: PageProps) {
 
           {/* Seller info - anonymized for privacy */}
           <div className="rounded-lg border p-3 sm:p-4">
-            <h3 className="text-sm font-medium sm:text-base">Seller</h3>
+            <div className="flex items-start justify-between gap-2">
+              <h3 className="text-sm font-medium sm:text-base">Seller</h3>
+              <div className="flex items-center gap-2">
+                <FollowButton sellerId={listing.seller.id} size="sm" showText={false} />
+                <Link
+                  href={`/${locale}/sellers/${listing.seller.id}`}
+                  className="text-xs text-primary hover:underline sm:text-sm flex items-center gap-1"
+                >
+                  <User className="h-3 w-3" />
+                  View Profile
+                </Link>
+              </div>
+            </div>
             <div className="mt-2 flex items-center gap-3 sm:mt-3">
               <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full bg-success text-sm text-success-foreground sm:h-10 sm:w-10">
                 <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                 </svg>
               </div>
-              <div className="min-w-0">
+              <div className="min-w-0 flex-1">
                 <div className="flex items-center gap-1.5 text-sm font-medium sm:text-base">
                   Verified Seller
                   <Badge variant="success" className="text-[10px]">Verified</Badge>
@@ -327,17 +389,32 @@ export default async function AuctionDetailPage({ params }: PageProps) {
                     year: 'numeric',
                   })}
                 </p>
+                {listing.seller.totalReviews > 0 && (
+                  <div className="mt-1">
+                    <SellerRatingBadge
+                      averageRating={listing.seller.averageRating}
+                      totalReviews={listing.seller.totalReviews}
+                      size="sm"
+                    />
+                  </div>
+                )}
               </div>
             </div>
           </div>
+
+          {/* Comments & Questions */}
+          <CommentsSection listingId={listing.id} locale={locale} />
         </div>
 
-        {/* Sidebar - Bid Panel (Desktop only) */}
-        <div className="hidden lg:block lg:col-span-1">
-          <div className="sticky top-4">
-            <BidPanel auction={bidPanelAuction} bids={bidPanelBids} />
-          </div>
+        {/* Sidebar - Bid Panel (Desktop) + Mobile Sticky Bar */}
+        <div className="lg:col-span-1">
+          <AuctionDetailClient auction={auction} />
         </div>
+      </div>
+
+      {/* Similar Objects - Full width below main content */}
+      <div className="mt-8 sm:mt-12">
+        <SimilarAuctions auctionId={id} />
       </div>
       </div>
     </>

@@ -84,7 +84,7 @@ export default function VerifyEmailPage() {
   }, [token, verifyEmail])
 
   const handleResendEmail = async () => {
-    if (resending) return
+    if (resending) {return}
 
     setResending(true)
 

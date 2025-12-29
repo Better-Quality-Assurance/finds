@@ -159,6 +159,18 @@ export const listingFormSchema = z.object({
   knownIssues: z.string().max(5000).optional(),
   isRunning: z.boolean(),
 
+  // Detailed Condition Grid (5 categories)
+  conditionOverall: z.enum(['EXCELLENT', 'VERY_GOOD', 'GOOD', 'FAIR', 'POOR']).optional(),
+  conditionOverallNotes: z.string().max(1000).optional(),
+  conditionPaintBody: z.enum(['EXCELLENT', 'VERY_GOOD', 'GOOD', 'FAIR', 'POOR']).optional(),
+  conditionPaintBodyNotes: z.string().max(1000).optional(),
+  conditionInterior: z.enum(['EXCELLENT', 'VERY_GOOD', 'GOOD', 'FAIR', 'POOR']).optional(),
+  conditionInteriorNotes: z.string().max(1000).optional(),
+  conditionFrame: z.enum(['EXCELLENT', 'VERY_GOOD', 'GOOD', 'FAIR', 'POOR']).optional(),
+  conditionFrameNotes: z.string().max(1000).optional(),
+  conditionMechanical: z.enum(['EXCELLENT', 'VERY_GOOD', 'GOOD', 'FAIR', 'POOR']).optional(),
+  conditionMechanicalNotes: z.string().max(1000).optional(),
+
   // Location
   locationCountry: z.string().min(2, 'Country is required').max(50),
   locationCity: z.string().min(2, 'City is required').max(100),

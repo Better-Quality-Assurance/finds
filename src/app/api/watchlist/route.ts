@@ -6,6 +6,8 @@ import { withSimpleErrorHandler } from '@/lib/with-error-handler'
 import { successResponse } from '@/lib/api-response'
 import { UnauthorizedError, NotFoundError, ConflictError, ValidationError } from '@/lib/errors'
 import { ERROR_CODES } from '@/lib/error-codes'
+import { pusher, CHANNELS, EVENTS } from '@/lib/pusher'
+import type { WatchlistCountUpdatedEvent } from '@/lib/pusher'
 
 // GET - Get user's watchlist
 export const GET = withSimpleErrorHandler(
@@ -101,6 +103,17 @@ export const POST = withSimpleErrorHandler(
       },
     })
 
+    // Get updated watchlist count
+    const watchlistCount = await prisma.watchlist.count({
+      where: { auctionId },
+    })
+
+    // Broadcast updated count via Pusher
+    await pusher.trigger(CHANNELS.auction(auctionId), EVENTS.WATCHLIST_COUNT_UPDATED, {
+      auctionId,
+      watchlistCount,
+    } as WatchlistCountUpdatedEvent)
+
     return successResponse({ watchlistItem }, 201)
   },
   {
@@ -195,6 +208,17 @@ export const DELETE = withSimpleErrorHandler(
         },
       },
     })
+
+    // Get updated watchlist count
+    const watchlistCount = await prisma.watchlist.count({
+      where: { auctionId },
+    })
+
+    // Broadcast updated count via Pusher
+    await pusher.trigger(CHANNELS.auction(auctionId), EVENTS.WATCHLIST_COUNT_UPDATED, {
+      auctionId,
+      watchlistCount,
+    } as WatchlistCountUpdatedEvent)
 
     return successResponse({ success: true })
   },

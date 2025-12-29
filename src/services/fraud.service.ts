@@ -79,29 +79,29 @@ export async function runBidFraudChecks(params: {
 
   // 2. Check bid velocity
   const velocityAlert = await checkBidVelocity(userId, auctionId)
-  if (velocityAlert) alerts.push(velocityAlert)
+  if (velocityAlert) {alerts.push(velocityAlert)}
 
   // 3. Check for same IP as seller (potential shill)
   if (ipAddress) {
     const ipAlert = await checkSellerIpMatch(auctionId, ipAddress, auction.listing.sellerId)
-    if (ipAlert) alerts.push(ipAlert)
+    if (ipAlert) {alerts.push(ipAlert)}
 
     // 4. Check for multiple bidders from same IP
     const coordAlert = await checkCoordinatedBidding(auctionId, ipAddress, userId)
-    if (coordAlert) alerts.push(coordAlert)
+    if (coordAlert) {alerts.push(coordAlert)}
   }
 
   // 5. Check for suspicious bid patterns
   const patternAlert = await checkBidPatterns(auction.bids, userId, bidAmount)
-  if (patternAlert) alerts.push(patternAlert)
+  if (patternAlert) {alerts.push(patternAlert)}
 
   // 6. Check for new account on high-value bid
   const newAccountAlert = await checkNewAccountHighValue(userId, bidAmount)
-  if (newAccountAlert) alerts.push(newAccountAlert)
+  if (newAccountAlert) {alerts.push(newAccountAlert)}
 
   // 7. Check for last-minute bid surge
   const surgeAlert = checkLastMinuteSurge(auction.bids, auction.currentEndTime)
-  if (surgeAlert) alerts.push(surgeAlert)
+  if (surgeAlert) {alerts.push(surgeAlert)}
 
   // Create alerts in database
   for (const alert of alerts) {
@@ -249,7 +249,7 @@ async function checkBidPatterns(
   userId: string,
   newBidAmount: number
 ): Promise<FraudCheckResult['alerts'][0] | null> {
-  if (bids.length < 2) return null
+  if (bids.length < 2) {return null}
 
   const userBids = bids.filter(b => b.bidder.id === userId)
 
@@ -287,7 +287,7 @@ async function checkNewAccountHighValue(
     select: { createdAt: true },
   })
 
-  if (!user) return null
+  if (!user) {return null}
 
   const accountAgeDays = (Date.now() - user.createdAt.getTime()) / (1000 * 60 * 60 * 24)
 

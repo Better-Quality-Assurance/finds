@@ -72,13 +72,13 @@ export function UsersManagementClient({ isAdmin }: UsersManagementClientProps) {
     try {
       setLoading(true)
       const params = new URLSearchParams()
-      if (search) params.set('search', search)
-      if (roleFilter) params.set('role', roleFilter)
-      if (statusFilter) params.set('status', statusFilter)
+      if (search) {params.set('search', search)}
+      if (roleFilter) {params.set('role', roleFilter)}
+      if (statusFilter) {params.set('status', statusFilter)}
       params.set('page', page.toString())
 
       const response = await fetch(`/api/admin/users?${params}`)
-      if (!response.ok) throw new Error('Failed to fetch users')
+      if (!response.ok) {throw new Error('Failed to fetch users')}
 
       const data = await response.json()
       setUsers(data.users)
@@ -95,7 +95,7 @@ export function UsersManagementClient({ isAdmin }: UsersManagementClientProps) {
   }, [fetchUsers])
 
   const handleAction = async () => {
-    if (!actionDialog.user || !actionDialog.type || actionDialog.type === 'view') return
+    if (!actionDialog.user || !actionDialog.type || actionDialog.type === 'view') {return}
 
     try {
       setProcessing(true)

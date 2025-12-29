@@ -41,14 +41,14 @@ const it = (name: string, fn: () => void | Promise<void>) => {
 }
 const expect = (actual: any) => ({
   toBeDefined: () => {
-    if (actual === undefined) throw new Error('Expected to be defined')
+    if (actual === undefined) {throw new Error('Expected to be defined')}
   },
   toBe: (expected: any) => {
-    if (actual !== expected) throw new Error(`Expected ${expected}, got ${actual}`)
+    if (actual !== expected) {throw new Error(`Expected ${expected}, got ${actual}`)}
   },
   not: {
     toBe: (expected: any) => {
-      if (actual === expected) throw new Error(`Expected not to be ${expected}`)
+      if (actual === expected) {throw new Error(`Expected not to be ${expected}`)}
     },
   },
   toEqual: (expected: any) => {
@@ -64,7 +64,7 @@ const expect = (actual: any) => ({
   resolves: {
     toBeUndefined: async () => {
       const result = await actual
-      if (result !== undefined) throw new Error('Expected to resolve to undefined')
+      if (result !== undefined) {throw new Error('Expected to resolve to undefined')}
     },
   },
 })

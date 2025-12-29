@@ -76,12 +76,12 @@ export function AuctionsManagementClient() {
     try {
       setLoading(true)
       const params = new URLSearchParams()
-      if (search) params.set('search', search)
-      if (statusFilter) params.set('status', statusFilter)
+      if (search) {params.set('search', search)}
+      if (statusFilter) {params.set('status', statusFilter)}
       params.set('page', page.toString())
 
       const response = await fetch(`/api/admin/auctions?${params}`)
-      if (!response.ok) throw new Error('Failed to fetch auctions')
+      if (!response.ok) {throw new Error('Failed to fetch auctions')}
 
       const data = await response.json()
       setAuctions(data.auctions)
@@ -99,7 +99,7 @@ export function AuctionsManagementClient() {
   }, [fetchAuctions])
 
   const handleAction = async () => {
-    if (!actionDialog.auction || !actionDialog.type || actionDialog.type === 'view') return
+    if (!actionDialog.auction || !actionDialog.type || actionDialog.type === 'view') {return}
 
     try {
       setProcessing(true)
@@ -148,7 +148,7 @@ export function AuctionsManagementClient() {
     const now = new Date()
     const diff = end.getTime() - now.getTime()
 
-    if (diff <= 0) return 'Ended'
+    if (diff <= 0) {return 'Ended'}
 
     const hours = Math.floor(diff / (1000 * 60 * 60))
     const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60))

@@ -78,7 +78,7 @@ export function VideoUploader({ listingId, onVideoUploaded }: VideoUploaderProps
 
   const handleVideoSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files
-    if (!files || files.length === 0) return
+    if (!files || files.length === 0) {return}
 
     // Check video count limit
     if (totalVideos + files.length > LISTING_RULES.MAX_VIDEOS) {
@@ -104,7 +104,7 @@ export function VideoUploader({ listingId, onVideoUploaded }: VideoUploaderProps
   }
 
   const removeVideo = async (videoId: string) => {
-    if (!listingId) return
+    if (!listingId) {return}
 
     try {
       setIsLoading(true)
@@ -126,8 +126,8 @@ export function VideoUploader({ listingId, onVideoUploaded }: VideoUploaderProps
   }
 
   const formatFileSize = (bytes: number): string => {
-    if (bytes < 1024) return bytes + ' B'
-    if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB'
+    if (bytes < 1024) {return bytes + ' B'}
+    if (bytes < 1024 * 1024) {return (bytes / 1024).toFixed(1) + ' KB'}
     return (bytes / (1024 * 1024)).toFixed(1) + ' MB'
   }
 

@@ -86,7 +86,7 @@ export async function releaseExpiredDeposits(): Promise<number> {
   let releasedCount = 0
   for (const deposit of expiredDeposits) {
     const released = await releaseBidDeposit(deposit.id)
-    if (released) releasedCount++
+    if (released) {releasedCount++}
   }
 
   return releasedCount

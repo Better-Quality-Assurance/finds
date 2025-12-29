@@ -18,7 +18,8 @@ export async function GET(request: Request) {
     const minPrice = searchParams.get('min_price') ? parseInt(searchParams.get('min_price')!) : undefined
     const maxPrice = searchParams.get('max_price') ? parseInt(searchParams.get('max_price')!) : undefined
     const country = searchParams.get('country') || undefined
-    const sortBy = (searchParams.get('sort') as 'ending_soon' | 'newly_listed' | 'price_low' | 'price_high' | 'most_bids') || 'ending_soon'
+    const searchQuery = searchParams.get('q') || undefined
+    const sortBy = (searchParams.get('sort') as 'ending_soon' | 'newly_listed' | 'price_low' | 'price_high' | 'most_bids' | 'relevance') || 'ending_soon'
 
     const result = await getActiveAuctions({
       page,
@@ -28,6 +29,7 @@ export async function GET(request: Request) {
       maxPrice,
       country,
       sortBy,
+      searchQuery,
     })
 
     return NextResponse.json(result)

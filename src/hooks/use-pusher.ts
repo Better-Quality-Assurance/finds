@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState, useCallback, useRef } from 'react'
+import { useEffect, useState, useCallback, useRef, useMemo } from 'react'
 import Pusher, { Channel } from 'pusher-js'
 import { CHANNELS, EVENTS, type NewBidEvent, type AuctionExtendedEvent, type AuctionEndedEvent } from '@/lib/pusher'
 
@@ -18,6 +18,32 @@ function getPusherInstance(): Pusher {
 }
 
 /**
+ * Hook for getting the Pusher instance
+ */
+export function usePusher(auctionId?: string | null) {
+  const pusher = useMemo(() => getPusherInstance(), [])
+  const [channel, setChannel] = useState<Channel | null>(null)
+
+  useEffect(() => {
+    if (!auctionId) {
+      setChannel(null)
+      return
+    }
+
+    const channelName = CHANNELS.auction(auctionId)
+    const ch = pusher.subscribe(channelName)
+    setChannel(ch)
+
+    return () => {
+      pusher.unsubscribe(channelName)
+      setChannel(null)
+    }
+  }, [auctionId, pusher])
+
+  return { pusher, channel }
+}
+
+/**
  * Hook for subscribing to auction real-time updates
  */
 export function useAuctionUpdates(
@@ -32,7 +58,7 @@ export function useAuctionUpdates(
   const channelRef = useRef<Channel | null>(null)
 
   useEffect(() => {
-    if (!auctionId) return
+    if (!auctionId) {return}
 
     const pusher = getPusherInstance()
     const channelName = CHANNELS.auction(auctionId)
@@ -83,7 +109,7 @@ export function useUserBidNotifications(
   const channelRef = useRef<Channel | null>(null)
 
   useEffect(() => {
-    if (!userId) return
+    if (!userId) {return}
 
     const pusher = getPusherInstance()
     const channelName = CHANNELS.userBids(userId)
@@ -131,12 +157,12 @@ export function useAuctionTimer(endTime: Date | string | null, onEnd?: () => voi
   }, [])
 
   useEffect(() => {
-    if (!endTime) return
+    if (!endTime) {return}
     endTimeRef.current = new Date(endTime)
   }, [endTime])
 
   useEffect(() => {
-    if (!endTimeRef.current) return
+    if (!endTimeRef.current) {return}
 
     const updateTimer = () => {
       const now = new Date()

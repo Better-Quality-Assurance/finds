@@ -93,17 +93,17 @@ export async function getAuditLogs(options: {
 
   const where: Record<string, unknown> = {}
 
-  if (actorId) where.actorId = actorId
-  if (resourceType) where.resourceType = resourceType
-  if (resourceId) where.resourceId = resourceId
-  if (action) where.action = { contains: action, mode: 'insensitive' }
-  if (severity) where.severity = severity
-  if (status) where.status = status
+  if (actorId) {where.actorId = actorId}
+  if (resourceType) {where.resourceType = resourceType}
+  if (resourceId) {where.resourceId = resourceId}
+  if (action) {where.action = { contains: action, mode: 'insensitive' }}
+  if (severity) {where.severity = severity}
+  if (status) {where.status = status}
 
   if (startDate || endDate) {
     where.createdAt = {}
-    if (startDate) (where.createdAt as Record<string, Date>).gte = startDate
-    if (endDate) (where.createdAt as Record<string, Date>).lte = endDate
+    if (startDate) {(where.createdAt as Record<string, Date>).gte = startDate}
+    if (endDate) {(where.createdAt as Record<string, Date>).lte = endDate}
   }
 
   const [logs, total] = await Promise.all([

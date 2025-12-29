@@ -20,7 +20,9 @@
     "all": "All",
     "none": "None",
     "yes": "Yes",
-    "no": "No"
+    "no": "No",
+    "page": "Page",
+    "of": "of"
   },
   "nav": {
     "home": "Home",
@@ -33,7 +35,8 @@
     "watchlist": "Watchlist",
     "myBids": "My Bids",
     "myListings": "My Listings",
-    "settings": "Settings"
+    "settings": "Settings",
+    "messages": "Messages"
   },
   "auth": {
     "login": "Log In",
@@ -113,9 +116,48 @@
     "reserveNotMet": "Reserve Not Met",
     "watchlist": "Watch",
     "watching": "Watching",
+    "addToWatchlist": "Add to watchlist",
+    "removeFromWatchlist": "Remove from watchlist",
+    "watchlistCount": "{count} watching",
+    "addedToWatchlist": "Added to watchlist",
+    "removedFromWatchlist": "Removed from watchlist",
+    "loginToWatchlist": "Please log in to add to watchlist",
     "buyerFee": "Buyer Fee (5%)",
     "total": "Total",
-    "extendedBy": "Extended by {minutes} min"
+    "extendedBy": "Extended by {minutes} min",
+    "similarObjects": "Similar objects",
+    "estimate": "Estimate",
+    "estimateRange": "Estimate {low} - {high}",
+    "estimateTooltip": "This is our estimated market value range based on comparable sales and vehicle condition",
+    "search": {
+      "placeholder": "Search by make, model, or keywords...",
+      "resultsFor": "{count} {count, plural, one {result} other {results}} for \"{query}\"",
+      "noResults": "No auctions found matching \"{query}\"",
+      "noResultsDescription": "Try different keywords or adjust your filters",
+      "searchResults": "Search Results",
+      "clearSearch": "Clear search"
+    },
+    "buyerProtection": {
+      "title": "Buy with Confidence",
+      "protectionTitle": "Finds Buyer Protection",
+      "protectionDescription": "Your payment's safe until you receive your vehicle.",
+      "viewDetails": "View details",
+      "trustpilotTitle": "Trustpilot 4.8 | 1,234 reviews",
+      "trustpilotDescription": "Our reputation is excellent."
+    },
+    "feeBreakdown": {
+      "title": "Other Costs",
+      "pickupRequired": "Pickup required",
+      "pickupLocation": "Pick up from {city}, {country}",
+      "buyerFee": "Buyer fee: {percent}%",
+      "buyerFeeDescription": "Calculated on final hammer price",
+      "privateSellerDisclaimer": "This vehicle is sold by a private seller. EU consumer rights may not apply."
+    },
+    "paymentMethods": {
+      "title": "Payment Methods",
+      "acceptedMethods": "We accept the following payment methods:",
+      "bankTransfer": "Bank Transfer"
+    }
   },
   "listing": {
     "submit": "Submit a Listing",
@@ -211,7 +253,31 @@
     "biddingHistory": "Bidding History",
     "wonAuctions": "Won Auctions",
     "activeListings": "Active Listings",
-    "pastListings": "Past Listings"
+    "pastListings": "Past Listings",
+    "myBids": "My Bids",
+    "myBidsDescription": "View and track all your auction bids in one place",
+    "yourBid": "Your Bid",
+    "currentPrice": "Current Price",
+    "endsIn": "Ends in",
+    "bidPlacedAt": "Bid placed",
+    "bidStatus": {
+      "winning": "Winning",
+      "won": "Won",
+      "lost": "Lost",
+      "outbid": "Outbid"
+    },
+    "bidFilters": {
+      "all": "All Bids",
+      "active": "Active",
+      "won": "Won",
+      "lost": "Lost"
+    },
+    "bidResultsCount": "{count} bids found",
+    "noBidsTitle": "No Bids Yet",
+    "noBidsDescription": "You haven't placed any bids yet. Start bidding on auctions to see them here.",
+    "noBidsFiltered": "No {filter} bids found",
+    "browseAuctions": "Browse Auctions",
+    "paginationInfo": "Showing {from} to {to} of {total} bids"
   },
   "admin": {
     "users": {
@@ -302,6 +368,13 @@
     "serverError": "Something went wrong. Please try again."
   },
   "seller": {
+    "followers": "Followers",
+    "following": {
+      "follow": "Follow",
+      "following": "Following",
+      "unfollow": "Unfollow",
+      "loading": "Loading..."
+    },
     "dashboard": {
       "title": "Seller Dashboard",
       "description": "Manage your payouts and sales",
@@ -397,5 +470,112 @@
     "createRequestError": "Failed to create request",
     "exportRequestCreated": "Data export request created successfully. You'll receive an email when ready.",
     "deleteRequestCreated": "Account deletion request created. You have 30 days to cancel before permanent deletion."
+  },
+  "comments": {
+    "title": "Comments & Questions",
+    "writeComment": "Ask a question or leave a comment...",
+    "writeReply": "Write a reply...",
+    "loginToComment": "Please log in to comment or ask questions",
+    "login": "Log In",
+    "reply": "Reply",
+    "replyingTo": "Replying to comment",
+    "postReply": "Post Reply",
+    "characterLimit": "Maximum {max} characters",
+    "noComments": "No comments yet",
+    "beTheFirst": "Be the first to ask a question about this vehicle",
+    "anonymous": "Anonymous",
+    "commentPosted": "Comment Posted",
+    "commentPostedSuccess": "Your comment has been posted and will be reviewed",
+    "commentPostFailed": "Failed to post comment. Please try again."
+  },
+  "messages": {
+    "title": "Messages",
+    "description": "Communicate with buyers and sellers",
+    "conversations": "Conversations",
+    "noConversations": "No conversations yet",
+    "noConversationsHint": "Start a conversation by clicking 'Ask Seller' on any listing",
+    "selectConversation": "Select a conversation to view messages",
+    "noMessages": "No messages yet",
+    "startConversation": "Send the first message to start the conversation",
+    "typeMessage": "Type a message...",
+    "regarding": "Re:",
+    "askSeller": "Ask Seller",
+    "loginRequired": "Please log in to message the seller",
+    "cannotMessageOwnListing": "You cannot message your own listing",
+    "fetchError": "Failed to load conversations",
+    "fetchMessagesError": "Failed to load messages",
+    "sendError": "Failed to send message",
+    "startConversationError": "Failed to start conversation"
+  },
+  "reviews": {
+    "reviews": "Reviews",
+    "noReviews": "No reviews yet",
+    "leaveReview": "Leave Review",
+    "leaveReviewTitle": "Leave a Review",
+    "leaveReviewDescription": "Share your experience buying from {seller} for {vehicle}",
+    "rating": "Rating",
+    "selectRating": "Select a rating",
+    "ratingRequired": "Please select a rating",
+    "ratingLabels": {
+      "1": "Poor",
+      "2": "Fair",
+      "3": "Good",
+      "4": "Very Good",
+      "5": "Excellent"
+    },
+    "titleOptional": "Title (optional)",
+    "titlePlaceholder": "Sum up your experience",
+    "reviewOptional": "Review (optional)",
+    "reviewPlaceholder": "Tell us about your experience with this seller...",
+    "submitReview": "Submit Review",
+    "submitting": "Submitting...",
+    "reviewSubmitted": "Review submitted successfully!",
+    "submitError": "Failed to submit review. Please try again.",
+    "reviewFor": "Review for",
+    "memberSince": "Member since",
+    "totalListings": "Total Listings",
+    "activeListings": "Active Listings",
+    "activeAuctions": "Active Auctions",
+    "viewAllListings": "View All Listings",
+    "viewProfile": "View Profile"
+  },
+  "condition": {
+    "title": "Condition Assessment",
+    "categoriesAssessed": "categories assessed",
+    "notAssessed": "Not assessed",
+    "disclaimer": "Condition assessments are provided by the seller. All vehicles are sold as-is. Please inspect carefully before bidding.",
+    "gridIntro": "Please assess the vehicle's condition across these 5 categories. Be thorough and honest - transparency builds buyer trust.",
+    "rating": "Condition Rating",
+    "selectRating": "Select condition rating",
+    "notes": "Additional Notes (Optional)",
+    "isRunning": {
+      "label": "Is the vehicle running?",
+      "description": "Can the vehicle be driven under its own power?"
+    },
+    "nonRunningNotice": "Non-running vehicles are welcome on Finds. Barn finds and project cars are a significant part of our community. Be sure to describe what is known about why the vehicle does not run.",
+    "knownIssues": {
+      "label": "Known Issues",
+      "placeholder": "List all known issues, defects, or problems with the vehicle. Be thorough - this protects both you and the buyer.",
+      "hint": "If there are no known issues, you can write 'No known issues'. However, for project cars and barn finds, there are usually multiple items to disclose."
+    },
+    "categories": {
+      "overall": "Overall Condition",
+      "overallPlaceholder": "Describe the vehicle's overall state. Consider age, mileage, maintenance history, and general presentation.",
+      "paintBody": "Paint & Body",
+      "paintBodyPlaceholder": "Note any chips, scratches, dents, rust, repaints, or bodywork. Mention panel gaps and fit.",
+      "interior": "Interior",
+      "interiorPlaceholder": "Describe seats, carpets, dashboard, headliner, controls. Note wear, tears, stains, or modifications.",
+      "frame": "Frame & Underbody",
+      "framePlaceholder": "Assess structural integrity, rust, previous repairs, subframe condition, and undercarriage protection.",
+      "mechanical": "Mechanical",
+      "mechanicalPlaceholder": "Cover engine performance, transmission, brakes, suspension, electrics. Note any recent service or issues."
+    },
+    "ratings": {
+      "EXCELLENT": "Excellent",
+      "VERY_GOOD": "Very Good",
+      "GOOD": "Good",
+      "FAIR": "Fair",
+      "POOR": "Poor"
+    }
   }
 }

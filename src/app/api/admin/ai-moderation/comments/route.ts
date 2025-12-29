@@ -29,7 +29,7 @@ export async function GET(request: Request) {
     const limit = parseInt(searchParams.get('limit') || '50')
 
     const where: Record<string, unknown> = {}
-    if (status) where.status = status
+    if (status) {where.status = status}
 
     const [moderations, total] = await Promise.all([
       prisma.aICommentModeration.findMany({

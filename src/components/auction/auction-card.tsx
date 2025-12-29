@@ -8,6 +8,7 @@ import { formatCurrency } from '@/lib/utils'
 import { useAuctionTimer } from '@/hooks/use-pusher'
 import { Clock, Gavel, MapPin, Eye } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { SellerRatingBadge } from '@/components/seller/seller-rating-badge'
 
 type AuctionCardProps = {
   auction: {
@@ -28,6 +29,11 @@ type AuctionCardProps = {
       locationCountry: string
       isRunning: boolean
       media: Array<{ publicUrl: string }>
+      seller?: {
+        id: string
+        averageRating: number | null
+        totalReviews: number
+      }
     }
   }
   showWatchButton?: boolean
@@ -132,6 +138,17 @@ export function AuctionCard({
             <MapPin className="h-3.5 w-3.5" aria-hidden="true" />
             {auction.listing.locationCity}, {auction.listing.locationCountry}
           </p>
+
+          {/* Seller Rating */}
+          {auction.listing.seller && auction.listing.seller.totalReviews > 0 && (
+            <div className="mt-2">
+              <SellerRatingBadge
+                averageRating={auction.listing.seller.averageRating}
+                totalReviews={auction.listing.seller.totalReviews}
+                size="sm"
+              />
+            </div>
+          )}
 
           {/* Price and bids */}
           <div className="mt-4 flex items-end justify-between border-t border-border/50 pt-4">

@@ -174,7 +174,7 @@ export class UserRepository extends BaseRepository<User> implements IUserReposit
       },
     })
 
-    if (!user) return false
+    if (!user) {return false}
 
     return user.bannedAt !== null && user.unbannedAt === null
   }
@@ -192,7 +192,7 @@ export class UserRepository extends BaseRepository<User> implements IUserReposit
       },
     })
 
-    if (!user) return false
+    if (!user) {return false}
 
     const isBanned = user.bannedAt !== null && user.unbannedAt === null
     return user.biddingEnabled && !isBanned

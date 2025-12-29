@@ -105,6 +105,20 @@ export class ValidationError extends AppError {
   }
 }
 
+/**
+ * Thrown when a bad request is made
+ * HTTP Status: 400 Bad Request
+ */
+export class BadRequestError extends AppError {
+  constructor(
+    message: string = 'Bad request',
+    code: ErrorCode = ERROR_CODES.VALIDATION_INVALID_INPUT,
+    details?: Record<string, unknown>
+  ) {
+    super(message, code, 400, details)
+  }
+}
+
 // ============================================================================
 // Resource Errors
 // ============================================================================

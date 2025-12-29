@@ -30,8 +30,8 @@ export async function GET(request: Request) {
     const limit = parseInt(searchParams.get('limit') || '20')
 
     const where: Record<string, unknown> = {}
-    if (status) where.status = status
-    if (decision) where.decision = decision
+    if (status) {where.status = status}
+    if (decision) {where.decision = decision}
 
     const [analyses, total] = await Promise.all([
       prisma.aIListingAnalysis.findMany({

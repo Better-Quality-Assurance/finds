@@ -187,7 +187,7 @@ async function logAuditSuccess(
 ): Promise<void> {
   try {
     const session = await auth()
-    if (!session?.user?.id) return
+    if (!session?.user?.id) {return}
 
     const url = new URL(request.url)
 
@@ -225,7 +225,7 @@ async function logAuditError(
 ): Promise<void> {
   try {
     const session = await auth()
-    if (!session?.user?.id) return
+    if (!session?.user?.id) {return}
 
     const url = new URL(request.url)
     const errorMessage = error instanceof Error ? error.message : String(error)

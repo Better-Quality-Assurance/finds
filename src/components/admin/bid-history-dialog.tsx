@@ -94,7 +94,7 @@ export function BidHistoryDialog({
   }, [open, auctionId])
 
   const fetchBidHistory = async () => {
-    if (!auctionId) return
+    if (!auctionId) {return}
 
     try {
       setLoading(true)
@@ -116,7 +116,7 @@ export function BidHistoryDialog({
   }
 
   const handleInvalidateBid = async () => {
-    if (!invalidateDialog.bid || !auctionId) return
+    if (!invalidateDialog.bid || !auctionId) {return}
 
     if (invalidateDialog.reason.trim().length < 10) {
       toast.error('Invalidation reason must be at least 10 characters')
@@ -156,7 +156,7 @@ export function BidHistoryDialog({
   }
 
   const getBidVelocity = (index: number): number | null => {
-    if (index >= bids.length - 1) return null
+    if (index >= bids.length - 1) {return null}
 
     const currentBid = new Date(bids[index].createdAt)
     const previousBid = new Date(bids[index + 1].createdAt)
@@ -166,9 +166,9 @@ export function BidHistoryDialog({
   }
 
   const formatVelocity = (seconds: number | null): string => {
-    if (seconds === null) return '-'
-    if (seconds < 60) return `${seconds}s`
-    if (seconds < 3600) return `${Math.floor(seconds / 60)}m`
+    if (seconds === null) {return '-'}
+    if (seconds < 60) {return `${seconds}s`}
+    if (seconds < 3600) {return `${Math.floor(seconds / 60)}m`}
     return `${Math.floor(seconds / 3600)}h`
   }
 

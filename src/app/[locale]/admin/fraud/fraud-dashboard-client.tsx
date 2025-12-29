@@ -47,10 +47,10 @@ export function FraudDashboardClient() {
     try {
       setLoading(true)
       const params = new URLSearchParams()
-      if (severityFilter) params.set('severity', severityFilter)
+      if (severityFilter) {params.set('severity', severityFilter)}
 
       const response = await fetch(`/api/admin/fraud?${params}`)
-      if (!response.ok) throw new Error('Failed to fetch alerts')
+      if (!response.ok) {throw new Error('Failed to fetch alerts')}
 
       const data = await response.json()
       setAlerts(data.alerts)
@@ -67,7 +67,7 @@ export function FraudDashboardClient() {
   }, [fetchAlerts])
 
   const handleReview = async (status: FraudAlertStatus) => {
-    if (!selectedAlert) return
+    if (!selectedAlert) {return}
 
     try {
       setReviewing(true)
@@ -77,7 +77,7 @@ export function FraudDashboardClient() {
         body: JSON.stringify({ status, notes: reviewNotes }),
       })
 
-      if (!response.ok) throw new Error('Failed to update alert')
+      if (!response.ok) {throw new Error('Failed to update alert')}
 
       toast.success('Alert updated')
       setSelectedAlert(null)

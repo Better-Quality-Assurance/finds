@@ -27,9 +27,9 @@ export async function GET(request: Request) {
     const limit = parseInt(searchParams.get('limit') || '20')
 
     const where: Record<string, unknown> = {}
-    if (status) where.status = status
-    if (published === 'true') where.isPublished = true
-    if (published === 'false') where.isPublished = false
+    if (status) {where.status = status}
+    if (published === 'true') {where.isPublished = true}
+    if (published === 'false') {where.isPublished = false}
 
     const [reviews, total] = await Promise.all([
       prisma.aICarReview.findMany({

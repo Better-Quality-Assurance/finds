@@ -32,7 +32,7 @@ export function ImageGallery({ images }: ImageGalleryProps) {
 
   // Keyboard navigation for fullscreen mode
   useEffect(() => {
-    if (!isFullscreen) return
+    if (!isFullscreen) {return}
 
     const handleKeyDown = (event: KeyboardEvent) => {
       switch (event.key) {

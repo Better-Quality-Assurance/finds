@@ -212,7 +212,7 @@ export class FraudRepository extends BaseRepository<FraudAlert> implements IFrau
    */
   async hasUserSuspiciousActivity(userId: string): Promise<boolean> {
     const criticalCount = await this.countCriticalAlertsByUserId(userId)
-    if (criticalCount > 0) return true
+    if (criticalCount > 0) {return true}
 
     const totalCount = await this.count({ userId })
     return totalCount >= 5

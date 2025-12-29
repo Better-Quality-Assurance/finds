@@ -31,6 +31,8 @@ type AuctionWithRelations = Auction & {
   bids: Bid[]
 }
 
+import { PaginatedAuctions } from '@/services/contracts/auction.interface'
+
 /**
  * Create an auction for an approved listing
  */
@@ -124,7 +126,7 @@ export async function getAuctionByListingId(listingId: string): Promise<Auction 
 }
 
 /**
- * Get active auctions with pagination
+ * Get active auctions with pagination and optional full-text search
  */
 export async function getActiveAuctions(options: {
   page?: number
@@ -133,8 +135,9 @@ export async function getActiveAuctions(options: {
   minPrice?: number
   maxPrice?: number
   country?: string
-  sortBy?: 'ending_soon' | 'newly_listed' | 'price_low' | 'price_high' | 'most_bids'
-}) {
+  sortBy?: 'ending_soon' | 'newly_listed' | 'price_low' | 'price_high' | 'most_bids' | 'relevance'
+  searchQuery?: string
+}): Promise<PaginatedAuctions> {
   const {
     page = 1,
     limit = 20,
@@ -143,8 +146,24 @@ export async function getActiveAuctions(options: {
     maxPrice,
     country,
     sortBy = 'ending_soon',
+    searchQuery,
   } = options
 
+  // If searching, use raw SQL for full-text search with ranking
+  if (searchQuery && searchQuery.trim()) {
+    return getActiveAuctionsWithSearch({
+      page,
+      limit,
+      category,
+      minPrice,
+      maxPrice,
+      country,
+      sortBy: sortBy === 'relevance' ? 'relevance' : sortBy,
+      searchQuery: searchQuery.trim(),
+    })
+  }
+
+  // Regular query without search
   const where: Record<string, unknown> = {
     status: 'ACTIVE',
     currentEndTime: { gt: new Date() },
@@ -152,12 +171,12 @@ export async function getActiveAuctions(options: {
 
   // Build listing filters
   const listingWhere: Record<string, unknown> = {}
-  if (category) listingWhere.category = category
-  if (country) listingWhere.locationCountry = country
+  if (category) {listingWhere.category = category}
+  if (country) {listingWhere.locationCountry = country}
   if (minPrice !== undefined || maxPrice !== undefined) {
     listingWhere.startingPrice = {}
-    if (minPrice !== undefined) (listingWhere.startingPrice as Record<string, number>).gte = minPrice
-    if (maxPrice !== undefined) (listingWhere.startingPrice as Record<string, number>).lte = maxPrice
+    if (minPrice !== undefined) {(listingWhere.startingPrice as Record<string, number>).gte = minPrice}
+    if (maxPrice !== undefined) {(listingWhere.startingPrice as Record<string, number>).lte = maxPrice}
   }
 
   if (Object.keys(listingWhere).length > 0) {
@@ -184,7 +203,7 @@ export async function getActiveAuctions(options: {
       break
   }
 
-  const [auctions, total] = await Promise.all([
+  const [rawAuctions, total] = await Promise.all([
     prisma.auction.findMany({
       where,
       orderBy,
@@ -207,6 +226,278 @@ export async function getActiveAuctions(options: {
     }),
     prisma.auction.count({ where }),
   ])
+
+  // Transform Prisma Decimal types to numbers
+  const auctions = rawAuctions.map(a => ({
+    id: a.id,
+    listingId: a.listingId,
+    startTime: a.startTime,
+    currentEndTime: a.currentEndTime,
+    currentBid: a.currentBid ? Number(a.currentBid) : null,
+    bidCount: a.bidCount,
+    reserveMet: a.reserveMet,
+    listing: {
+      id: a.listing.id,
+      title: a.listing.title,
+      year: a.listing.year,
+      make: a.listing.make,
+      model: a.listing.model,
+      startingPrice: Number(a.listing.startingPrice),
+      currency: a.listing.currency,
+      locationCity: a.listing.locationCity,
+      locationCountry: a.listing.locationCountry,
+      isRunning: a.listing.isRunning,
+      media: a.listing.media.map(m => ({
+        id: m.id,
+        publicUrl: m.publicUrl,
+        thumbnailUrl: m.thumbnailUrl,
+      })),
+    },
+    _count: a._count,
+  }))
+
+  return {
+    auctions,
+    pagination: {
+      page,
+      limit,
+      total,
+      totalPages: Math.ceil(total / limit),
+    },
+  }
+}
+
+/**
+ * Get active auctions with full-text search
+ */
+async function getActiveAuctionsWithSearch(options: {
+  page: number
+  limit: number
+  category?: string
+  minPrice?: number
+  maxPrice?: number
+  country?: string
+  sortBy: 'ending_soon' | 'newly_listed' | 'price_low' | 'price_high' | 'most_bids' | 'relevance'
+  searchQuery: string
+}): Promise<PaginatedAuctions> {
+  const {
+    page,
+    limit,
+    category,
+    minPrice,
+    maxPrice,
+    country,
+    sortBy,
+    searchQuery,
+  } = options
+
+  // Sanitize search query and convert to tsquery format
+  // Replace special characters and split into words
+  const sanitized = searchQuery
+    .replace(/[^\w\s]/g, ' ')
+    .trim()
+    .split(/\s+/)
+    .filter(word => word.length > 0)
+    .join(' & ') // Use AND operator for all words
+
+  if (!sanitized) {
+    // If search query becomes empty after sanitization, return regular results
+    return getActiveAuctions({ page, limit, category, minPrice, maxPrice, country, sortBy })
+  }
+
+  // Build WHERE clauses for filters
+  const filterConditions: string[] = ['a.status = \'ACTIVE\'', 'a.current_end_time > NOW()']
+  const filterParams: unknown[] = []
+  let paramIndex = 1
+
+  if (category) {
+    filterConditions.push(`l.category = $${paramIndex}`)
+    filterParams.push(category)
+    paramIndex++
+  }
+
+  if (country) {
+    filterConditions.push(`l.location_country = $${paramIndex}`)
+    filterParams.push(country)
+    paramIndex++
+  }
+
+  if (minPrice !== undefined) {
+    filterConditions.push(`l.starting_price >= $${paramIndex}`)
+    filterParams.push(minPrice)
+    paramIndex++
+  }
+
+  if (maxPrice !== undefined) {
+    filterConditions.push(`l.starting_price <= $${paramIndex}`)
+    filterParams.push(maxPrice)
+    paramIndex++
+  }
+
+  // Add search condition
+  filterConditions.push(`l.search_vector @@ to_tsquery('english', $${paramIndex})`)
+  filterParams.push(sanitized)
+  const searchParamIndex = paramIndex
+  paramIndex++
+
+  const whereClause = filterConditions.join(' AND ')
+
+  // Determine ORDER BY clause
+  let orderByClause = ''
+  switch (sortBy) {
+    case 'relevance':
+      orderByClause = `ts_rank(l.search_vector, to_tsquery('english', $${searchParamIndex})) DESC, a.current_end_time ASC`
+      break
+    case 'ending_soon':
+      orderByClause = 'a.current_end_time ASC'
+      break
+    case 'newly_listed':
+      orderByClause = 'a.start_time DESC'
+      break
+    case 'price_low':
+      orderByClause = 'a.current_bid ASC NULLS FIRST'
+      break
+    case 'price_high':
+      orderByClause = 'a.current_bid DESC NULLS LAST'
+      break
+    case 'most_bids':
+      orderByClause = 'a.bid_count DESC'
+      break
+  }
+
+  // Count total matching auctions
+  const countQuery = `
+    SELECT COUNT(*)::int as count
+    FROM auctions a
+    INNER JOIN listings l ON a.listing_id = l.id
+    WHERE ${whereClause}
+  `
+
+  const countResult = await prisma.$queryRawUnsafe<[{ count: number }]>(countQuery, ...filterParams)
+  const total = countResult[0]?.count || 0
+
+  // Fetch paginated auctions
+  const offset = (page - 1) * limit
+  filterParams.push(limit, offset)
+
+  const auctionsQuery = `
+    SELECT
+      a.id,
+      a.listing_id,
+      a.start_time,
+      a.original_end_time,
+      a.current_end_time,
+      a.anti_sniping_enabled,
+      a.anti_sniping_window_minutes,
+      a.anti_sniping_extension_minutes,
+      a.extension_count,
+      a.max_extensions,
+      a.starting_price,
+      a.reserve_price,
+      a.reserve_met,
+      a.current_bid,
+      a.bid_increment,
+      a.currency,
+      a.bid_count,
+      a.next_bidder_number,
+      a.status,
+      a.winner_id,
+      a.winning_bid_id,
+      a.final_price,
+      a.buyer_fee_rate,
+      a.buyer_fee_amount,
+      a.payment_status,
+      a.payment_intent_id,
+      a.paid_at,
+      a.payment_deadline,
+      a.seller_payout_status,
+      a.seller_payout_id,
+      a.seller_payout_amount,
+      a.seller_paid_at,
+      a.created_at,
+      a.updated_at,
+      l.id as listing_id,
+      l.title,
+      l.year,
+      l.make,
+      l.model,
+      l.starting_price as listing_starting_price,
+      l.currency as listing_currency,
+      l.location_city,
+      l.location_country,
+      l.is_running,
+      ts_rank(l.search_vector, to_tsquery('english', $${searchParamIndex})) as search_rank
+    FROM auctions a
+    INNER JOIN listings l ON a.listing_id = l.id
+    WHERE ${whereClause}
+    ORDER BY ${orderByClause}
+    LIMIT $${paramIndex} OFFSET $${paramIndex + 1}
+  `
+
+  const auctionsRaw = await prisma.$queryRawUnsafe<unknown[]>(auctionsQuery, ...filterParams)
+
+  // Fetch media for each listing
+  const auctionIds = (auctionsRaw as { id: string }[]).map(a => a.id)
+
+  const media = auctionIds.length > 0
+    ? await prisma.listingMedia.findMany({
+        where: {
+          listing: {
+            auction: {
+              id: { in: auctionIds }
+            }
+          },
+          type: 'PHOTO',
+        },
+        orderBy: { position: 'asc' },
+        take: auctionIds.length, // One per auction
+      })
+    : []
+
+  // Transform raw results to match expected structure
+  const auctions = (auctionsRaw as {
+    id: string
+    listing_id: string
+    start_time: Date
+    current_end_time: Date
+    current_bid: number | null
+    bid_count: number
+    reserve_met: boolean
+    title: string
+    year: number
+    make: string
+    model: string
+    listing_starting_price: number
+    listing_currency: string
+    location_city: string
+    location_country: string
+    is_running: boolean
+    search_rank: number
+  }[]).map(a => ({
+    id: a.id,
+    listingId: a.listing_id,
+    startTime: a.start_time,
+    currentEndTime: a.current_end_time,
+    currentBid: a.current_bid,
+    bidCount: a.bid_count,
+    reserveMet: a.reserve_met,
+    listing: {
+      id: a.listing_id,
+      title: a.title,
+      year: a.year,
+      make: a.make,
+      model: a.model,
+      startingPrice: a.listing_starting_price,
+      currency: a.listing_currency,
+      locationCity: a.location_city,
+      locationCountry: a.location_country,
+      isRunning: a.is_running,
+      media: media.filter(m => m.listingId === a.listing_id).slice(0, 1),
+    },
+    _count: {
+      bids: a.bid_count,
+    },
+  }))
 
   return {
     auctions,

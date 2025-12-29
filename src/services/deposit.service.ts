@@ -399,7 +399,7 @@ export class DepositService implements IBidDepositService {
     let releasedCount = 0
     for (const deposit of deposits) {
       const released = await this.releaseBidDeposit(deposit.id)
-      if (released) releasedCount++
+      if (released) {releasedCount++}
     }
 
     return releasedCount

@@ -20,7 +20,9 @@
     "all": "Toate",
     "none": "Niciuna",
     "yes": "Da",
-    "no": "Nu"
+    "no": "Nu",
+    "page": "Pagina",
+    "of": "din"
   },
   "nav": {
     "home": "Acasa",
@@ -33,7 +35,8 @@
     "watchlist": "Favorite",
     "myBids": "Lictatiile Mele",
     "myListings": "Anunturile Mele",
-    "settings": "Setari"
+    "settings": "Setari",
+    "messages": "Mesaje"
   },
   "auth": {
     "login": "Autentificare",
@@ -113,9 +116,48 @@
     "reserveNotMet": "Rezerva Neatinsa",
     "watchlist": "Urmareste",
     "watching": "Urmaresti",
+    "addToWatchlist": "Adauga la favorite",
+    "removeFromWatchlist": "Elimina din favorite",
+    "watchlistCount": "{count} urmaresc",
+    "addedToWatchlist": "Adaugat la favorite",
+    "removedFromWatchlist": "Eliminat din favorite",
+    "loginToWatchlist": "Te rugam sa te autentifici pentru a adauga la favorite",
     "buyerFee": "Comision Cumparator (5%)",
     "total": "Total",
-    "extendedBy": "Prelungit cu {minutes} min"
+    "extendedBy": "Prelungit cu {minutes} min",
+    "similarObjects": "Obiecte similare",
+    "estimate": "Estimare",
+    "estimateRange": "Estimare {low} - {high}",
+    "estimateTooltip": "Aceasta este estimarea noastra a valorii de piata bazata pe vanzari comparabile si starea vehiculului",
+    "search": {
+      "placeholder": "Cauta dupa marca, model sau cuvinte cheie...",
+      "resultsFor": "{count} {count, plural, one {rezultat} other {rezultate}} pentru \"{query}\"",
+      "noResults": "Nu s-au gasit licitatii pentru \"{query}\"",
+      "noResultsDescription": "Incearca alte cuvinte cheie sau ajusteaza filtrele",
+      "searchResults": "Rezultate Cautare",
+      "clearSearch": "Sterge cautarea"
+    },
+    "buyerProtection": {
+      "title": "Cumpara cu Incredere",
+      "protectionTitle": "Protectia Cumparatorului Finds",
+      "protectionDescription": "Plata ta este in siguranta pana primesti vehiculul.",
+      "viewDetails": "Vezi detalii",
+      "trustpilotTitle": "Trustpilot 4.8 | 1,234 recenzii",
+      "trustpilotDescription": "Reputatia noastra este excelenta."
+    },
+    "feeBreakdown": {
+      "title": "Alte Costuri",
+      "pickupRequired": "Ridicare necesara",
+      "pickupLocation": "Ridicare din {city}, {country}",
+      "buyerFee": "Comision cumparator: {percent}%",
+      "buyerFeeDescription": "Calculat pe pretul final de adjudecare",
+      "privateSellerDisclaimer": "Acest vehicul este vandut de un vanzator privat. Drepturile consumatorului UE pot sa nu se aplice."
+    },
+    "paymentMethods": {
+      "title": "Metode de Plata",
+      "acceptedMethods": "Acceptam urmatoarele metode de plata:",
+      "bankTransfer": "Transfer Bancar"
+    }
   },
   "listing": {
     "submit": "Trimite un Anunt",
@@ -211,7 +253,31 @@
     "biddingHistory": "Istoric Licitatii",
     "wonAuctions": "Licitatii Castigate",
     "activeListings": "Anunturi Active",
-    "pastListings": "Anunturi Anterioare"
+    "pastListings": "Anunturi Anterioare",
+    "myBids": "Licitatiile Mele",
+    "myBidsDescription": "Vizualizeaza si urmareste toate licitatiile tale intr-un singur loc",
+    "yourBid": "Licitatia Ta",
+    "currentPrice": "Pret Curent",
+    "endsIn": "Se termina in",
+    "bidPlacedAt": "Licitatie plasata",
+    "bidStatus": {
+      "winning": "Castigi",
+      "won": "Castigat",
+      "lost": "Pierdut",
+      "outbid": "Depasit"
+    },
+    "bidFilters": {
+      "all": "Toate Licitatiile",
+      "active": "Active",
+      "won": "Castigate",
+      "lost": "Pierdute"
+    },
+    "bidResultsCount": "{count} licitatii gasite",
+    "noBidsTitle": "Nicio Licitatie Inca",
+    "noBidsDescription": "Nu ai plasat inca nicio licitatie. Incepe sa licitezi pentru a le vedea aici.",
+    "noBidsFiltered": "Nicio licitatie {filter} gasita",
+    "browseAuctions": "Exploreaza Licitatiile",
+    "paginationInfo": "Afisare {from} - {to} din {total} licitatii"
   },
   "admin": {
     "users": {
@@ -302,6 +368,13 @@
     "serverError": "Ceva nu a functionat. Te rugam sa incerci din nou."
   },
   "seller": {
+    "followers": "Urmaritori",
+    "following": {
+      "follow": "Urmareste",
+      "following": "Urmaresti",
+      "unfollow": "Nu mai urmari",
+      "loading": "Se incarca..."
+    },
     "dashboard": {
       "title": "Panoul Vanzatorului",
       "description": "Gestioneaza platile si vanzarile tale",
@@ -397,5 +470,112 @@
     "createRequestError": "Crearea solicitarii a esuat",
     "exportRequestCreated": "Solicitare de export date creata cu succes. Vei primi un email cand este gata.",
     "deleteRequestCreated": "Solicitare de stergere cont creata. Ai 30 de zile pentru a anula inainte de stergerea permanenta."
+  },
+  "comments": {
+    "title": "Comentarii si Intrebari",
+    "writeComment": "Pune o intrebare sau lasa un comentariu...",
+    "writeReply": "Scrie un raspuns...",
+    "loginToComment": "Te rugam sa te autentifici pentru a comenta sau pune intrebari",
+    "login": "Autentificare",
+    "reply": "Raspunde",
+    "replyingTo": "Raspunzi la comentariu",
+    "postReply": "Posteaza Raspuns",
+    "characterLimit": "Maxim {max} caractere",
+    "noComments": "Inca nu sunt comentarii",
+    "beTheFirst": "Fii primul care pune o intrebare despre acest vehicul",
+    "anonymous": "Anonim",
+    "commentPosted": "Comentariu Postat",
+    "commentPostedSuccess": "Comentariul tau a fost postat si va fi revizuit",
+    "commentPostFailed": "Postarea comentariului a esuat. Te rugam sa incerci din nou."
+  },
+  "messages": {
+    "title": "Mesaje",
+    "description": "Comunica cu cumparatori si vanzatori",
+    "conversations": "Conversatii",
+    "noConversations": "Inca nu ai conversatii",
+    "noConversationsHint": "Incepe o conversatie apasand 'Intreaba Vanzatorul' pe orice anunt",
+    "selectConversation": "Selecteaza o conversatie pentru a vedea mesajele",
+    "noMessages": "Inca nu sunt mesaje",
+    "startConversation": "Trimite primul mesaj pentru a incepe conversatia",
+    "typeMessage": "Scrie un mesaj...",
+    "regarding": "Re:",
+    "askSeller": "Intreaba Vanzatorul",
+    "loginRequired": "Te rugam sa te autentifici pentru a trimite mesaje vanzatorului",
+    "cannotMessageOwnListing": "Nu poti trimite mesaje la propriul anunt",
+    "fetchError": "Incarcarea conversatiilor a esuat",
+    "fetchMessagesError": "Incarcarea mesajelor a esuat",
+    "sendError": "Trimiterea mesajului a esuat",
+    "startConversationError": "Inceperea conversatiei a esuat"
+  },
+  "reviews": {
+    "reviews": "Recenzii",
+    "noReviews": "Inca nu sunt recenzii",
+    "leaveReview": "Lasa o Recenzie",
+    "leaveReviewTitle": "Lasa o Recenzie",
+    "leaveReviewDescription": "Spune-ne despre experienta ta de cumparare de la {seller} pentru {vehicle}",
+    "rating": "Evaluare",
+    "selectRating": "Selecteaza o evaluare",
+    "ratingRequired": "Te rugam sa selectezi o evaluare",
+    "ratingLabels": {
+      "1": "Slab",
+      "2": "Acceptabil",
+      "3": "Bun",
+      "4": "Foarte Bun",
+      "5": "Excelent"
+    },
+    "titleOptional": "Titlu (optional)",
+    "titlePlaceholder": "Rezuma experienta ta",
+    "reviewOptional": "Recenzie (optional)",
+    "reviewPlaceholder": "Spune-ne despre experienta ta cu acest vanzator...",
+    "submitReview": "Trimite Recenzie",
+    "submitting": "Se trimite...",
+    "reviewSubmitted": "Recenzie trimisa cu succes!",
+    "submitError": "Trimiterea recenziei a esuat. Te rugam sa incerci din nou.",
+    "reviewFor": "Recenzie pentru",
+    "memberSince": "Membru din",
+    "totalListings": "Total Anunturi",
+    "activeListings": "Anunturi Active",
+    "activeAuctions": "Licitatii Active",
+    "viewAllListings": "Vezi Toate Anunturile",
+    "viewProfile": "Vezi Profil"
+  },
+  "condition": {
+    "title": "Evaluare Stare Tehnica",
+    "categoriesAssessed": "categorii evaluate",
+    "notAssessed": "Neevaluat",
+    "disclaimer": "Evaluarile starii tehnice sunt furnizate de vanzator. Toate vehiculele sunt vandute in starea in care se afla. Va rugam sa inspectati cu atentie inainte de licitare.",
+    "gridIntro": "Va rugam sa evaluati starea tehnica a vehiculului pe aceste 5 categorii. Fiti amanuntit si onest - transparenta creeaza incredere din partea cumparatorilor.",
+    "rating": "Evaluare Stare",
+    "selectRating": "Selecteaza evaluarea starii",
+    "notes": "Note Aditionale (Optional)",
+    "isRunning": {
+      "label": "Vehiculul functioneaza?",
+      "description": "Poate fi condus vehiculul din putere proprie?"
+    },
+    "nonRunningNotice": "Vehiculele nefunctionale sunt binevenite pe Finds. Masini gasite in hambare si proiecte auto reprezinta o parte semnificativa a comunitatii noastre. Asigurati-va ca descrieti ceea ce se stie despre motivul pentru care vehiculul nu functioneaza.",
+    "knownIssues": {
+      "label": "Probleme Cunoscute",
+      "placeholder": "Listati toate problemele, defectele sau deficientele cunoscute ale vehiculului. Fiti amanuntit - acest lucru va protejeaza atat pe dvs., cat si pe cumparator.",
+      "hint": "Daca nu exista probleme cunoscute, puteti scrie 'Fara probleme cunoscute'. Totusi, pentru masini proiect si cele gasite in hambare, de obicei sunt mai multe aspecte de dezvăluit."
+    },
+    "categories": {
+      "overall": "Stare Generala",
+      "overallPlaceholder": "Descrieti starea generala a vehiculului. Luati in considerare varsta, kilometrajul, istoricul intretinerii si prezentarea generala.",
+      "paintBody": "Vopsea si Caroserie",
+      "paintBodyPlaceholder": "Notati eventualele ciobituri, zgarieturi, lovituri, rugina, revopsiri sau lucrari la caroserie. Mentionati spatiile dintre panouri si ajustarea acestora.",
+      "interior": "Interior",
+      "interiorPlaceholder": "Descrieti scaunele, covoarele, bordul, plafonul, butoanele. Notati uzura, rupturi, pete sau modificari.",
+      "frame": "Sasiu si Partea de Jos",
+      "framePlaceholder": "Evaluati integritatea structurala, rugina, reparatii anterioare, starea subcadrul si protectia caroseriei pe dedesubt.",
+      "mechanical": "Mecanic",
+      "mechanicalPlaceholder": "Acoperiti performanta motorului, transmisie, frane, suspensie, sistemul electric. Notati orice service recent sau probleme."
+    },
+    "ratings": {
+      "EXCELLENT": "Excelent",
+      "VERY_GOOD": "Foarte Bun",
+      "GOOD": "Bun",
+      "FAIR": "Acceptabil",
+      "POOR": "Slab"
+    }
   }
 }

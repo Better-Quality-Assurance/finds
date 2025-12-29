@@ -92,6 +92,11 @@ model User {
   unbannedAt  DateTime? @map("unbanned_at")
   unbanReason String?   @map("unban_reason") @db.Text
 
+  // Seller ratings
+  averageRating Float? @map("average_rating")
+  totalReviews  Int    @default(0) @map("total_reviews")
+  followerCount Int    @default(0) @map("follower_count")
+
   // GDPR & Preferences
   marketingConsent     Boolean   @default(false)
   marketingConsentDate DateTime? @map("marketing_consent_date")
@@ -115,8 +120,17 @@ model User {
   fraudAlerts    FraudAlert[]
   dataRequests   DataRequest[]
   consentRecords ConsentRecord[]
+  sellerReviews  SellerReview[]  @relation("SellerReviews")
+  reviewsGiven   SellerReview[]  @relation("ReviewsGiven")
+  following      SellerFollow[]  @relation("Following")
+  followers      SellerFollow[]  @relation("Followers")
 
   @@map("users")
+
+  // Messaging relations
+  buyerConversations  Conversation[] @relation("BuyerConversations")
+  sellerConversations Conversation[] @relation("SellerConversations")
+  messages            Message[]
 }
 
 // ============================================================================
@@ -168,6 +182,18 @@ model Listing {
   knownIssues     String? @map("known_issues") @db.Text
   isRunning       Boolean @default(true) @map("is_running")
 
+  // Detailed Condition Grid (Catawiki-style 5 categories)
+  conditionOverall          String? @map("condition_overall") // Excellent, Very Good, Good, Fair, Poor
+  conditionOverallNotes     String? @map("condition_overall_notes") @db.Text
+  conditionPaintBody        String? @map("condition_paint_body")
+  conditionPaintBodyNotes   String? @map("condition_paint_body_notes") @db.Text
+  conditionInterior         String? @map("condition_interior")
+  conditionInteriorNotes    String? @map("condition_interior_notes") @db.Text
+  conditionFrame            String? @map("condition_frame")
+  conditionFrameNotes       String? @map("condition_frame_notes") @db.Text
+  conditionMechanical       String? @map("condition_mechanical")
+  conditionMechanicalNotes  String? @map("condition_mechanical_notes") @db.Text
+
   // Location
   locationCountry String  @default("RO") @map("location_country")
   locationCity    String  @map("location_city")
@@ -176,6 +202,8 @@ model Listing {
   // Pricing
   startingPrice Decimal  @map("starting_price") @db.Decimal(12, 2)
   reservePrice  Decimal? @map("reserve_price") @db.Decimal(12, 2)
+  estimateLow   Int?     @map("estimate_low") // Estimated value range (low)
+  estimateHigh  Int?     @map("estimate_high") // Estimated value range (high)
   currency      String   @default("EUR")
 
   // Status & Review
@@ -191,12 +219,16 @@ model Listing {
   submittedAt DateTime? @map("submitted_at")
   approvedAt  DateTime? @map("approved_at")
 
+  // Full-text search (managed by PostgreSQL trigger)
+  searchVector Unsupported("tsvector")? @map("search_vector")
+
   // Relations
-  media       ListingMedia[]
-  auction     Auction?
-  comments    Comment[]
-  aiAnalysis  AIListingAnalysis?
-  aiCarReview AICarReview?
+  media         ListingMedia[]
+  auction       Auction?
+  comments      Comment[]
+  aiAnalysis    AIListingAnalysis?
+  aiCarReview   AICarReview?
+  conversations Conversation[]
 
   @@index([status])
   @@index([sellerId])
@@ -323,8 +355,9 @@ model Auction {
   updatedAt DateTime @updatedAt @map("updated_at")
 
   // Relations
-  bids      Bid[]
-  watchlist Watchlist[]
+  bids          Bid[]
+  watchlist     Watchlist[]
+  sellerReviews SellerReview[]
 
   @@index([status])
   @@index([currentEndTime])
@@ -449,6 +482,20 @@ model Comment {
   @@index([listingId])
   @@index([authorId])
   @@map("comments")
+}
+
+model SellerFollow {
+  id         String   @id @default(cuid())
+  followerId String   @map("follower_id")
+  follower   User     @relation("Following", fields: [followerId], references: [id], onDelete: Cascade)
+  sellerId   String   @map("seller_id")
+  seller     User     @relation("Followers", fields: [sellerId], references: [id], onDelete: Cascade)
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  @@unique([followerId, sellerId])
+  @@index([sellerId])
+  @@index([followerId])
+  @@map("seller_follows")
 }
 
 // ============================================================================
@@ -834,4 +881,68 @@ model SystemConfigHistory {
 
   @@index([configId, changedAt(sort: Desc)])
   @@map("system_config_history")
+}
+
+// ============================================================================
+// SELLER REVIEWS
+// ============================================================================
+
+model SellerReview {
+  id         String   @id @default(cuid())
+  sellerId   String   @map("seller_id")
+  seller     User     @relation("SellerReviews", fields: [sellerId], references: [id], onDelete: Cascade)
+  reviewerId String   @map("reviewer_id")
+  reviewer   User     @relation("ReviewsGiven", fields: [reviewerId], references: [id], onDelete: Cascade)
+  auctionId  String   @map("auction_id")
+  auction    Auction  @relation(fields: [auctionId], references: [id], onDelete: Cascade)
+
+  rating     Int      // 1-5 stars
+  title      String?
+  content    String?  @db.Text
+
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @updatedAt @map("updated_at")
+
+  @@unique([auctionId, reviewerId]) // One review per auction per buyer
+  @@index([sellerId, createdAt(sort: Desc)])
+  @@map("seller_reviews")
+}
+
+// ============================================================================
+// MESSAGING MODELS
+// ============================================================================
+
+model Conversation {
+  id        String   @id @default(cuid())
+  listingId String   @map("listing_id")
+  listing   Listing  @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  buyerId   String   @map("buyer_id")
+  buyer     User     @relation("BuyerConversations", fields: [buyerId], references: [id], onDelete: Cascade)
+  sellerId  String   @map("seller_id")
+  seller    User     @relation("SellerConversations", fields: [sellerId], references: [id], onDelete: Cascade)
+  messages  Message[]
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@unique([listingId, buyerId])
+  @@index([buyerId])
+  @@index([sellerId])
+  @@index([listingId])
+  @@index([updatedAt(sort: Desc)])
+  @@map("conversations")
+}
+
+model Message {
+  id             String       @id @default(cuid())
+  conversationId String       @map("conversation_id")
+  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  senderId       String       @map("sender_id")
+  sender         User         @relation(fields: [senderId], references: [id], onDelete: Cascade)
+  content        String       @db.Text
+  isRead         Boolean      @default(false) @map("is_read")
+  createdAt      DateTime     @default(now()) @map("created_at")
+
+  @@index([conversationId, createdAt])
+  @@index([senderId])
+  @@map("messages")
 }

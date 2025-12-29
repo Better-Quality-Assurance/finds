@@ -73,7 +73,7 @@ export function ListingForm({ listingId, initialData }: ListingFormProps) {
     const fieldsToValidate = getFieldsForStep(currentStep)
     const isValid = await form.trigger(fieldsToValidate as any)
 
-    if (!isValid) return
+    if (!isValid) {return}
 
     // On first step completion, save draft
     if (currentStep === 0 && !createdListingId) {

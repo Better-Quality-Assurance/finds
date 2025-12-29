@@ -88,7 +88,7 @@ export function AISettingsClient({ isAdmin }: AISettingsClientProps) {
     try {
       setLoading(true)
       const response = await fetch('/api/admin/ai-settings')
-      if (!response.ok) throw new Error('Failed to fetch settings')
+      if (!response.ok) {throw new Error('Failed to fetch settings')}
 
       const data = await response.json()
       setSettings(data)
@@ -107,14 +107,14 @@ export function AISettingsClient({ isAdmin }: AISettingsClientProps) {
 
   // Track changes
   useEffect(() => {
-    if (!settings || !originalSettings) return
+    if (!settings || !originalSettings) {return}
     const changed = JSON.stringify(settings.moderation) !== JSON.stringify(originalSettings.moderation) ||
                    JSON.stringify(settings.licensePlate) !== JSON.stringify(originalSettings.licensePlate)
     setHasChanges(changed)
   }, [settings, originalSettings])
 
   const handleSave = async () => {
-    if (!settings) return
+    if (!settings) {return}
 
     try {
       setSaving(true)
@@ -163,7 +163,7 @@ export function AISettingsClient({ isAdmin }: AISettingsClientProps) {
     key: K,
     value: AISettings['moderation'][K]
   ) => {
-    if (!settings) return
+    if (!settings) {return}
     setSettings({
       ...settings,
       moderation: { ...settings.moderation, [key]: value },
@@ -174,7 +174,7 @@ export function AISettingsClient({ isAdmin }: AISettingsClientProps) {
     key: K,
     value: AISettings['licensePlate'][K]
   ) => {
-    if (!settings) return
+    if (!settings) {return}
     setSettings({
       ...settings,
       licensePlate: { ...settings.licensePlate, [key]: value },
