@@ -3,6 +3,23 @@ import { BuyerFeeService } from '@/services/buyer-fee.service'
 import { PaymentStatus, Prisma } from '@prisma/client'
 import { createMockPrisma, createMockStripe, factories } from '../helpers/test-utils'
 
+// Mock the stripe module to avoid real API calls
+vi.mock('@/lib/stripe', () => ({
+  getDefaultPaymentMethod: vi.fn(),
+  getStripe: vi.fn(() => ({
+    paymentIntents: { create: vi.fn(), retrieve: vi.fn() },
+    customers: { retrieve: vi.fn() },
+    paymentMethods: { list: vi.fn() },
+  })),
+  stripe: {
+    customers: { retrieve: vi.fn() },
+    paymentMethods: { list: vi.fn() },
+  },
+}))
+
+// Import after mock setup
+import { getDefaultPaymentMethod } from '@/lib/stripe'
+
 describe('BuyerFeeService', () => {
   let buyerFeeService: BuyerFeeService
   let mockPrisma: ReturnType<typeof createMockPrisma>
@@ -26,7 +43,7 @@ describe('BuyerFeeService', () => {
         finalPrice: new Prisma.Decimal(finalPrice),
         buyerFeeAmount: new Prisma.Decimal(buyerFee),
         paymentStatus: PaymentStatus.UNPAID,
-        paymentDeadline: new Date('2024-12-31'),
+        paymentDeadline: new Date('2099-12-31'),
       })
 
       const listing = factories.listing()
@@ -48,9 +65,8 @@ describe('BuyerFeeService', () => {
 
       vi.mocked(mockPrisma.user.findUnique).mockResolvedValue(user as any)
 
-      vi.mocked(mockStripe.paymentMethods.list).mockResolvedValue({
-        data: [factories.stripePaymentMethod()],
-      } as any)
+      // Mock getDefaultPaymentMethod from @/lib/stripe
+      vi.mocked(getDefaultPaymentMethod).mockResolvedValue(factories.stripePaymentMethod())
 
       vi.mocked(mockStripe.paymentIntents.create).mockResolvedValue(paymentIntent)
       vi.mocked(mockPrisma.auction.update).mockResolvedValue({} as any)
@@ -158,7 +174,7 @@ describe('BuyerFeeService', () => {
         winnerId: 'user-123',
         finalPrice: new Prisma.Decimal(1000),
         buyerFeeAmount: new Prisma.Decimal(50),
-        paymentDeadline: new Date('2024-12-31'),
+        paymentDeadline: new Date('2099-12-31'),
       })
       const listing = factories.listing()
 
@@ -179,9 +195,8 @@ describe('BuyerFeeService', () => {
 
       vi.mocked(mockPrisma.user.findUnique).mockResolvedValue(user as any)
 
-      vi.mocked(mockStripe.paymentMethods.list).mockResolvedValue({
-        data: [factories.stripePaymentMethod()],
-      } as any)
+      // Mock getDefaultPaymentMethod from @/lib/stripe
+      vi.mocked(getDefaultPaymentMethod).mockResolvedValue(factories.stripePaymentMethod())
 
       vi.mocked(mockStripe.paymentIntents.create).mockResolvedValue(paymentIntent)
       vi.mocked(mockPrisma.auction.update).mockResolvedValue({} as any)
@@ -206,7 +221,7 @@ describe('BuyerFeeService', () => {
         winnerId: 'user-123',
         finalPrice: new Prisma.Decimal(1000),
         buyerFeeAmount: new Prisma.Decimal(50),
-        paymentDeadline: new Date('2024-12-31'),
+        paymentDeadline: new Date('2099-12-31'),
       })
       const listing = factories.listing()
 
@@ -222,9 +237,8 @@ describe('BuyerFeeService', () => {
 
       vi.mocked(mockPrisma.user.findUnique).mockResolvedValue(user as any)
 
-      vi.mocked(mockStripe.paymentMethods.list).mockResolvedValue({
-        data: [factories.stripePaymentMethod()],
-      } as any)
+      // Mock getDefaultPaymentMethod from @/lib/stripe
+      vi.mocked(getDefaultPaymentMethod).mockResolvedValue(factories.stripePaymentMethod())
 
       vi.mocked(mockStripe.paymentIntents.create).mockRejectedValue(
         new Error('card_declined: Your card was declined')
@@ -246,7 +260,7 @@ describe('BuyerFeeService', () => {
       const auction = {
         paymentStatus: PaymentStatus.UNPAID,
         paidAt: null,
-        paymentDeadline: new Date('2024-12-31'),
+        paymentDeadline: new Date('2099-12-31'),
         finalPrice: new Prisma.Decimal(finalPrice),
         buyerFeeAmount: new Prisma.Decimal(buyerFee),
       }
@@ -272,14 +286,14 @@ describe('BuyerFeeService', () => {
 
   describe('setPaymentDeadline', () => {
     it('should set payment deadline 5 business days after auction end', async () => {
-      const auctionEndTime = new Date('2024-01-01T10:00:00Z') // Monday
+      const auctionEndTime = new Date('2099-01-01T10:00:00Z') // Monday
 
       const auction = {
         currentEndTime: auctionEndTime,
       }
 
       const updatedAuction = factories.auction({
-        paymentDeadline: new Date('2024-01-08T10:00:00Z'), // 5 business days later
+        paymentDeadline: new Date('2099-01-08T10:00:00Z'), // 5 business days later
       })
 
       vi.mocked(mockPrisma.auction.findUnique).mockResolvedValue(auction as any)

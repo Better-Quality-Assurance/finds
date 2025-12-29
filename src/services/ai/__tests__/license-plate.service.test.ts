@@ -4,7 +4,7 @@
  * Demonstrates improved testability after OCP refactoring
  */
 
-import { describe, it, expect, beforeEach } from '@jest/globals'
+import { describe, it, expect, beforeEach } from 'vitest'
 import type { IVisionProvider } from '@/services/contracts/vision-provider.interface'
 import { LicensePlateDetectionService } from '../license-plate.service'
 import type { PlateDetectionResult } from '../license-plate.service'

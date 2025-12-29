@@ -3,7 +3,7 @@
  * Shows how to test notification service without actual Pusher connection
  */
 
-import { describe, it, expect, beforeEach } from '@jest/globals'
+import { describe, it, expect, beforeEach } from 'vitest'
 import { MockNotificationTransport } from './mock-notification-transport'
 import {
   setNotificationTransport,
