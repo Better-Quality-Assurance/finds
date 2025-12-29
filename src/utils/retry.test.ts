@@ -46,9 +46,10 @@ describe('retry utilities', () => {
 
       const promise = withRetry(fn, { maxRetries: 3, baseDelay: 1000 })
 
+      // Attach rejection handler before running timers to avoid unhandled rejection
+      const expectation = expect(promise).rejects.toThrow('persistent failure')
       await vi.runAllTimersAsync()
-
-      await expect(promise).rejects.toThrow('persistent failure')
+      await expectation
       expect(fn).toHaveBeenCalledTimes(4) // 1 initial + 3 retries
     })
 
@@ -64,12 +65,15 @@ describe('retry utilities', () => {
         },
       })
 
+      // Attach rejection handler before advancing timers to avoid unhandled rejection
+      const expectation = expect(promise).rejects.toThrow('fail')
+
       // Manually advance timers to track delays
       await vi.advanceTimersByTimeAsync(1000) // First retry: 1s
       await vi.advanceTimersByTimeAsync(2000) // Second retry: 2s
       await vi.advanceTimersByTimeAsync(4000) // Third retry: 4s
 
-      await expect(promise).rejects.toThrow('fail')
+      await expectation
 
       // Should have 3 retries
       expect(delays).toHaveLength(3)
@@ -86,8 +90,10 @@ describe('retry utilities', () => {
         onRetry,
       })
 
+      // Attach rejection handler before running timers to avoid unhandled rejection
+      const handled = promise.catch(() => {}) // Suppress error
       await vi.runAllTimersAsync()
-      await promise.catch(() => {}) // Suppress error
+      await handled
 
       expect(onRetry).toHaveBeenCalledTimes(2)
       expect(onRetry).toHaveBeenNthCalledWith(1, 1, error)
@@ -95,7 +101,7 @@ describe('retry utilities', () => {
     })
 
     it('should respect shouldRetry predicate', async () => {
-      const retryableError = new Error('retryable')
+      const _retryableError = new Error('retryable')
       const nonRetryableError = new Error('non-retryable')
 
       const fn = vi.fn().mockRejectedValue(nonRetryableError)
@@ -105,8 +111,10 @@ describe('retry utilities', () => {
         shouldRetry: (err) => err.message === 'retryable',
       })
 
+      // Attach rejection handler before running timers to avoid unhandled rejection
+      const expectation = expect(promise).rejects.toThrow('non-retryable')
       await vi.runAllTimersAsync()
-      await expect(promise).rejects.toThrow('non-retryable')
+      await expectation
       expect(fn).toHaveBeenCalledTimes(1) // Should not retry
     })
 
@@ -115,8 +123,10 @@ describe('retry utilities', () => {
 
       const promise = withRetry(fn, { maxRetries: 1, baseDelay: 100 })
 
+      // Attach rejection handler before running timers to avoid unhandled rejection
+      const expectation = expect(promise).rejects.toThrow('string error')
       await vi.runAllTimersAsync()
-      await expect(promise).rejects.toThrow('string error')
+      await expectation
     })
   })
 
@@ -235,9 +245,9 @@ describe('retry utilities', () => {
       await vi.runAllTimersAsync()
       await promise
 
-      // Delays should be approximately: 1000ms, 2000ms, 4000ms
-      // (with some tolerance for timer precision)
-      expect(delays.length).toBe(3)
+      // onRetry called 3 times, but first call initializes lastTime
+      // so only 2 delays are recorded (between attempts 1-2 and 2-3)
+      expect(delays.length).toBe(2)
     })
   })
 
