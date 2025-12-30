@@ -6,6 +6,7 @@ import { withErrorHandler } from '@/lib/with-error-handler'
 import { successResponse } from '@/lib/api-response'
 import { UnauthorizedError, NotFoundError, BadRequestError } from '@/lib/errors'
 import { moderateComment } from '@/services/ai-moderation.service'
+import { broadcastNewComment } from '@/services/notification.service'
 
 type RouteParams = { params: Promise<{ id: string }> }
 
@@ -170,6 +171,30 @@ export const POST = withErrorHandler<{ id: string }>(
       console.error('AI moderation failed for comment:', comment.id, error)
       // Don't block comment creation if moderation fails
     })
+
+    // Get auction ID from listing to broadcast the comment
+    const auction = await prisma.auction.findFirst({
+      where: { listingId },
+      select: { id: true },
+    })
+
+    // Broadcast new comment to auction viewers via Pusher (non-blocking)
+    if (auction?.id) {
+      broadcastNewComment({
+        commentId: comment.id,
+        auctionId: auction.id,
+        listingId,
+        content: comment.content,
+        authorName: comment.author.name,
+        authorImage: comment.author.image,
+        authorId: session.user.id,
+        timestamp: comment.createdAt.toISOString(),
+        parentId: parentId || null,
+      }).catch((error) => {
+        console.error('Failed to broadcast new comment:', comment.id, error)
+        // Don't block comment creation if broadcast fails
+      })
+    }
 
     return successResponse(
       {

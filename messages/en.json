@@ -473,6 +473,7 @@
   },
   "comments": {
     "title": "Comments & Questions",
+    "activityTitle": "Activity",
     "writeComment": "Ask a question or leave a comment...",
     "writeReply": "Write a reply...",
     "loginToComment": "Please log in to comment or ask questions",
@@ -482,7 +483,9 @@
     "postReply": "Post Reply",
     "characterLimit": "Maximum {max} characters",
     "noComments": "No comments yet",
+    "noActivity": "No activity yet",
     "beTheFirst": "Be the first to ask a question about this vehicle",
+    "beTheFirstActivity": "Be the first to comment or bid!",
     "anonymous": "Anonymous",
     "commentPosted": "Comment Posted",
     "commentPostedSuccess": "Your comment has been posted and will be reviewed",

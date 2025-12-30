@@ -8,7 +8,7 @@ import { Badge } from '@/components/ui/badge'
 import { formatCurrency } from '@/lib/utils'
 import { MapPin, Calendar, Gauge, Car, Wrench, FileText, User } from 'lucide-react'
 import { Markdown } from '@/components/ui/markdown'
-import { CommentsSection } from '@/components/listing/comments-section'
+import { ActivityTimeline } from '@/components/auction/activity-timeline'
 import { SellerRatingBadge } from '@/components/seller/seller-rating-badge'
 import { SimilarAuctions } from '@/components/auction/similar-auctions'
 import { FollowButton } from '@/components/seller/follow-button'
@@ -402,8 +402,13 @@ export default async function AuctionDetailPage({ params }: PageProps) {
             </div>
           </div>
 
-          {/* Comments & Questions */}
-          <CommentsSection listingId={listing.id} locale={locale} />
+          {/* Activity Timeline - Comments & Bids */}
+          <ActivityTimeline
+            auctionId={auction.id}
+            listingId={listing.id}
+            currency={listing.currency}
+            locale={locale}
+          />
         </div>
 
         {/* Sidebar - Bid Panel (Desktop) + Mobile Sticky Bar */}

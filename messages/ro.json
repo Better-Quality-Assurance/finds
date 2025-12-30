@@ -473,6 +473,7 @@
   },
   "comments": {
     "title": "Comentarii si Intrebari",
+    "activityTitle": "Activitate",
     "writeComment": "Pune o intrebare sau lasa un comentariu...",
     "writeReply": "Scrie un raspuns...",
     "loginToComment": "Te rugam sa te autentifici pentru a comenta sau pune intrebari",
@@ -482,7 +483,9 @@
     "postReply": "Posteaza Raspuns",
     "characterLimit": "Maxim {max} caractere",
     "noComments": "Inca nu sunt comentarii",
+    "noActivity": "Inca nu este activitate",
     "beTheFirst": "Fii primul care pune o intrebare despre acest vehicul",
+    "beTheFirstActivity": "Fii primul care comenteaza sau liciteaza!",
     "anonymous": "Anonim",
     "commentPosted": "Comentariu Postat",
     "commentPostedSuccess": "Comentariul tau a fost postat si va fi revizuit",

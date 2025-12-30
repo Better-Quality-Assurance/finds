@@ -587,7 +587,12 @@ export async function broadcastNewBid(data: {
   isReserveMet: boolean
 }): Promise<void> {
   try {
+    // Broadcast to auction-specific channel
     await transport.send(`auction-${data.auctionId}`, EVENTS.NEW_BID, data)
+
+    // Also broadcast to public channel for homepage updates
+    await transport.send('public', EVENTS.NEW_BID, data)
+
     console.log(`Broadcast new bid for auction ${data.auctionId}`)
   } catch (error) {
     console.error(`Failed to broadcast new bid for auction ${data.auctionId}:`, error)
@@ -733,6 +738,38 @@ export async function notifyWinner(
     console.log(`Notified winner ${userId} for auction ${data.auctionId}`)
   } catch (error) {
     console.error(`Failed to notify winner ${userId}:`, error)
+  }
+}
+
+/**
+ * Broadcast a new comment to all viewers of an auction
+ * Uses the transport layer to send to auction-specific channel
+ */
+export async function broadcastNewComment(data: {
+  commentId: string
+  auctionId: string
+  listingId: string
+  content: string
+  authorName: string | null
+  authorImage: string | null
+  authorId: string
+  timestamp: string
+  parentId: string | null
+}): Promise<void> {
+  try {
+    await transport.send(`auction-${data.auctionId}`, EVENTS.NEW_COMMENT, {
+      commentId: data.commentId,
+      auctionId: data.auctionId,
+      listingId: data.listingId,
+      content: data.content,
+      authorName: data.authorName,
+      authorImage: data.authorImage,
+      timestamp: data.timestamp,
+      parentId: data.parentId,
+    })
+    console.log(`Broadcast new comment for auction ${data.auctionId}`)
+  } catch (error) {
+    console.error(`Failed to broadcast new comment for auction ${data.auctionId}:`, error)
   }
 }
 

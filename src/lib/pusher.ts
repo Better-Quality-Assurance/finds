@@ -29,6 +29,7 @@ export const EVENTS = {
   AUCTION_STARTING: 'auction-starting',
   RESERVE_MET: 'reserve-met',
   WATCHLIST_COUNT_UPDATED: 'watchlist-count-updated',
+  NEW_COMMENT: 'new-comment',
 }
 
 // Event payload types
@@ -67,6 +68,17 @@ export type OutbidEvent = {
 export type WatchlistCountUpdatedEvent = {
   auctionId: string
   watchlistCount: number
+}
+
+export type NewCommentEvent = {
+  commentId: string
+  auctionId: string
+  listingId: string
+  content: string
+  authorName: string | null
+  authorImage: string | null
+  timestamp: string
+  parentId: string | null
 }
 
 /**
