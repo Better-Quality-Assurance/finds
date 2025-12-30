@@ -542,6 +542,15 @@
     "viewAllListings": "Vezi Toate Anunturile",
     "viewProfile": "Vezi Profil"
   },
+  "home": {
+    "latestBids": {
+      "title": "Ultimele Licitatii",
+      "liveCount": "{count, plural, one {# licitatie} other {# licitatii}} activa acum",
+      "viewAll": "Vezi Toate Licitatiile",
+      "latestBid": "Ultima Licitatie",
+      "bidder": "Licitator #{number}"
+    }
+  },
   "condition": {
     "title": "Evaluare Stare Tehnica",
     "categoriesAssessed": "categorii evaluate",

@@ -542,6 +542,15 @@
     "viewAllListings": "View All Listings",
     "viewProfile": "View Profile"
   },
+  "home": {
+    "latestBids": {
+      "title": "Latest Bids",
+      "liveCount": "{count, plural, one {# auction} other {# auctions}} now live",
+      "viewAll": "View All Auctions",
+      "latestBid": "Latest Bid",
+      "bidder": "Bidder #{number}"
+    }
+  },
   "condition": {
     "title": "Condition Assessment",
     "categoriesAssessed": "categories assessed",

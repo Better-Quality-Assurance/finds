@@ -1,110 +1,16 @@
 'use client'
 
-import { useEffect, useState } from 'react'
 import Image from 'next/image'
+import { useTranslations } from 'next-intl'
 import { Link } from '@/i18n/routing'
 import { Card, CardContent } from '@/components/ui/card'
 import { formatCurrency } from '@/lib/utils'
 import { Gavel, ArrowRight } from 'lucide-react'
-import Pusher from 'pusher-js'
-import { CHANNELS, EVENTS, type NewBidEvent } from '@/lib/pusher'
-
-type BidData = {
-  id: string
-  amount: number
-  currency: string
-  createdAt: string
-  bidderNumber: number
-  bidderCountry: string | null
-  auction: {
-    id: string
-    currentEndTime: string
-    reserveMet: boolean
-  }
-  listing: {
-    id: string
-    title: string
-    year: number
-    make: string
-    model: string
-    currency: string
-    imageUrl: string | null
-  }
-}
-
-type LatestBidsResponse = {
-  bids: BidData[]
-  liveAuctionCount: number
-}
-
-// Singleton Pusher instance for client-side
-let pusherInstance: Pusher | null = null
-
-function getPusherInstance(): Pusher {
-  if (!pusherInstance) {
-    pusherInstance = new Pusher(process.env.NEXT_PUBLIC_PUSHER_KEY!, {
-      cluster: process.env.NEXT_PUBLIC_PUSHER_CLUSTER!,
-    })
-  }
-  return pusherInstance
-}
+import { useLatestBids, type LatestBid } from '@/hooks/use-latest-bids'
 
 export function LatestBidsSection() {
-  const [bids, setBids] = useState<BidData[]>([])
-  const [liveCount, setLiveCount] = useState(0)
-  const [isLoading, setIsLoading] = useState(true)
-
-  // Fetch initial data
-  useEffect(() => {
-    async function fetchLatestBids() {
-      try {
-        const response = await fetch('/api/home/latest-bids')
-        if (!response.ok) {
-          throw new Error('Failed to fetch latest bids')
-        }
-        const data: LatestBidsResponse = await response.json()
-        setBids(data.bids)
-        setLiveCount(data.liveAuctionCount)
-      } catch (error) {
-        console.error('Error fetching latest bids:', error)
-      } finally {
-        setIsLoading(false)
-      }
-    }
-
-    fetchLatestBids()
-  }, [])
-
-  // Subscribe to Pusher public channel for real-time bid updates
-  useEffect(() => {
-    const pusher = getPusherInstance()
-    const channel = pusher.subscribe(CHANNELS.public)
-
-    const handleNewBid = async (_data: NewBidEvent) => {
-      // Fetch the full bid details
-      try {
-        const response = await fetch('/api/home/latest-bids')
-        if (!response.ok) {
-          return
-        }
-
-        const freshData: LatestBidsResponse = await response.json()
-
-        // Update bids and live count
-        setBids(freshData.bids)
-        setLiveCount(freshData.liveAuctionCount)
-      } catch (error) {
-        console.error('Error updating bid:', error)
-      }
-    }
-
-    channel.bind(EVENTS.NEW_BID, handleNewBid)
-
-    return () => {
-      channel.unbind(EVENTS.NEW_BID, handleNewBid)
-      pusher.unsubscribe(CHANNELS.public)
-    }
-  }, [])
+  const t = useTranslations('home.latestBids')
+  const { bids, liveAuctionCount, isLoading } = useLatestBids()
 
   if (isLoading) {
     return (
@@ -137,17 +43,17 @@ export function LatestBidsSection() {
         <div className="mb-8 flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
           <div>
             <h2 className="font-heading text-3xl font-bold tracking-tight md:text-4xl">
-              Latest Bids
+              {t('title')}
             </h2>
             <p className="mt-2 text-lg text-muted-foreground">
-              {liveCount} {liveCount === 1 ? 'auction' : 'auctions'} now live
+              {t('liveCount', { count: liveAuctionCount })}
             </p>
           </div>
           <Link
             href="/auctions"
             className="group inline-flex items-center gap-2 text-primary hover:underline"
           >
-            View All Auctions
+            {t('viewAll')}
             <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
           </Link>
         </div>
@@ -165,8 +71,12 @@ export function LatestBidsSection() {
   )
 }
 
-function BidCard({ bid }: { bid: BidData }) {
-  const vehicleTitle = bid.listing.title ||
+function BidCard({ bid }: { bid: LatestBid }) {
+  const t = useTranslations('home.latestBids')
+  const tAuction = useTranslations('auction')
+
+  const vehicleTitle =
+    bid.listing.title ||
     `${bid.listing.year} ${bid.listing.make} ${bid.listing.model}`
 
   return (
@@ -199,7 +109,7 @@ function BidCard({ bid }: { bid: BidData }) {
             {bid.auction.reserveMet && (
               <div className="absolute bottom-3 left-3">
                 <div className="rounded-full bg-success/90 px-3 py-1 text-xs font-semibold text-success-foreground backdrop-blur-sm">
-                  Reserve Met
+                  {tAuction('reserveMet')}
                 </div>
               </div>
             )}
@@ -217,7 +127,7 @@ function BidCard({ bid }: { bid: BidData }) {
               <div className="flex items-end justify-between border-t border-border/50 pt-3">
                 <div>
                   <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                    Latest Bid
+                    {t('latestBid')}
                   </p>
                   <p className="font-mono text-xl font-bold text-primary">
                     {formatCurrency(bid.amount, bid.listing.currency)}
@@ -226,7 +136,7 @@ function BidCard({ bid }: { bid: BidData }) {
                 <div className="text-right">
                   <p className="flex items-center gap-1.5 rounded-full bg-muted/50 px-2.5 py-1 text-xs font-medium text-muted-foreground">
                     <Gavel className="h-3 w-3" />
-                    Bidder #{bid.bidderNumber}
+                    {t('bidder', { number: bid.bidderNumber })}
                   </p>
                   {bid.bidderCountry && (
                     <p className="mt-1 text-xs text-muted-foreground">

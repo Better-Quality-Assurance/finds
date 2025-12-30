@@ -18,6 +18,14 @@ function getPusherInstance(): Pusher {
 }
 
 /**
+ * Hook for getting the singleton Pusher client instance
+ * Use this when you need direct access to the Pusher client
+ */
+export function usePusherClient(): Pusher {
+  return useMemo(() => getPusherInstance(), [])
+}
+
+/**
  * Hook for getting the Pusher instance
  */
 export function usePusher(auctionId?: string | null) {
