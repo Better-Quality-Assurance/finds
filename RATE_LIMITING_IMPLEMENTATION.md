@@ -86,7 +86,7 @@ All rate-limited endpoints now include these headers:
 ```
 X-RateLimit-Limit: 30           # Total requests allowed
 X-RateLimit-Remaining: 25       # Requests remaining
-X-RateLimit-Reset: 2024-01-20T10:30:00.000Z  # Reset time
+X-RateLimit-Reset: 2025-01-20T10:30:00.000Z  # Reset time
 ```
 
 When rate limited (429 response):
@@ -102,7 +102,7 @@ Retry-After: 45  # Seconds until reset
   "success": true,
   "data": { ... },
   "requestId": "abc123",
-  "timestamp": "2024-01-20T10:00:00.000Z"
+  "timestamp": "2025-01-20T10:00:00.000Z"
 }
 ```
 Headers:
@@ -116,7 +116,7 @@ Headers:
 {
   "error": "Too many requests. Please try again later.",
   "retryAfter": 45,
-  "resetAt": "2024-01-20T10:30:00.000Z"
+  "resetAt": "2025-01-20T10:30:00.000Z"
 }
 ```
 Headers:

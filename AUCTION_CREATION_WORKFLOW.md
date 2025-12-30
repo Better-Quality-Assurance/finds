@@ -25,7 +25,7 @@ When an admin approves a listing via `POST /api/admin/listings/:id/approve`, the
 **Request Body (Optional Parameters):**
 ```json
 {
-  "startTime": "2024-12-25T10:00:00Z",  // Optional, defaults to now
+  "startTime": "2025-01-15T10:00:00Z",  // Optional, defaults to now
   "durationDays": 7                      // Optional, defaults to 7 (3-14 allowed)
 }
 ```
@@ -37,7 +37,7 @@ When an admin approves a listing via `POST /api/admin/listings/:id/approve`, the
   "auction": {
     "id": "auction_id",
     "status": "ACTIVE",
-    "startTime": "2024-12-25T10:00:00Z",
+    "startTime": "2025-01-15T10:00:00Z",
     "currentEndTime": "2025-01-01T10:00:00Z",
     "startingPrice": "5000.00",
     "reservePrice": "8000.00",
@@ -56,7 +56,7 @@ Created a new `POST /api/admin/auctions` endpoint for manual auction creation/sc
 ```json
 {
   "listingId": "listing_id",           // Required
-  "startTime": "2024-12-26T14:00:00Z", // Optional, defaults to now
+  "startTime": "2025-01-16T14:00:00Z", // Optional, defaults to now
   "durationDays": 10                   // Optional, defaults to 7
 }
 ```
@@ -364,7 +364,7 @@ curl -X POST http://localhost:3000/api/admin/auctions \
   -H "Cookie: authjs.session-token=..." \
   -d '{
     "listingId": "LISTING_ID",
-    "startTime": "2024-12-26T14:00:00Z",
+    "startTime": "2025-01-16T14:00:00Z",
     "durationDays": 10
   }'
 ```

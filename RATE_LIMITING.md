@@ -65,7 +65,7 @@ All API responses include rate limit information in headers:
 ```
 X-RateLimit-Limit: 30           # Total requests allowed in window
 X-RateLimit-Remaining: 25       # Requests remaining in current window
-X-RateLimit-Reset: 2024-01-20T10:30:00.000Z  # When the window resets
+X-RateLimit-Reset: 2025-01-20T10:30:00.000Z  # When the window resets
 ```
 
 ### Rate Limited Responses
@@ -78,7 +78,7 @@ When rate limited, the API returns:
 ```
 X-RateLimit-Limit: 30
 X-RateLimit-Remaining: 0
-X-RateLimit-Reset: 2024-01-20T10:30:00.000Z
+X-RateLimit-Reset: 2025-01-20T10:30:00.000Z
 Retry-After: 45  # Seconds until reset
 ```
 
@@ -87,7 +87,7 @@ Retry-After: 45  # Seconds until reset
 {
   "error": "Too many requests. Please try again later.",
   "retryAfter": 45,
-  "resetAt": "2024-01-20T10:30:00.000Z"
+  "resetAt": "2025-01-20T10:30:00.000Z"
 }
 ```
 

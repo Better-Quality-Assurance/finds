@@ -16,7 +16,7 @@
 **Request Body (Optional):**
 ```json
 {
-  "startTime": "2024-12-26T14:00:00Z",  // Optional: ISO 8601 date, defaults to now
+  "startTime": "2025-01-16T14:00:00Z",  // Optional: ISO 8601 date, defaults to now
   "durationDays": 10                    // Optional: 3-14 days, defaults to 7
 }
 ```
@@ -28,21 +28,21 @@
     "id": "clxy123abc",
     "title": "1967 Ford Mustang Fastback",
     "status": "ACTIVE",
-    "approvedAt": "2024-12-25T10:00:00Z",
+    "approvedAt": "2025-01-15T10:00:00Z",
     // ... other listing fields
   },
   "auction": {
     "id": "clxy456def",
     "listingId": "clxy123abc",
     "status": "ACTIVE",
-    "startTime": "2024-12-25T10:00:00Z",
+    "startTime": "2025-01-15T10:00:00Z",
     "originalEndTime": "2025-01-01T10:00:00Z",
     "currentEndTime": "2025-01-01T10:00:00Z",
     "startingPrice": "5000.00",
     "reservePrice": "8000.00",
     "currency": "EUR",
     "antiSnipingEnabled": true,
-    "createdAt": "2024-12-25T10:00:00Z"
+    "createdAt": "2025-01-15T10:00:00Z"
   }
 }
 ```
@@ -105,7 +105,7 @@
 ```json
 {
   "listingId": "clxy123abc",                // Required: Listing ID (must be APPROVED)
-  "startTime": "2024-12-26T14:00:00Z",     // Optional: ISO 8601 date, defaults to now
+  "startTime": "2025-01-16T14:00:00Z",     // Optional: ISO 8601 date, defaults to now
   "durationDays": 10                        // Optional: 3-14 days, defaults to 7
 }
 ```
@@ -117,14 +117,14 @@
     "id": "clxy789ghi",
     "listingId": "clxy123abc",
     "status": "SCHEDULED",
-    "startTime": "2024-12-26T14:00:00Z",
+    "startTime": "2025-01-16T14:00:00Z",
     "originalEndTime": "2025-01-05T14:00:00Z",
     "currentEndTime": "2025-01-05T14:00:00Z",
     "startingPrice": "12000.00",
     "reservePrice": "15000.00",
     "currency": "EUR",
     "antiSnipingEnabled": true,
-    "createdAt": "2024-12-25T10:00:00Z"
+    "createdAt": "2025-01-15T10:00:00Z"
   },
   "listing": {
     "id": "clxy123abc",
@@ -220,7 +220,7 @@
     {
       "id": "clxy789ghi",
       "status": "ACTIVE",
-      "startTime": "2024-12-25T10:00:00Z",
+      "startTime": "2025-01-15T10:00:00Z",
       "currentEndTime": "2025-01-01T10:00:00Z",
       "startingPrice": "5000.00",
       "currentBid": "5500.00",
@@ -281,7 +281,7 @@
     "auctionEndTime": "2025-01-01T10:00:00Z"
   },
   "link": "/auctions/clxy789ghi",
-  "timestamp": "2024-12-25T10:00:00Z"
+  "timestamp": "2025-01-15T10:00:00Z"
 }
 ```
 
@@ -298,7 +298,7 @@
   "currency": "EUR",
   "endTime": "2025-01-01T10:00:00Z",
   "imageUrl": "https://cdn.finds.com/listings/clxy123abc/photo1.jpg",
-  "timestamp": "2024-12-25T10:00:00Z"
+  "timestamp": "2025-01-15T10:00:00Z"
 }
 ```
 
@@ -340,7 +340,7 @@ All auction creation and approval actions are logged in the audit_log table with
     "listingTitle": "1967 Ford Mustang Fastback",
     "sellerId": "user123",
     "sellerEmail": "john@example.com",
-    "startTime": "2024-12-25T10:00:00Z",
+    "startTime": "2025-01-15T10:00:00Z",
     "endTime": "2025-01-01T10:00:00Z",
     "startingPrice": "5000.00",
     "reservePrice": "8000.00",
@@ -412,7 +412,7 @@ Content-Type: application/json
 
 {
   "listingId": "clxy123abc",
-  "startTime": "2024-12-26T14:00:00Z",
+  "startTime": "2025-01-16T14:00:00Z",
   "durationDays": 7
 }
 
@@ -421,7 +421,7 @@ Content-Type: application/json
 # - Listing status: ACTIVE
 # - No notifications sent yet
 
-# 2. Cron job runs at 2024-12-26 14:00
+# 2. Cron job runs at 2025-01-16 14:00
 # - Auction status changed to ACTIVE
 # - Seller notification sent
 # - Public broadcast sent
@@ -467,7 +467,7 @@ curl -X POST http://localhost:3000/api/admin/auctions \
   -H "Cookie: $SESSION" \
   -d '{
     "listingId": "LISTING_ID",
-    "startTime": "2024-12-26T14:00:00Z",
+    "startTime": "2025-01-16T14:00:00Z",
     "durationDays": 7
   }'
 
