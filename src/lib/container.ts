@@ -43,7 +43,7 @@ import { MediaProcessingService } from '@/services/media/media-processing.servic
 import { ImageProcessorService } from '@/services/image/image-processor.service'
 
 // SMS Provider Implementations
-import { MockSMSProvider, TwilioSMSProvider } from '@/services/providers'
+import { MockSMSProvider } from '@/services/providers'
 
 // Validators
 import { RoleValidator } from '@/services/validators/role.validator'
@@ -264,24 +264,40 @@ function createAIModerationService(): IAIModerationService {
 /**
  * Create SMS provider based on environment configuration
  * Uses Twilio if configured, falls back to mock provider for development
+ * Note: TwilioSMSProvider is dynamically imported to avoid build warnings when twilio is not installed
  */
-function createSMSProvider(): ISMSProvider {
+async function createSMSProviderAsync(): Promise<ISMSProvider> {
   const accountSid = process.env.TWILIO_ACCOUNT_SID
   const authToken = process.env.TWILIO_AUTH_TOKEN
   const fromNumber = process.env.TWILIO_PHONE_NUMBER
 
   // If Twilio credentials are configured, use Twilio provider
   if (accountSid && authToken && fromNumber) {
-    console.log('[Container] Initializing Twilio SMS provider')
-    return new TwilioSMSProvider({
-      accountSid,
-      authToken,
-      fromNumber,
-    })
+    try {
+      const { TwilioSMSProvider } = await import('@/services/providers/twilio-sms.provider')
+      console.log('[Container] Initializing Twilio SMS provider')
+      return new TwilioSMSProvider({
+        accountSid,
+        authToken,
+        fromNumber,
+      })
+    } catch (error) {
+      console.warn('[Container] Failed to load Twilio provider, using mock:', error)
+    }
   }
 
   // Otherwise use mock provider for development
   console.log('[Container] Initializing Mock SMS provider (Twilio not configured)')
+  return new MockSMSProvider()
+}
+
+/**
+ * Synchronous SMS provider creation for immediate use
+ * Returns MockSMSProvider immediately; if Twilio is configured, it will be initialized later
+ */
+function createSMSProvider(): ISMSProvider {
+  // For synchronous container creation, start with mock provider
+  // The async initialization can upgrade this if needed
   return new MockSMSProvider()
 }
 

@@ -1,5 +1,4 @@
 import { Suspense } from 'react'
-import { getTranslations } from 'next-intl/server'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Skeleton } from '@/components/ui/skeleton'
@@ -205,7 +204,6 @@ export default async function RecentSalesPage({
 }: {
   searchParams: Promise<SearchParams>
 }) {
-  const t = await getTranslations('common')
   const params = await searchParams
 
   return (

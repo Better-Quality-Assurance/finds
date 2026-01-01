@@ -1,5 +1,4 @@
 import { Suspense } from 'react'
-import { getTranslations } from 'next-intl/server'
 import { AuctionCard } from '@/components/auction/auction-card'
 import { AuctionFilters } from './auction-filters'
 import { Loader2 } from 'lucide-react'
@@ -7,7 +6,6 @@ import { auth } from '@/lib/auth'
 import { prisma } from '@/lib/db'
 
 export async function generateMetadata() {
-  const t = await getTranslations('auction')
   return {
     title: 'Live Auctions - Finds',
     description: 'Browse live auctions for classic cars, barn finds, and project vehicles',

@@ -9,7 +9,7 @@ const createDataRequestSchema = z.object({
 })
 
 // GET - Fetch user's data requests
-export async function GET(request: NextRequest) {
+export async function GET(_request: NextRequest) {
   try {
     const session = await auth()
 

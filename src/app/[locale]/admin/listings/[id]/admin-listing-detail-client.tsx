@@ -1,7 +1,6 @@
 'use client'
 
 import { useState } from 'react'
-import Image from 'next/image'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -106,7 +105,7 @@ export function AdminListingDetailClient({ listing, userRole }: AdminListingDeta
 
   const canReview = ['ADMIN', 'MODERATOR', 'REVIEWER'].includes(userRole)
   const isPending = listing.status === 'PENDING_REVIEW' || listing.status === 'CHANGES_REQUESTED'
-  const photos = listing.media.filter(m => m.type === 'PHOTO')
+  const _photos = listing.media.filter(m => m.type === 'PHOTO')
   const statusBadge = STATUS_BADGES[listing.status]
   const licensePlateCount = listing.media.filter((m) => m.licensePlateDetected).length
 

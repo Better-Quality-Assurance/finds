@@ -73,6 +73,14 @@ function getCSP() {
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  // Mark twilio as an external package - it's optional and only used if installed
+  webpack: (config, { isServer }) => {
+    if (isServer) {
+      config.externals = config.externals || []
+      config.externals.push('twilio')
+    }
+    return config
+  },
   images: {
     remotePatterns: [
       {

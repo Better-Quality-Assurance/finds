@@ -23,7 +23,6 @@ import {
   AlertCircle,
   Loader2,
   Eye,
-  Clock,
   User,
   MapPin,
   Camera,

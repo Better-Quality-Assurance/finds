@@ -1,7 +1,6 @@
 import { useTranslations } from 'next-intl'
 import type { Metadata } from 'next'
 import { Link } from '@/i18n/routing'
-import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { ArrowRight, Car, Shield, Clock, CheckCircle, Sparkles } from 'lucide-react'
 import { LatestBidsSection } from '@/components/home/latest-bids-section'

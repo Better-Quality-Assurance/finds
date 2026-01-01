@@ -59,7 +59,7 @@ export function UsersManagementClient({ isAdmin }: UsersManagementClientProps) {
   const [page, setPage] = useState(1)
   const [totalPages, setTotalPages] = useState(1)
 
-  const [selectedUser, setSelectedUser] = useState<UserData | null>(null)
+  const [_selectedUser, _setSelectedUser] = useState<UserData | null>(null)
   const [actionDialog, setActionDialog] = useState<{
     type: 'suspend' | 'unsuspend' | 'verify' | 'change_role' | 'ban' | 'unban' | 'view' | null
     user: UserData | null

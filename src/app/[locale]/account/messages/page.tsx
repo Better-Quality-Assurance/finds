@@ -13,9 +13,7 @@ import { toast } from 'sonner'
 import {
   MessageSquare,
   Send,
-  User,
   Car,
-  AlertCircle,
   Loader2,
   Lock,
   Mail,
@@ -68,7 +66,6 @@ type Conversation = {
 
 export default function MessagesPage() {
   const t = useTranslations('messages')
-  const tCommon = useTranslations('common')
   const { data: session } = useSession()
 
   const [conversations, setConversations] = useState<Conversation[]>([])

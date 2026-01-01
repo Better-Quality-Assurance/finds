@@ -13,8 +13,6 @@ import {
   Clock,
   AlertTriangle,
   DollarSign,
-  ExternalLink,
-  ArrowRight,
   Wallet,
   TrendingUp
 } from 'lucide-react'

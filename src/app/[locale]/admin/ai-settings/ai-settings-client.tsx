@@ -24,7 +24,6 @@ import {
   RefreshCw,
   Save,
   RotateCcw,
-  Settings,
   Zap,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
