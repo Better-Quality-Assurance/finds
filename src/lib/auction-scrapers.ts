@@ -143,16 +143,22 @@ async function scrapeBonhams(): Promise<ScrapedAuctionLink[]> {
 
 /**
  * Main function to scrape all auction sites
+ *
+ * Note: Only BaT works with simple HTTP scraping.
+ * Other sites (Catawiki, Collecting Cars, Bonhams) require JavaScript rendering
+ * and would need a headless browser (Puppeteer/Playwright) to scrape.
  */
 export async function scrapeAllAuctionSites(): Promise<ScrapedAuctionLink[]> {
   const results: ScrapedAuctionLink[] = []
 
-  // Run scrapers in parallel
-  const [bat, catawiki, collectingCars, bonhams] = await Promise.allSettled([
+  // Only BaT works with server-side scraping (returns actual HTML)
+  // Other sites are JavaScript-rendered and return empty data
+  const [bat] = await Promise.allSettled([
     scrapeBringATrailer(),
-    scrapeCatawiki(),
-    scrapeCollectingCars(),
-    scrapeBonhams(),
+    // Disabled: These sites require JavaScript rendering
+    // scrapeCatawiki(),
+    // scrapeCollectingCars(),
+    // scrapeBonhams(),
   ])
 
   if (bat.status === 'fulfilled') {
@@ -160,27 +166,6 @@ export async function scrapeAllAuctionSites(): Promise<ScrapedAuctionLink[]> {
     results.push(...bat.value)
   } else {
     console.error('[Scraper] BaT failed:', bat.reason)
-  }
-
-  if (catawiki.status === 'fulfilled') {
-    console.log(`[Scraper] Catawiki: ${catawiki.value.length} links`)
-    results.push(...catawiki.value)
-  } else {
-    console.error('[Scraper] Catawiki failed:', catawiki.reason)
-  }
-
-  if (collectingCars.status === 'fulfilled') {
-    console.log(`[Scraper] Collecting Cars: ${collectingCars.value.length} links`)
-    results.push(...collectingCars.value)
-  } else {
-    console.error('[Scraper] Collecting Cars failed:', collectingCars.reason)
-  }
-
-  if (bonhams.status === 'fulfilled') {
-    console.log(`[Scraper] Bonhams: ${bonhams.value.length} links`)
-    results.push(...bonhams.value)
-  } else {
-    console.error('[Scraper] Bonhams failed:', bonhams.reason)
   }
 
   console.log(`[Scraper] Total links found: ${results.length}`)
