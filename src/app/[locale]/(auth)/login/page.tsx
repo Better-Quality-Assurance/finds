@@ -27,7 +27,7 @@ export default function LoginPage() {
   const tErrors = useTranslations('errors')
   const router = useRouter()
   const searchParams = useSearchParams()
-  const callbackUrl = searchParams.get('callbackUrl') || '/account'
+  const callbackUrl = searchParams.get('callbackUrl') || '/account/settings'
   const [isLoading, setIsLoading] = useState(false)
 
   const {
