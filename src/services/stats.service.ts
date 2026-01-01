@@ -167,7 +167,7 @@ export class StatsService implements IStatsService {
       prisma.user.count({ where: { createdAt: { gte: today } } }),
       prisma.bid.count({ where: { createdAt: { gte: today } } }),
       prisma.auction.count({
-        where: { status: { in: ['SOLD', 'UNSOLD'] }, updatedAt: { gte: today } },
+        where: { status: { in: ['SOLD', 'NO_SALE'] }, updatedAt: { gte: today } },
       }),
       prisma.listing.count({ where: { createdAt: { gte: today } } }),
       prisma.auction.count({ where: { status: 'ACTIVE' } }),
