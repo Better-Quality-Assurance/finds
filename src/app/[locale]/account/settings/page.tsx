@@ -19,6 +19,7 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { toast } from 'sonner'
 import { Download, Trash2, FileText, Clock, CheckCircle, XCircle, AlertCircle, Shield } from 'lucide-react'
 import { formatDistanceToNow } from 'date-fns'
+import { UserActivityStats } from '@/components/stats/user-activity-stats'
 
 type DataRequestType = 'EXPORT' | 'DELETE'
 type DataRequestStatus = 'PENDING' | 'PROCESSING' | 'COMPLETED' | 'REJECTED'
@@ -135,6 +136,11 @@ export default function SettingsPage() {
       <div className="mb-8">
         <h1 className="text-3xl font-bold">{t('title')}</h1>
         <p className="mt-1 text-muted-foreground">{t('description')}</p>
+      </div>
+
+      {/* User Activity Stats */}
+      <div className="mb-6">
+        <UserActivityStats />
       </div>
 
       {/* GDPR Data Rights Section */}

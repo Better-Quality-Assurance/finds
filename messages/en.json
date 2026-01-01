@@ -534,6 +534,9 @@
     "submitting": "Submitting...",
     "reviewSubmitted": "Review submitted successfully!",
     "submitError": "Failed to submit review. Please try again.",
+    "congratulationsWinner": "Congratulations on winning this auction!",
+    "leaveReviewPrompt": "Help other buyers by sharing your experience with this seller.",
+    "thankYouForReview": "Thank you for sharing your experience!",
     "reviewFor": "Review for",
     "memberSince": "Member since",
     "totalListings": "Total Listings",
@@ -549,6 +552,27 @@
       "viewAll": "View All Auctions",
       "latestBid": "Latest Bid",
       "bidder": "Bidder #{number}"
+    }
+  },
+  "stats": {
+    "platformTitle": "Trusted by Enthusiasts",
+    "activeAuctions": "Active Auctions",
+    "totalSold": "Vehicles Sold",
+    "totalBids": "Bids Placed",
+    "communityMembers": "Community Members",
+    "totalValueSold": "{value} in total sales",
+    "userStats": {
+      "title": "Your Activity",
+      "bidsPlaced": "Bids Placed",
+      "auctionsWon": "Auctions Won",
+      "watchlistItems": "Watchlist Items",
+      "totalSpent": "Total Spent",
+      "memberSince": "Member Since",
+      "sellerStats": "Seller Stats",
+      "listingsCreated": "Listings Created",
+      "auctionsSold": "Auctions Sold",
+      "totalEarned": "Total Earned",
+      "averageRating": "Average Rating"
     }
   },
   "condition": {

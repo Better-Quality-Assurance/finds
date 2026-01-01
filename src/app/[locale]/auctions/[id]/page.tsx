@@ -15,6 +15,8 @@ import { FollowButton } from '@/components/seller/follow-button'
 import { WatchlistButton } from '@/components/auction/watchlist-button'
 import { ConditionGrid } from '@/components/listing/condition-grid'
 import { PriceEstimate } from '@/components/auction/price-estimate'
+import { WinnerReviewPrompt } from '@/components/seller/winner-review-prompt'
+import { AskSellerButton } from '@/components/listing/ask-seller-button'
 
 type PageProps = {
   params: Promise<{ id: string; locale: string }>
@@ -59,6 +61,14 @@ async function getAuction(id: string, userId?: string) {
         ? {
             where: { userId },
             take: 1,
+          }
+        : false,
+      // Check if user already left a review
+      sellerReviews: userId
+        ? {
+            where: { reviewerId: userId },
+            take: 1,
+            select: { id: true },
           }
         : false,
     },
@@ -123,6 +133,12 @@ export default async function AuctionDetailPage({ params }: PageProps) {
   const photos = listing.media.filter((m) => m.type === 'PHOTO')
   const watchlistCount = auction._count.watchlist
   const isWatching = auction.watchlist && auction.watchlist.length > 0
+
+  // Check if current user is the winner and can leave a review
+  const isWinner = session?.user?.id && auction.winnerId === session.user.id
+  const isPaid = auction.paymentStatus === 'PAID'
+  const hasExistingReview = auction.sellerReviews && auction.sellerReviews.length > 0
+  const canReview = isWinner && isPaid
 
   // Vehicle structured data for SEO and ML/LLM friendliness
   const structuredData = {
@@ -400,7 +416,26 @@ export default async function AuctionDetailPage({ params }: PageProps) {
                 )}
               </div>
             </div>
+            {/* Ask Seller Button */}
+            <div className="mt-4 border-t pt-4">
+              <AskSellerButton listingId={listing.id} className="w-full" />
+            </div>
           </div>
+
+          {/* Winner Review Prompt */}
+          {canReview && (
+            <WinnerReviewPrompt
+              auctionId={auction.id}
+              sellerId={listing.seller.id}
+              sellerName={listing.seller.name}
+              vehicleInfo={{
+                year: listing.year,
+                make: listing.make,
+                model: listing.model,
+              }}
+              hasExistingReview={hasExistingReview || false}
+            />
+          )}
 
           {/* Activity Timeline - Comments & Bids */}
           <ActivityTimeline

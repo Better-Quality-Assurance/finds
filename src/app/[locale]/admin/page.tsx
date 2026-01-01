@@ -14,6 +14,7 @@ import {
   Clock,
   CheckCircle,
   ArrowRight,
+  BarChart3,
 } from 'lucide-react'
 
 export const metadata = {
@@ -250,6 +251,25 @@ export default async function AdminDashboardPage() {
                   <h3 className="font-semibold">Fraud Alerts</h3>
                   <p className="text-sm text-muted-foreground">
                     Review suspicious activity
+                  </p>
+                </div>
+              </div>
+              <ArrowRight className="h-5 w-5 text-muted-foreground" />
+            </CardContent>
+          </Card>
+        </Link>
+
+        <Link href="/admin/analytics">
+          <Card className="cursor-pointer transition-shadow hover:shadow-md">
+            <CardContent className="flex items-center justify-between p-6">
+              <div className="flex items-center gap-4">
+                <div className="rounded-lg bg-primary/10 p-3">
+                  <BarChart3 className="h-6 w-6 text-primary" />
+                </div>
+                <div>
+                  <h3 className="font-semibold">Analytics</h3>
+                  <p className="text-sm text-muted-foreground">
+                    Detailed statistics & trends
                   </p>
                 </div>
               </div>

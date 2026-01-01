@@ -534,6 +534,9 @@
     "submitting": "Se trimite...",
     "reviewSubmitted": "Recenzie trimisa cu succes!",
     "submitError": "Trimiterea recenziei a esuat. Te rugam sa incerci din nou.",
+    "congratulationsWinner": "Felicitari pentru castigarea acestei licitatii!",
+    "leaveReviewPrompt": "Ajuta alti cumparatori impartasind experienta ta cu acest vanzator.",
+    "thankYouForReview": "Iti multumim pentru impartasirea experientei tale!",
     "reviewFor": "Recenzie pentru",
     "memberSince": "Membru din",
     "totalListings": "Total Anunturi",
@@ -549,6 +552,27 @@
       "viewAll": "Vezi Toate Licitatiile",
       "latestBid": "Ultima Licitatie",
       "bidder": "Licitator #{number}"
+    }
+  },
+  "stats": {
+    "platformTitle": "Cu Increderea Pasionatilor",
+    "activeAuctions": "Licitatii Active",
+    "totalSold": "Vehicule Vandute",
+    "totalBids": "Licitatii Plasate",
+    "communityMembers": "Membri Comunitate",
+    "totalValueSold": "{value} vanzari totale",
+    "userStats": {
+      "title": "Activitatea Ta",
+      "bidsPlaced": "Licitatii Plasate",
+      "auctionsWon": "Licitatii Castigate",
+      "watchlistItems": "Articole Urmarite",
+      "totalSpent": "Total Cheltuit",
+      "memberSince": "Membru Din",
+      "sellerStats": "Statistici Vanzator",
+      "listingsCreated": "Anunturi Create",
+      "auctionsSold": "Licitatii Vandute",
+      "totalEarned": "Total Castigat",
+      "averageRating": "Evaluare Medie"
     }
   },
   "condition": {

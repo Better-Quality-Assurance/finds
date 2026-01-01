@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { ArrowRight, Car, Shield, Clock, CheckCircle, Sparkles } from 'lucide-react'
 import { LatestBidsSection } from '@/components/home/latest-bids-section'
+import { PlatformStats } from '@/components/stats/platform-stats'
 
 export async function generateMetadata(): Promise<Metadata> {
   return {
@@ -90,6 +91,9 @@ export default function HomePage() {
           </div>
         </div>
       </section>
+
+      {/* Platform Stats */}
+      <PlatformStats />
 
       {/* Features Section */}
       <section className="py-24">
