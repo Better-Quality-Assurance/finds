@@ -10,6 +10,7 @@ import type { PrismaClient, AIListingImprovement, Listing, Auction } from '@pris
 import type { IAIProvider } from '@/services/contracts/ai-provider.interface'
 import { GlobalSalesService } from './global-sales.service'
 import { paymentLogger as logger, logError } from '@/lib/logger'
+import { z } from 'zod'
 
 export interface ListingImprovementSuggestions {
   reason: 'no_bids' | 'reserve_not_met'
@@ -44,6 +45,36 @@ export interface ListingImprovementSuggestions {
   overallScore: number // 1-100 listing quality
   topPriorities: string[] // Top 3 things to fix
 }
+
+/**
+ * Zod schema for validating AI response
+ * Provides runtime validation and better error messages for malformed responses
+ */
+const AIResponseSchema = z.object({
+  pricingAnalysis: z.object({
+    suggestedStartingPrice: z.number().positive(),
+    suggestedReserve: z.number().nullable(),
+    currentVsMarket: z.enum(['overpriced', 'underpriced', 'fair']),
+    reasoning: z.string(),
+  }),
+  photoSuggestions: z.object({
+    currentCount: z.number().int().min(0),
+    recommendedCount: z.number().int().min(0),
+    missingCategories: z.array(z.string()),
+    qualityIssues: z.array(z.string()),
+  }),
+  descriptionSuggestions: z.object({
+    missingInfo: z.array(z.string()),
+    improvements: z.array(z.string()),
+  }),
+  timingSuggestions: z.object({
+    recommendedDuration: z.number().int().positive(),
+    bestStartDay: z.string(),
+    reasoning: z.string(),
+  }),
+  overallScore: z.number().int().min(1).max(100),
+  topPriorities: z.array(z.string()).min(1).max(5),
+})
 
 const IMPROVEMENT_PROMPT = `You are an expert auction consultant analyzing why a classic car auction did not sell. Your goal is to provide specific, actionable suggestions to help the seller succeed on their next attempt.
 
@@ -185,10 +216,21 @@ export class ListingImprovementService {
       const content = response.content.trim()
       const jsonMatch = content.match(/\{[\s\S]*\}/)
       if (!jsonMatch) {
-        throw new Error('Invalid AI response format')
+        throw new Error('Invalid AI response format: no JSON object found')
       }
 
-      const suggestions = JSON.parse(jsonMatch[0]) as Partial<ListingImprovementSuggestions>
+      // Parse and validate with Zod schema
+      let suggestions: z.infer<typeof AIResponseSchema>
+      try {
+        const parsed = JSON.parse(jsonMatch[0])
+        suggestions = AIResponseSchema.parse(parsed)
+      } catch (parseError) {
+        if (parseError instanceof z.ZodError) {
+          const issues = parseError.issues.map(i => `${i.path.join('.')}: ${i.message}`).join(', ')
+          throw new Error(`Invalid AI response structure: ${issues}`)
+        }
+        throw new Error(`Failed to parse AI response JSON: ${parseError instanceof Error ? parseError.message : 'Unknown error'}`)
+      }
 
       // Update record
       const processingTimeMs = Date.now() - startTime

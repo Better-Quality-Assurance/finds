@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@/lib/auth'
 import { prisma } from '@/lib/db'
 import { z } from 'zod'
+import { logAuditEvent } from '@/services/audit.service'
 
 // Validation schema for query parameters
 const bidsQuerySchema = z.object({
@@ -106,6 +107,8 @@ export async function GET(request: NextRequest) {
               currentEndTime: true,
               paymentStatus: true,
               paymentDeadline: true,
+              paidAt: true,
+              paymentIntentId: true,
               listing: {
                 select: {
                   id: true,
@@ -147,12 +150,25 @@ export async function GET(request: NextRequest) {
       }),
     ])
 
+    // Track which contacts were revealed for audit logging
+    const contactReveals: Array<{
+      auctionId: string
+      sellerId: string
+      sellerEmail: string
+    }> = []
+
     // Transform data for client
     const transformedBids = bids.map((bid) => {
       const auction = bid.auction
       const listing = auction.listing
       const isWinner = auction.winnerId === session.user.id
-      const isPaid = auction.paymentStatus === 'PAID'
+
+      // Secure payment verification:
+      // 1. Payment status must be PAID
+      // 2. paidAt timestamp must exist (confirms actual payment)
+      // 3. Payment must not be in REFUNDED state
+      const isPaidAndVerified = auction.paymentStatus === 'PAID' &&
+                                auction.paidAt !== null
 
       // Determine bid status
       let bidStatus: 'active' | 'won' | 'lost' | 'outbid'
@@ -164,19 +180,31 @@ export async function GET(request: NextRequest) {
         bidStatus = 'lost'
       }
 
-      // Only reveal seller contact if winner has paid
-      const canSeeSellerContact = isWinner && isPaid
-      const sellerContact = canSeeSellerContact && listing.seller ? {
-        name: listing.seller.name,
-        email: listing.seller.email,
-        phone: listing.seller.phone,
-        contactRevealed: true,
-      } : listing.seller ? {
-        name: listing.seller.name,
-        email: maskEmail(listing.seller.email),
-        phone: null,
-        contactRevealed: false,
-      } : null
+      // Only reveal seller contact if winner has verified payment
+      const canSeeSellerContact = isWinner && isPaidAndVerified
+      let sellerContact = null
+
+      if (canSeeSellerContact && listing.seller) {
+        sellerContact = {
+          name: listing.seller.name,
+          email: listing.seller.email,
+          phone: listing.seller.phone,
+          contactRevealed: true,
+        }
+        // Track for audit logging
+        contactReveals.push({
+          auctionId: auction.id,
+          sellerId: listing.seller.id,
+          sellerEmail: listing.seller.email,
+        })
+      } else if (listing.seller) {
+        sellerContact = {
+          name: listing.seller.name,
+          email: maskEmail(listing.seller.email),
+          phone: null,
+          contactRevealed: false,
+        }
+      }
 
       return {
         id: bid.id,
@@ -210,6 +238,37 @@ export async function GET(request: NextRequest) {
     })
 
     const totalPages = Math.ceil(totalCount / perPage)
+
+    // Audit log contact reveals (non-blocking for performance)
+    if (contactReveals.length > 0) {
+      const clientIp = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ||
+                       request.headers.get('x-real-ip') ||
+                       'unknown'
+      const userAgent = request.headers.get('user-agent') || 'unknown'
+
+      // Log each contact reveal (fire-and-forget, don't block response)
+      Promise.allSettled(
+        contactReveals.map(reveal =>
+          logAuditEvent({
+            actorId: session.user.id,
+            actorEmail: session.user.email || undefined,
+            actorIp: clientIp,
+            actorUserAgent: userAgent,
+            action: 'CONTACT_REVEALED',
+            resourceType: 'AUCTION',
+            resourceId: reveal.auctionId,
+            details: {
+              sellerId: reveal.sellerId,
+              sellerEmailDomain: reveal.sellerEmail.split('@')[1],
+              revealReason: 'payment_complete',
+            },
+            severity: 'LOW',
+          })
+        )
+      ).catch(err => {
+        console.error('Failed to log contact reveal audit:', err)
+      })
+    }
 
     return NextResponse.json({
       bids: transformedBids,

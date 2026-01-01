@@ -1116,3 +1116,231 @@ The Finds Team`,
     throw new Error('Failed to send payment received email')
   }
 }
+
+/**
+ * Send auction expired email to seller (no sale)
+ * @param to - The seller's email address
+ * @param name - The seller's name
+ * @param listingTitle - The title of the listing
+ * @param reason - Why the auction didn't sell ('no_bids' or 'reserve_not_met')
+ * @param listingUrl - URL to view/relist the listing
+ */
+export async function sendAuctionExpiredEmail(
+  to: string,
+  name: string,
+  listingTitle: string,
+  reason: 'no_bids' | 'reserve_not_met',
+  listingUrl: string
+) {
+  const reasonText = reason === 'no_bids'
+    ? 'Your auction ended without receiving any bids.'
+    : 'Your auction ended without meeting the reserve price.'
+
+  const reasonAdvice = reason === 'no_bids'
+    ? 'Consider reviewing your starting price or adding more photos to attract buyers.'
+    : 'Consider adjusting your reserve price or highlighting more features of your vehicle.'
+
+  try {
+    const data = await getResendClient().emails.send({
+      from: getFromEmail(),
+      to,
+      subject: `Auction Ended Without Sale - ${listingTitle} | Finds`,
+      html: `
+        <!DOCTYPE html>
+        <html>
+          <head>
+            <meta charset="utf-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>Auction Ended</title>
+          </head>
+          <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
+            <div style="background-color: #f8f9fa; padding: 30px; border-radius: 10px;">
+              <h1 style="color: #1a1a1a; margin-bottom: 20px;">Auction Ended, ${name}</h1>
+
+              <p style="font-size: 16px; margin-bottom: 20px;">
+                ${reasonText}
+              </p>
+
+              <p style="font-size: 18px; margin-bottom: 30px; font-weight: 600; color: #1a1a1a;">
+                "${listingTitle}"
+              </p>
+
+              <div style="background-color: #fff3cd; border-left: 4px solid #ffc107; padding: 15px; margin: 20px 0;">
+                <p style="margin: 0; font-size: 15px; color: #856404;">
+                  <strong>Don't give up!</strong> ${reasonAdvice}
+                </p>
+              </div>
+
+              <p style="font-size: 15px; margin: 20px 0;">
+                We're generating AI-powered suggestions to help improve your listing. You'll receive another email when they're ready, or you can check your dashboard now to relist with improvements.
+              </p>
+
+              <div style="text-align: center; margin: 30px 0;">
+                <a href="${listingUrl}"
+                   style="background-color: #000; color: #fff; padding: 14px 28px; text-decoration: none; border-radius: 6px; font-weight: 600; display: inline-block;">
+                  View Listing & Relist Options
+                </a>
+              </div>
+
+              <hr style="border: none; border-top: 1px solid #ddd; margin: 30px 0;">
+
+              <p style="font-size: 14px; color: #666; margin-bottom: 15px;">
+                <strong>Tips for next time:</strong>
+              </p>
+              <ul style="font-size: 14px; color: #666; margin: 0; padding-left: 20px;">
+                <li style="margin-bottom: 8px;">Add more high-quality photos from different angles</li>
+                <li style="margin-bottom: 8px;">Include detailed condition information</li>
+                <li style="margin-bottom: 8px;">Research comparable sales for competitive pricing</li>
+                <li style="margin-bottom: 8px;">Respond promptly to buyer questions</li>
+              </ul>
+
+              <p style="font-size: 13px; color: #999; margin-top: 30px;">
+                Questions? We're here to help. Reply to this email or contact us through your seller dashboard.
+              </p>
+
+              <p style="font-size: 13px; color: #999; margin-top: 20px;">
+                Best regards,<br>
+                The Finds Team
+              </p>
+            </div>
+          </body>
+        </html>
+      `,
+      text: `Auction Ended, ${name}
+
+${reasonText}
+
+"${listingTitle}"
+
+Don't give up! ${reasonAdvice}
+
+We're generating AI-powered suggestions to help improve your listing. You'll receive another email when they're ready, or you can check your dashboard now to relist with improvements.
+
+View listing & relist options: ${listingUrl}
+
+Tips for next time:
+- Add more high-quality photos from different angles
+- Include detailed condition information
+- Research comparable sales for competitive pricing
+- Respond promptly to buyer questions
+
+Questions? We're here to help.
+
+Best regards,
+The Finds Team`,
+    })
+
+    return { success: true, data }
+  } catch (error) {
+    console.error('Failed to send auction expired email:', error)
+    throw new Error('Failed to send auction expired email')
+  }
+}
+
+/**
+ * Send email when AI improvement suggestions are ready
+ * @param to - The seller's email address
+ * @param name - The seller's name
+ * @param listingTitle - The title of the listing
+ * @param topSuggestions - Top 3 improvement suggestions
+ * @param listingUrl - URL to view improvements and relist
+ */
+export async function sendImprovementSuggestionsEmail(
+  to: string,
+  name: string,
+  listingTitle: string,
+  topSuggestions: string[],
+  listingUrl: string
+) {
+  const suggestionsHtml = topSuggestions.length > 0
+    ? `<ul style="font-size: 15px; color: #333; margin: 15px 0; padding-left: 20px;">
+        ${topSuggestions.map(s => `<li style="margin-bottom: 10px;">${s}</li>`).join('')}
+       </ul>`
+    : '<p style="font-size: 15px; color: #666;">View your dashboard for detailed recommendations.</p>'
+
+  const suggestionsText = topSuggestions.length > 0
+    ? topSuggestions.map((s, i) => `${i + 1}. ${s}`).join('\n')
+    : 'View your dashboard for detailed recommendations.'
+
+  try {
+    const data = await getResendClient().emails.send({
+      from: getFromEmail(),
+      to,
+      subject: `AI Suggestions Ready for "${listingTitle}" | Finds`,
+      html: `
+        <!DOCTYPE html>
+        <html>
+          <head>
+            <meta charset="utf-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>Improvement Suggestions Ready</title>
+          </head>
+          <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
+            <div style="background-color: #f8f9fa; padding: 30px; border-radius: 10px;">
+              <h1 style="color: #1a1a1a; margin-bottom: 20px;">🤖 AI Suggestions Ready</h1>
+
+              <p style="font-size: 16px; margin-bottom: 20px;">
+                Hi ${name}, we've analyzed your listing and market data to help you sell next time:
+              </p>
+
+              <p style="font-size: 18px; margin-bottom: 20px; font-weight: 600; color: #1a1a1a;">
+                "${listingTitle}"
+              </p>
+
+              <div style="background-color: #e3f2fd; border-left: 4px solid #2196f3; padding: 15px; margin: 20px 0;">
+                <p style="margin: 0 0 10px 0; font-size: 15px; color: #1565c0; font-weight: 600;">
+                  Top Suggestions:
+                </p>
+                ${suggestionsHtml}
+              </div>
+
+              <p style="font-size: 15px; margin: 20px 0;">
+                We've also analyzed pricing based on recent similar sales and have recommendations for photos and description improvements.
+              </p>
+
+              <div style="text-align: center; margin: 30px 0;">
+                <a href="${listingUrl}"
+                   style="background-color: #2196f3; color: #fff; padding: 14px 28px; text-decoration: none; border-radius: 6px; font-weight: 600; display: inline-block;">
+                  View Full Suggestions & Relist
+                </a>
+              </div>
+
+              <hr style="border: none; border-top: 1px solid #ddd; margin: 30px 0;">
+
+              <p style="font-size: 13px; color: #999;">
+                These suggestions are based on AI analysis of your listing compared to recently sold vehicles. Use them as guidance to improve your chances of selling.
+              </p>
+
+              <p style="font-size: 13px; color: #999; margin-top: 20px;">
+                Best regards,<br>
+                The Finds Team
+              </p>
+            </div>
+          </body>
+        </html>
+      `,
+      text: `AI Suggestions Ready
+
+Hi ${name}, we've analyzed your listing and market data to help you sell next time:
+
+"${listingTitle}"
+
+Top Suggestions:
+${suggestionsText}
+
+We've also analyzed pricing based on recent similar sales and have recommendations for photos and description improvements.
+
+View full suggestions & relist: ${listingUrl}
+
+These suggestions are based on AI analysis of your listing compared to recently sold vehicles. Use them as guidance to improve your chances of selling.
+
+Best regards,
+The Finds Team`,
+    })
+
+    return { success: true, data }
+  } catch (error) {
+    console.error('Failed to send improvement suggestions email:', error)
+    throw new Error('Failed to send improvement suggestions email')
+  }
+}

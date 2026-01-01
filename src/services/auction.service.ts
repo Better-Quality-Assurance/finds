@@ -804,10 +804,11 @@ export async function endAuction(auctionId: string): Promise<Auction> {
   if (result === 'NO_SALE') {
     const improvementReason = currentBid === null ? 'no_bids' : 'reserve_not_met'
 
-    // Notify seller immediately (non-blocking)
+    // Notify seller immediately via real-time + email (non-blocking)
     import('./notification.service')
-      .then(({ notifySellerAuctionExpired }) => {
-        return notifySellerAuctionExpired(
+      .then(async ({ notifySellerAuctionExpired }) => {
+        // Send real-time notification
+        await notifySellerAuctionExpired(
           auction.listing.sellerId,
           auctionId,
           auction.listingId,
@@ -815,12 +816,31 @@ export async function endAuction(auctionId: string): Promise<Auction> {
           improvementReason,
           [] // Suggestions will be available later
         )
+
+        // Also send email notification
+        const seller = await prisma.user.findUnique({
+          where: { id: auction.listing.sellerId },
+          select: { email: true, name: true },
+        })
+
+        if (seller?.email) {
+          const listingUrl = `${process.env.NEXTAUTH_URL || 'http://localhost:3000'}/account/listings?id=${auction.listingId}`
+          const { sendAuctionExpiredEmail } = await import('@/lib/email')
+          await sendAuctionExpiredEmail(
+            seller.email,
+            seller.name || 'Seller',
+            auction.listing.title,
+            improvementReason,
+            listingUrl
+          )
+        }
       })
       .catch(error => {
         logError(auctionLogger, 'Failed to notify seller of expired auction', error, { auctionId })
       })
 
     // Generate AI improvement suggestions (non-blocking, takes longer)
+    // Then send follow-up notification when ready
     import('./ai/listing-improvement.service')
       .then(({ generateListingImprovements }) => {
         return generateListingImprovements(
@@ -829,11 +849,22 @@ export async function endAuction(auctionId: string): Promise<Auction> {
           improvementReason
         )
       })
-      .then(() => {
+      .then(async (improvement) => {
         auctionLogger.info(
           { auctionId, listingId: auction.listingId, reason: improvementReason },
           'Generated listing improvement suggestions'
         )
+
+        // Send follow-up notification with AI suggestions
+        if (improvement?.topPriorities && improvement.topPriorities.length > 0) {
+          const { notifySellerImprovementsReady } = await import('./notification.service')
+          await notifySellerImprovementsReady(
+            auction.listing.sellerId,
+            auction.listingId,
+            auction.listing.title,
+            improvement.topPriorities.slice(0, 3) // Top 3 suggestions
+          )
+        }
       })
       .catch(error => {
         logError(

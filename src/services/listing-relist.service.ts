@@ -58,9 +58,27 @@ export class RelistService {
         return { success: false, error: 'Not authorized to relist this listing' }
       }
 
-      // Verify status allows relisting
+      // Verify listing status allows relisting
       if (original.status !== 'EXPIRED' && original.status !== 'WITHDRAWN') {
         return { success: false, error: `Cannot relist listing in status: ${original.status}` }
+      }
+
+      // Verify auction actually ended (prevents race conditions)
+      const activeAuction = await this.prisma.auction.findFirst({
+        where: {
+          listingId,
+          status: {
+            in: ['SCHEDULED', 'ACTIVE', 'EXTENDED'],
+          },
+        },
+        select: { id: true, status: true },
+      })
+
+      if (activeAuction) {
+        return {
+          success: false,
+          error: `Cannot relist while auction is still ${activeAuction.status.toLowerCase()}`
+        }
       }
 
       // Get AI improvements if available and requested
@@ -79,7 +97,7 @@ export class RelistService {
         year: original.year,
         mileage: original.mileage,
         mileageUnit: original.mileageUnit,
-        vin: original.vin,
+        vin: null, // VIN should be re-entered for relisted vehicle
         registrationCountry: original.registrationCountry,
         conditionRating: original.conditionRating,
         conditionNotes: original.conditionNotes,
@@ -113,37 +131,42 @@ export class RelistService {
         approvedAt: null,
       }
 
-      // Create new listing
-      const newListing = await this.prisma.listing.create({
-        data: newListingData,
-      })
-
-      // Copy media to new listing (reference same files)
-      if (original.media.length > 0) {
-        await this.prisma.listingMedia.createMany({
-          data: original.media.map(m => ({
-            listingId: newListing.id,
-            type: m.type,
-            storagePath: m.storagePath,
-            publicUrl: m.publicUrl,
-            thumbnailUrl: m.thumbnailUrl,
-            originalUrl: m.originalUrl,
-            position: m.position,
-            isPrimary: m.isPrimary,
-            category: m.category,
-            caption: m.caption,
-            fileSize: m.fileSize,
-            mimeType: m.mimeType,
-            width: m.width,
-            height: m.height,
-            licensePlateDetected: m.licensePlateDetected,
-            licensePlateBlurred: m.licensePlateBlurred,
-            // Prisma JSON null requires special handling
-            ...(m.plateDetectionData !== null && { plateDetectionData: m.plateDetectionData }),
-            needsManualReview: m.needsManualReview,
-          })),
+      // Use transaction to ensure atomicity
+      const newListing = await this.prisma.$transaction(async (tx) => {
+        // Create new listing
+        const listing = await tx.listing.create({
+          data: newListingData,
         })
-      }
+
+        // Copy media to new listing (reference same files)
+        if (original.media.length > 0) {
+          await tx.listingMedia.createMany({
+            data: original.media.map(m => ({
+              listingId: listing.id,
+              type: m.type,
+              storagePath: m.storagePath,
+              publicUrl: m.publicUrl,
+              thumbnailUrl: m.thumbnailUrl,
+              originalUrl: m.originalUrl,
+              position: m.position,
+              isPrimary: m.isPrimary,
+              category: m.category,
+              caption: m.caption,
+              fileSize: m.fileSize,
+              mimeType: m.mimeType,
+              width: m.width,
+              height: m.height,
+              licensePlateDetected: m.licensePlateDetected,
+              licensePlateBlurred: m.licensePlateBlurred,
+              // Prisma JSON null requires special handling
+              ...(m.plateDetectionData !== null && { plateDetectionData: m.plateDetectionData }),
+              needsManualReview: m.needsManualReview,
+            })),
+          })
+        }
+
+        return listing
+      })
 
       logger.info(
         {

@@ -227,6 +227,56 @@ export async function notifySellerAuctionExpired(
 }
 
 /**
+ * Notify seller that AI improvement suggestions are ready
+ * Called after async AI generation completes
+ */
+export async function notifySellerImprovementsReady(
+  sellerId: string,
+  listingId: string,
+  listingTitle: string,
+  topSuggestions: string[]
+): Promise<void> {
+  try {
+    // Send real-time notification
+    await transport.sendToUser(sellerId, 'improvements-ready', {
+      type: 'improvements_ready',
+      listingId,
+      listingTitle,
+      topSuggestions,
+      message: `AI suggestions are ready for "${listingTitle}". View them to improve your listing.`,
+    })
+
+    // Send email notification
+    const seller = await prisma.user.findUnique({
+      where: { id: sellerId },
+      select: { email: true, name: true },
+    })
+
+    if (seller?.email) {
+      const listingUrl = `${process.env.NEXTAUTH_URL || 'http://localhost:3000'}/account/listings?id=${listingId}`
+      const { sendImprovementSuggestionsEmail } = await import('@/lib/email')
+      await sendImprovementSuggestionsEmail(
+        seller.email,
+        seller.name || 'Seller',
+        listingTitle,
+        topSuggestions,
+        listingUrl
+      )
+    }
+
+    notificationLogger.info(
+      { sellerId, listingId, suggestionsCount: topSuggestions.length },
+      'Notified seller about improvement suggestions'
+    )
+  } catch (error) {
+    logError(notificationLogger, 'Failed to notify seller of improvement suggestions', error, {
+      sellerId,
+      listingId,
+    })
+  }
+}
+
+/**
  * Broadcast new auction going live to all users
  */
 export async function broadcastAuctionLive(
