@@ -9,6 +9,9 @@
 
 import { NextRequest, NextResponse } from 'next/server'
 import { getContainer } from '@/lib/container'
+
+// Force dynamic rendering - this route uses headers and database
+export const dynamic = 'force-dynamic'
 import {
   createGlobalSalesService,
   AUCTION_SOURCES,
