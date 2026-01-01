@@ -194,58 +194,72 @@ async function scrapeBonhams(): Promise<ScrapedAuctionLink[]> {
 /**
  * Main function to scrape all auction sites
  *
- * - BaT: Server-rendered (simple HTTP fetch)
- * - Catawiki, Collecting Cars: JavaScript-rendered (Puppeteer)
+ * - BaT: Server-rendered (simple HTTP fetch) - always works
+ * - Catawiki, Collecting Cars: JavaScript-rendered (Puppeteer) - optional
+ *
+ * Set USE_PUPPETEER=true env var to enable Puppeteer-based scrapers.
+ * Puppeteer requires Chromium dependencies that may not be available on all platforms.
  */
 export async function scrapeAllAuctionSites(): Promise<ScrapedAuctionLink[]> {
   const results: ScrapedAuctionLink[] = []
+  const usePuppeteer = process.env.USE_PUPPETEER === 'true'
 
   try {
-    // Run all scrapers in parallel
-    // BaT uses simple HTTP, Catawiki/Collecting Cars use Puppeteer
-    const [bat, catawiki, collectingCars] = await Promise.allSettled([
-      scrapeBringATrailer(),
-      scrapeCatawiki(),
-      scrapeCollectingCars(),
-    ])
+    // Always run BaT (works without Puppeteer)
+    const batResult = await scrapeBringATrailer()
+    console.log(`[Scraper] BaT: ${batResult.length} links`)
+    results.push(...batResult)
 
-    if (bat.status === 'fulfilled') {
-      console.log(`[Scraper] BaT: ${bat.value.length} links`)
-      results.push(...bat.value)
-    } else {
-      console.error('[Scraper] BaT failed:', bat.reason)
-    }
+    // Optionally run Puppeteer-based scrapers
+    if (usePuppeteer) {
+      console.log('[Scraper] Puppeteer enabled, scraping Catawiki...')
+      const [catawiki, collectingCars] = await Promise.allSettled([
+        scrapeCatawiki(),
+        scrapeCollectingCars(),
+      ])
 
-    if (catawiki.status === 'fulfilled') {
-      console.log(`[Scraper] Catawiki: ${catawiki.value.length} links`)
-      results.push(...catawiki.value)
-    } else {
-      console.error('[Scraper] Catawiki failed:', catawiki.reason)
-    }
+      if (catawiki.status === 'fulfilled') {
+        console.log(`[Scraper] Catawiki: ${catawiki.value.length} links`)
+        results.push(...catawiki.value)
+      } else {
+        console.error('[Scraper] Catawiki failed:', catawiki.reason)
+      }
 
-    if (collectingCars.status === 'fulfilled') {
-      console.log(`[Scraper] Collecting Cars: ${collectingCars.value.length} links`)
-      results.push(...collectingCars.value)
+      if (collectingCars.status === 'fulfilled') {
+        console.log(`[Scraper] Collecting Cars: ${collectingCars.value.length} links`)
+        results.push(...collectingCars.value)
+      } else {
+        console.error('[Scraper] Collecting Cars failed:', collectingCars.reason)
+      }
+
+      // Close browser when done
+      await closeBrowser()
     } else {
-      console.error('[Scraper] Collecting Cars failed:', collectingCars.reason)
+      console.log('[Scraper] Puppeteer disabled (set USE_PUPPETEER=true to enable)')
     }
 
     console.log(`[Scraper] Total links found: ${results.length}`)
     return results
-  } finally {
-    // Always close the Puppeteer browser to free resources
-    await closeBrowser()
+  } catch (error) {
+    console.error('[Scraper] Error:', error)
+    // Make sure browser is closed even on error
+    if (usePuppeteer) {
+      await closeBrowser().catch(() => {})
+    }
+    return results
   }
 }
 
 /**
  * Fetch content from a single auction page
- * Uses Puppeteer for JS-rendered sites, simple HTTP for others
+ * Uses Puppeteer for JS-rendered sites when enabled, simple HTTP for others
  */
 export async function fetchAuctionPage(url: string): Promise<string | null> {
+  const usePuppeteer = process.env.USE_PUPPETEER === 'true'
+
   // Check if URL requires Puppeteer (JS-rendered sites)
   const jsRenderedDomains = ['catawiki.com', 'collectingcars.com']
-  const needsPuppeteer = jsRenderedDomains.some(domain => url.includes(domain))
+  const needsPuppeteer = usePuppeteer && jsRenderedDomains.some(domain => url.includes(domain))
 
   if (needsPuppeteer) {
     return fetchWithPuppeteer(url, {
