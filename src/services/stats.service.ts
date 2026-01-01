@@ -195,7 +195,7 @@ export class StatsService implements IStatsService {
         GROUP BY DATE(created_at) ORDER BY date ASC
       `,
       prisma.auction.count({ where: { status: 'SOLD' } }),
-      prisma.auction.count({ where: { status: 'UNSOLD' } }),
+      prisma.auction.count({ where: { status: 'NO_SALE' } }),
     ])
 
     const totalSalesVolume = Number(revenueData._sum.finalPrice || 0)
