@@ -22,7 +22,9 @@
     "yes": "Da",
     "no": "Nu",
     "page": "Pagina",
-    "of": "din"
+    "of": "din",
+    "bids": "licitații",
+    "remove": "Elimină"
   },
   "nav": {
     "home": "Acasa",

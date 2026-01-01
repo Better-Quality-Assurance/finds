@@ -22,7 +22,9 @@
     "yes": "Yes",
     "no": "No",
     "page": "Page",
-    "of": "of"
+    "of": "of",
+    "bids": "bids",
+    "remove": "Remove"
   },
   "nav": {
     "home": "Home",
