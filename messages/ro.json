@@ -310,7 +310,15 @@
       "sold": "Vandut",
       "no_sale": "Nevandut",
       "cancelled": "Anulata"
-    }
+    },
+    "paymentComplete": "Plata Finalizata",
+    "paymentRequired": "Plata Necesara",
+    "sellerContact": "Contact Vanzator",
+    "seller": "Vanzator",
+    "buyerFee": "Taxa Cumparator",
+    "payBy": "Plateste pana la",
+    "payNow": "Plateste Acum",
+    "payToUnlockContact": "Finalizeaza plata pentru a debloca detaliile de contact ale vanzatorului si a aranja ridicarea vehiculului."
   },
   "admin": {
     "users": {
@@ -599,7 +607,10 @@
     "fetchError": "Incarcarea conversatiilor a esuat",
     "fetchMessagesError": "Incarcarea mesajelor a esuat",
     "sendError": "Trimiterea mesajului a esuat",
-    "startConversationError": "Inceperea conversatiei a esuat"
+    "startConversationError": "Inceperea conversatiei a esuat",
+    "contactUnlocked": "Informatii de contact deblocate",
+    "contactLocked": "Detalii contact ascunse",
+    "contactLockedHint": "Castiga licitatia si finalizeaza plata pentru a debloca detaliile de contact"
   },
   "reviews": {
     "reviews": "Recenzii",

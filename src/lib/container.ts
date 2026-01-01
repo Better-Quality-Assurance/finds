@@ -414,6 +414,8 @@ export function createTestContainer(): ServiceContainer {
           heldAt: new Date(),
           releasedAt: null,
           capturedAt: null,
+          forfeitedAt: null,
+          forfeitReason: null,
           createdAt: new Date(),
           updatedAt: new Date(),
         },

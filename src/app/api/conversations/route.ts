@@ -3,6 +3,40 @@ import { auth } from '@/lib/auth'
 import { prisma } from '@/lib/db'
 import { z } from 'zod'
 
+/**
+ * Check if a user can see full contact details for a listing
+ * Contact is only revealed when:
+ * 1. User is the auction winner AND
+ * 2. Payment status is PAID
+ */
+async function canSeeContactDetails(
+  userId: string,
+  listingId: string
+): Promise<boolean> {
+  const auction = await prisma.auction.findFirst({
+    where: {
+      listingId,
+      status: 'SOLD',
+      winnerId: userId,
+      paymentStatus: 'PAID',
+    },
+    select: { id: true },
+  })
+
+  return !!auction
+}
+
+/**
+ * Mask email for privacy - show domain only
+ * e.g., "john.doe@example.com" -> "j***@example.com"
+ */
+function maskEmail(email: string): string {
+  const [local, domain] = email.split('@')
+  if (!domain) {return '***@***.com'}
+  const maskedLocal = local.length > 1 ? local[0] + '***' : '***'
+  return `${maskedLocal}@${domain}`
+}
+
 // GET /api/conversations - List user's conversations
 export async function GET() {
   try {
@@ -44,6 +78,7 @@ export async function GET() {
             name: true,
             email: true,
             image: true,
+            phone: true,
           },
         },
         seller: {
@@ -52,6 +87,7 @@ export async function GET() {
             name: true,
             email: true,
             image: true,
+            phone: true,
           },
         },
         messages: {
@@ -79,27 +115,51 @@ export async function GET() {
       orderBy: { updatedAt: 'desc' },
     })
 
-    // Transform conversations to include unread count and other participant
-    const transformedConversations = conversations.map((conv) => {
-      const isUserBuyer = conv.buyerId === userId
-      const otherParticipant = isUserBuyer ? conv.seller : conv.buyer
-      const lastMessage = conv.messages[0] || null
+    // Transform conversations with privacy-aware contact info
+    const transformedConversations = await Promise.all(
+      conversations.map(async (conv) => {
+        const isUserBuyer = conv.buyerId === userId
+        const otherParticipant = isUserBuyer ? conv.seller : conv.buyer
+        const lastMessage = conv.messages[0] || null
 
-      return {
-        id: conv.id,
-        listingId: conv.listingId,
-        listing: {
-          ...conv.listing,
-          primaryImage:
-            conv.listing.media[0]?.thumbnailUrl || conv.listing.media[0]?.publicUrl || null,
-        },
-        otherParticipant,
-        lastMessage,
-        unreadCount: conv._count.messages,
-        createdAt: conv.createdAt,
-        updatedAt: conv.updatedAt,
-      }
-    })
+        // Check if user can see full contact details
+        // Buyers need to win + pay, sellers can always see buyer info for their listing
+        let canSeeContact = false
+        if (isUserBuyer) {
+          // Buyer can see seller contact only if they won and paid
+          canSeeContact = await canSeeContactDetails(userId, conv.listingId)
+        } else {
+          // Seller can see buyer contact only if buyer won and paid
+          canSeeContact = await canSeeContactDetails(conv.buyerId, conv.listingId)
+        }
+
+        // Mask contact info if not authorized
+        const safeParticipant = {
+          id: otherParticipant.id,
+          name: otherParticipant.name,
+          image: otherParticipant.image,
+          // Only reveal email/phone after payment
+          email: canSeeContact ? otherParticipant.email : maskEmail(otherParticipant.email),
+          phone: canSeeContact ? otherParticipant.phone : null,
+          contactRevealed: canSeeContact,
+        }
+
+        return {
+          id: conv.id,
+          listingId: conv.listingId,
+          listing: {
+            ...conv.listing,
+            primaryImage:
+              conv.listing.media[0]?.thumbnailUrl || conv.listing.media[0]?.publicUrl || null,
+          },
+          otherParticipant: safeParticipant,
+          lastMessage,
+          unreadCount: conv._count.messages,
+          createdAt: conv.createdAt,
+          updatedAt: conv.updatedAt,
+        }
+      })
+    )
 
     return NextResponse.json({ conversations: transformedConversations })
   } catch (error) {
@@ -146,6 +206,9 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    // Check if buyer can see seller contact (won + paid)
+    const canSeeContact = await canSeeContactDetails(userId, listingId)
+
     // Check if conversation already exists
     const existingConversation = await prisma.conversation.findUnique({
       where: {
@@ -171,12 +234,24 @@ export async function POST(request: NextRequest) {
           },
         },
         seller: {
-          select: { id: true, name: true, email: true, image: true },
+          select: { id: true, name: true, email: true, image: true, phone: true },
         },
       },
     })
 
     if (existingConversation) {
+      // Mask seller contact if buyer hasn't paid
+      const safeParticipant = {
+        id: existingConversation.seller.id,
+        name: existingConversation.seller.name,
+        image: existingConversation.seller.image,
+        email: canSeeContact
+          ? existingConversation.seller.email
+          : maskEmail(existingConversation.seller.email),
+        phone: canSeeContact ? existingConversation.seller.phone : null,
+        contactRevealed: canSeeContact,
+      }
+
       return NextResponse.json({
         conversation: {
           id: existingConversation.id,
@@ -188,7 +263,7 @@ export async function POST(request: NextRequest) {
               existingConversation.listing.media[0]?.publicUrl ||
               null,
           },
-          otherParticipant: existingConversation.seller,
+          otherParticipant: safeParticipant,
         },
       })
     }
@@ -217,10 +292,22 @@ export async function POST(request: NextRequest) {
           },
         },
         seller: {
-          select: { id: true, name: true, email: true, image: true },
+          select: { id: true, name: true, email: true, image: true, phone: true },
         },
       },
     })
+
+    // Mask seller contact for new conversations (buyer hasn't paid yet)
+    const safeParticipant = {
+      id: conversation.seller.id,
+      name: conversation.seller.name,
+      image: conversation.seller.image,
+      email: canSeeContact
+        ? conversation.seller.email
+        : maskEmail(conversation.seller.email),
+      phone: canSeeContact ? conversation.seller.phone : null,
+      contactRevealed: canSeeContact,
+    }
 
     return NextResponse.json(
       {
@@ -234,7 +321,7 @@ export async function POST(request: NextRequest) {
               conversation.listing.media[0]?.publicUrl ||
               null,
           },
-          otherParticipant: conversation.seller,
+          otherParticipant: safeParticipant,
         },
       },
       { status: 201 }

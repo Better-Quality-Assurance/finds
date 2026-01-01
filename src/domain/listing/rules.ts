@@ -10,7 +10,8 @@ export const LISTING_RULES = {
   // Video requirements
   MAX_VIDEOS: 5,
   MAX_VIDEO_SIZE_MB: 500,
-  MAX_VIDEO_DURATION_SECONDS: 300, // 5 minutes
+  MIN_VIDEO_DURATION_SECONDS: 3, // 3 seconds minimum
+  MAX_VIDEO_DURATION_SECONDS: 300, // 5 minutes maximum
   ALLOWED_VIDEO_TYPES: ['video/mp4', 'video/quicktime', 'video/webm'],
 
   // Required photo categories

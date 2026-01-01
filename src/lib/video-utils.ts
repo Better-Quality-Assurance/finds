@@ -3,6 +3,8 @@
  * Client-side video metadata extraction and validation using HTML5 Video API
  */
 
+import { LISTING_RULES } from '@/domain/listing/rules'
+
 export type VideoMetadata = {
   duration: number // seconds
   width: number
@@ -16,9 +18,9 @@ export type VideoValidationResult = {
   metadata?: VideoMetadata
 }
 
-// Default constraints
-const DEFAULT_MAX_DURATION = 120 // 2 minutes
-const DEFAULT_MIN_DURATION = 3 // 3 seconds
+// Video duration constraints - use LISTING_RULES as single source of truth
+const DEFAULT_MAX_DURATION = LISTING_RULES.MAX_VIDEO_DURATION_SECONDS // 5 minutes
+const DEFAULT_MIN_DURATION = LISTING_RULES.MIN_VIDEO_DURATION_SECONDS // 3 seconds
 
 /**
  * Extract metadata from a video file using HTML5 Video API

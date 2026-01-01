@@ -17,6 +17,10 @@ import {
   Car,
   AlertCircle,
   Loader2,
+  Lock,
+  Mail,
+  Phone,
+  CheckCircle,
 } from 'lucide-react'
 import { formatDistanceToNow } from 'date-fns'
 import { cn } from '@/lib/utils'
@@ -52,7 +56,9 @@ type Conversation = {
     id: string
     name: string | null
     email: string
+    phone: string | null
     image: string | null
+    contactRevealed: boolean
   }
   lastMessage: Message | null
   unreadCount: number
@@ -380,6 +386,54 @@ export default function MessagesPage() {
                         {selectedConversation.listing.model}
                       </p>
                     </div>
+                  </div>
+
+                  {/* Contact Info Section */}
+                  <div className="mt-3 rounded-lg border p-3">
+                    {selectedConversation.otherParticipant.contactRevealed ? (
+                      <div className="space-y-2">
+                        <div className="flex items-center gap-2 text-sm">
+                          <CheckCircle className="h-4 w-4 text-success" />
+                          <span className="font-medium text-success">
+                            {t('contactUnlocked')}
+                          </span>
+                        </div>
+                        <div className="flex flex-wrap gap-4 text-sm">
+                          <div className="flex items-center gap-1.5">
+                            <Mail className="h-4 w-4 text-muted-foreground" />
+                            <a
+                              href={`mailto:${selectedConversation.otherParticipant.email}`}
+                              className="text-primary hover:underline"
+                            >
+                              {selectedConversation.otherParticipant.email}
+                            </a>
+                          </div>
+                          {selectedConversation.otherParticipant.phone && (
+                            <div className="flex items-center gap-1.5">
+                              <Phone className="h-4 w-4 text-muted-foreground" />
+                              <a
+                                href={`tel:${selectedConversation.otherParticipant.phone}`}
+                                className="text-primary hover:underline"
+                              >
+                                {selectedConversation.otherParticipant.phone}
+                              </a>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="flex items-start gap-2 text-sm">
+                        <Lock className="h-4 w-4 mt-0.5 text-muted-foreground" />
+                        <div>
+                          <p className="font-medium text-muted-foreground">
+                            {t('contactLocked')}
+                          </p>
+                          <p className="text-xs text-muted-foreground mt-0.5">
+                            {t('contactLockedHint')}
+                          </p>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </CardHeader>
 

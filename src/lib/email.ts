@@ -855,3 +855,264 @@ The Finds Team`,
     throw new Error('Failed to send listing changes requested email')
   }
 }
+
+/**
+ * Send payment complete email to buyer with seller contact details
+ * This is sent after the buyer fee is paid - the key moment for contact exchange
+ */
+export async function sendPaymentCompleteEmail(
+  to: string,
+  buyerName: string,
+  vehicleTitle: string,
+  finalPrice: number,
+  currency: string,
+  seller: { name: string; email: string; phone?: string }
+) {
+  const formatCurrency = (amount: number) => {
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: currency,
+    }).format(amount)
+  }
+
+  try {
+    const data = await getResendClient().emails.send({
+      from: getFromEmail(),
+      to,
+      subject: `Payment Complete - Seller Contact for ${vehicleTitle} - Finds`,
+      html: `
+        <!DOCTYPE html>
+        <html>
+          <head>
+            <meta charset="utf-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>Payment Complete - Seller Contact</title>
+          </head>
+          <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
+            <div style="background-color: #f8f9fa; padding: 30px; border-radius: 10px;">
+              <h1 style="color: #4caf50; margin-bottom: 20px;">Payment Complete!</h1>
+
+              <p style="font-size: 16px; margin-bottom: 20px;">
+                Hi ${buyerName},
+              </p>
+
+              <p style="font-size: 16px; margin-bottom: 20px;">
+                Your payment for <strong>"${vehicleTitle}"</strong> has been received. You can now contact the seller directly to arrange collection or delivery.
+              </p>
+
+              <div style="background-color: #e8f5e9; border-left: 4px solid #4caf50; padding: 20px; margin: 20px 0; border-radius: 4px;">
+                <h3 style="margin: 0 0 15px 0; color: #2e7d32;">Seller Contact Details</h3>
+                <table style="width: 100%; border-collapse: collapse;">
+                  <tr>
+                    <td style="padding: 8px 0; font-size: 15px;"><strong>Name:</strong></td>
+                    <td style="padding: 8px 0; font-size: 15px;">${seller.name}</td>
+                  </tr>
+                  <tr>
+                    <td style="padding: 8px 0; font-size: 15px;"><strong>Email:</strong></td>
+                    <td style="padding: 8px 0; font-size: 15px;"><a href="mailto:${seller.email}" style="color: #1565c0;">${seller.email}</a></td>
+                  </tr>
+                  ${seller.phone ? `
+                  <tr>
+                    <td style="padding: 8px 0; font-size: 15px;"><strong>Phone:</strong></td>
+                    <td style="padding: 8px 0; font-size: 15px;"><a href="tel:${seller.phone}" style="color: #1565c0;">${seller.phone}</a></td>
+                  </tr>
+                  ` : ''}
+                </table>
+              </div>
+
+              <div style="background-color: #fff3e0; border-left: 4px solid #ff9800; padding: 20px; margin: 20px 0; border-radius: 4px;">
+                <h3 style="margin: 0 0 10px 0; color: #e65100;">Purchase Summary</h3>
+                <p style="margin: 0; font-size: 15px;">
+                  Vehicle: ${vehicleTitle}<br>
+                  Amount: <strong>${formatCurrency(finalPrice)}</strong>
+                </p>
+              </div>
+
+              <h3 style="color: #1a1a1a; margin-top: 30px;">Next Steps</h3>
+              <ol style="padding-left: 20px; margin-bottom: 20px;">
+                <li style="margin-bottom: 10px;">Contact the seller to arrange a viewing and collection time</li>
+                <li style="margin-bottom: 10px;">Inspect the vehicle before finalizing the transaction</li>
+                <li style="margin-bottom: 10px;">Arrange payment directly with the seller</li>
+                <li style="margin-bottom: 10px;">Complete the ownership transfer paperwork</li>
+              </ol>
+
+              <hr style="border: none; border-top: 1px solid #ddd; margin: 30px 0;">
+
+              <p style="font-size: 13px; color: #999;">
+                If you have any issues with the transaction, please contact our support team.
+              </p>
+
+              <p style="font-size: 13px; color: #999; margin-top: 20px;">
+                Best regards,<br>
+                The Finds Team
+              </p>
+            </div>
+          </body>
+        </html>
+      `,
+      text: `Payment Complete - Seller Contact Details
+
+Hi ${buyerName},
+
+Your payment for "${vehicleTitle}" has been received. You can now contact the seller directly.
+
+SELLER CONTACT DETAILS:
+Name: ${seller.name}
+Email: ${seller.email}
+${seller.phone ? `Phone: ${seller.phone}` : ''}
+
+PURCHASE SUMMARY:
+Vehicle: ${vehicleTitle}
+Amount: ${formatCurrency(finalPrice)}
+
+NEXT STEPS:
+1. Contact the seller to arrange a viewing and collection time
+2. Inspect the vehicle before finalizing the transaction
+3. Arrange payment directly with the seller
+4. Complete the ownership transfer paperwork
+
+If you have any issues with the transaction, please contact our support team.
+
+Best regards,
+The Finds Team`,
+    })
+
+    return { success: true, data }
+  } catch (error) {
+    console.error('Failed to send payment complete email:', error)
+    throw new Error('Failed to send payment complete email')
+  }
+}
+
+/**
+ * Send payment received email to seller with buyer contact details
+ * This is sent after the buyer fee is paid
+ */
+export async function sendPaymentReceivedEmail(
+  to: string,
+  sellerName: string,
+  vehicleTitle: string,
+  finalPrice: number,
+  currency: string,
+  buyer: { name: string; email: string; phone?: string }
+) {
+  const formatCurrency = (amount: number) => {
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: currency,
+    }).format(amount)
+  }
+
+  try {
+    const data = await getResendClient().emails.send({
+      from: getFromEmail(),
+      to,
+      subject: `Buyer Payment Complete - ${vehicleTitle} - Finds`,
+      html: `
+        <!DOCTYPE html>
+        <html>
+          <head>
+            <meta charset="utf-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>Buyer Payment Complete</title>
+          </head>
+          <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
+            <div style="background-color: #f8f9fa; padding: 30px; border-radius: 10px;">
+              <h1 style="color: #4caf50; margin-bottom: 20px;">Payment Received!</h1>
+
+              <p style="font-size: 16px; margin-bottom: 20px;">
+                Hi ${sellerName},
+              </p>
+
+              <p style="font-size: 16px; margin-bottom: 20px;">
+                Great news! The buyer has completed their payment for <strong>"${vehicleTitle}"</strong>. You can now contact them to arrange handover.
+              </p>
+
+              <div style="background-color: #e3f2fd; border-left: 4px solid #2196f3; padding: 20px; margin: 20px 0; border-radius: 4px;">
+                <h3 style="margin: 0 0 15px 0; color: #1565c0;">Buyer Contact Details</h3>
+                <table style="width: 100%; border-collapse: collapse;">
+                  <tr>
+                    <td style="padding: 8px 0; font-size: 15px;"><strong>Name:</strong></td>
+                    <td style="padding: 8px 0; font-size: 15px;">${buyer.name}</td>
+                  </tr>
+                  <tr>
+                    <td style="padding: 8px 0; font-size: 15px;"><strong>Email:</strong></td>
+                    <td style="padding: 8px 0; font-size: 15px;"><a href="mailto:${buyer.email}" style="color: #1565c0;">${buyer.email}</a></td>
+                  </tr>
+                  ${buyer.phone ? `
+                  <tr>
+                    <td style="padding: 8px 0; font-size: 15px;"><strong>Phone:</strong></td>
+                    <td style="padding: 8px 0; font-size: 15px;"><a href="tel:${buyer.phone}" style="color: #1565c0;">${buyer.phone}</a></td>
+                  </tr>
+                  ` : ''}
+                </table>
+              </div>
+
+              <div style="background-color: #e8f5e9; border-left: 4px solid #4caf50; padding: 20px; margin: 20px 0; border-radius: 4px;">
+                <h3 style="margin: 0 0 10px 0; color: #2e7d32;">Sale Summary</h3>
+                <p style="margin: 0; font-size: 15px;">
+                  Vehicle: ${vehicleTitle}<br>
+                  Sale Price: <strong>${formatCurrency(finalPrice)}</strong>
+                </p>
+                <p style="margin: 10px 0 0 0; font-size: 13px; color: #666;">
+                  Your payout will be processed within 2-3 business days after the sale is finalized.
+                </p>
+              </div>
+
+              <h3 style="color: #1a1a1a; margin-top: 30px;">Next Steps</h3>
+              <ol style="padding-left: 20px; margin-bottom: 20px;">
+                <li style="margin-bottom: 10px;">Contact the buyer to arrange handover</li>
+                <li style="margin-bottom: 10px;">Prepare the vehicle and documentation</li>
+                <li style="margin-bottom: 10px;">Meet with the buyer and complete the sale</li>
+                <li style="margin-bottom: 10px;">Ensure all ownership transfer paperwork is completed</li>
+              </ol>
+
+              <hr style="border: none; border-top: 1px solid #ddd; margin: 30px 0;">
+
+              <p style="font-size: 13px; color: #999;">
+                If you have any issues with the transaction, please contact our support team.
+              </p>
+
+              <p style="font-size: 13px; color: #999; margin-top: 20px;">
+                Best regards,<br>
+                The Finds Team
+              </p>
+            </div>
+          </body>
+        </html>
+      `,
+      text: `Buyer Payment Complete
+
+Hi ${sellerName},
+
+Great news! The buyer has completed their payment for "${vehicleTitle}". You can now contact them to arrange handover.
+
+BUYER CONTACT DETAILS:
+Name: ${buyer.name}
+Email: ${buyer.email}
+${buyer.phone ? `Phone: ${buyer.phone}` : ''}
+
+SALE SUMMARY:
+Vehicle: ${vehicleTitle}
+Sale Price: ${formatCurrency(finalPrice)}
+
+Your payout will be processed within 2-3 business days after the sale is finalized.
+
+NEXT STEPS:
+1. Contact the buyer to arrange handover
+2. Prepare the vehicle and documentation
+3. Meet with the buyer and complete the sale
+4. Ensure all ownership transfer paperwork is completed
+
+If you have any issues with the transaction, please contact our support team.
+
+Best regards,
+The Finds Team`,
+    })
+
+    return { success: true, data }
+  } catch (error) {
+    console.error('Failed to send payment received email:', error)
+    throw new Error('Failed to send payment received email')
+  }
+}

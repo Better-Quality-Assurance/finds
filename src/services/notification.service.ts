@@ -854,3 +854,119 @@ function formatDate(date: Date): string {
   }
   return 'soon'
 }
+
+/**
+ * Notify buyer and seller that payment is complete
+ * Includes full contact details for both parties
+ * This is the critical point where contact info is exchanged
+ */
+export async function notifyPaymentComplete(
+  auctionId: string
+): Promise<void> {
+  try {
+    // Get full auction details with both parties
+    const auction = await prisma.auction.findUnique({
+      where: { id: auctionId },
+      include: {
+        listing: {
+          include: {
+            seller: {
+              select: {
+                id: true,
+                name: true,
+                email: true,
+                phone: true,
+              },
+            },
+          },
+        },
+        winner: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+            phone: true,
+          },
+        },
+      },
+    })
+
+    if (!auction || !auction.winner) {
+      notificationLogger.warn({ auctionId }, 'Cannot notify payment complete - auction or winner not found')
+      return
+    }
+
+    const { listing, winner } = auction
+    const seller = listing.seller
+    const vehicleTitle = listing.title
+    const finalPrice = Number(auction.finalPrice || 0)
+    const currency = listing.currency
+
+    // Notify buyer with seller contact
+    await sendUserNotification(winner.id, {
+      type: 'AUCTION_WON',
+      title: 'Payment Complete - Contact Details Unlocked',
+      message: `Your payment for "${vehicleTitle}" is complete. You can now contact the seller to arrange pickup.`,
+      data: {
+        auctionId,
+        sellerName: seller.name,
+        sellerEmail: seller.email,
+        sellerPhone: seller.phone,
+      },
+      link: `/account/bids?status=won`,
+    })
+
+    // Send email to buyer with seller contact
+    if (winner.email) {
+      await emailService.sendPaymentCompleteEmail(
+        winner.email,
+        winner.name || 'Buyer',
+        vehicleTitle,
+        finalPrice,
+        currency,
+        {
+          name: seller.name || 'Seller',
+          email: seller.email,
+          phone: seller.phone || undefined,
+        }
+      )
+    }
+
+    // Notify seller with buyer contact
+    await sendUserNotification(seller.id, {
+      type: 'AUCTION_WON',
+      title: 'Payment Received - Buyer Contact',
+      message: `Payment received for "${vehicleTitle}". Contact the buyer to arrange handover.`,
+      data: {
+        auctionId,
+        buyerName: winner.name,
+        buyerEmail: winner.email,
+        buyerPhone: winner.phone,
+      },
+      link: `/account/seller`,
+    })
+
+    // Send email to seller with buyer contact
+    if (seller.email) {
+      await emailService.sendPaymentReceivedEmail(
+        seller.email,
+        seller.name || 'Seller',
+        vehicleTitle,
+        finalPrice,
+        currency,
+        {
+          name: winner.name || 'Buyer',
+          email: winner.email,
+          phone: winner.phone || undefined,
+        }
+      )
+    }
+
+    notificationLogger.info(
+      { auctionId, winnerId: winner.id, sellerId: seller.id },
+      'Notified both parties about payment complete with contact details'
+    )
+  } catch (error) {
+    logError(notificationLogger, 'Failed to notify payment complete', error, { auctionId })
+  }
+}

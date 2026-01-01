@@ -136,6 +136,16 @@ export class BuyerFeeService implements IBuyerFeeService {
           },
         })
 
+        // Send contact exchange notifications to buyer and seller
+        // This is the critical point where contact info is unlocked
+        try {
+          const { notifyPaymentComplete } = await import('./notification.service')
+          await notifyPaymentComplete(auctionId)
+        } catch (notifyError) {
+          // Don't fail the payment if notification fails
+          paymentLogger.error({ auctionId, error: notifyError }, 'Failed to send payment complete notification')
+        }
+
         return { success: true, paymentIntent }
       }
 
@@ -217,6 +227,14 @@ export class BuyerFeeService implements IBuyerFeeService {
             paidAt: new Date(),
           },
         })
+
+        // Send contact exchange notifications to buyer and seller
+        try {
+          const { notifyPaymentComplete } = await import('./notification.service')
+          await notifyPaymentComplete(auctionId)
+        } catch (notifyError) {
+          paymentLogger.error({ auctionId, error: notifyError }, 'Failed to send payment complete notification')
+        }
 
         return { success: true, paymentIntent }
       }

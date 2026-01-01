@@ -482,12 +482,13 @@ export class DepositService implements IBidDepositService {
       // Capture the held funds as forfeiture
       await this.paymentProcessor.capturePayment(deposit.stripePaymentIntentId)
 
-      // Update deposit status - use CAPTURED status for forfeiture
+      // Update deposit status to FORFEITED with reason
       await this.prisma.bidDeposit.update({
         where: { id: depositId },
         data: {
-          status: 'CAPTURED',
-          capturedAt: new Date(),
+          status: 'FORFEITED',
+          forfeitedAt: new Date(),
+          forfeitReason: reason,
         },
       })
 

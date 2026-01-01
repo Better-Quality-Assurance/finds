@@ -310,7 +310,15 @@
       "sold": "Sold",
       "no_sale": "No Sale",
       "cancelled": "Cancelled"
-    }
+    },
+    "paymentComplete": "Payment Complete",
+    "paymentRequired": "Payment Required",
+    "sellerContact": "Seller Contact",
+    "seller": "Seller",
+    "buyerFee": "Buyer Fee",
+    "payBy": "Pay by",
+    "payNow": "Pay Now",
+    "payToUnlockContact": "Complete payment to unlock seller contact details and arrange vehicle pickup."
   },
   "admin": {
     "users": {
@@ -599,7 +607,10 @@
     "fetchError": "Failed to load conversations",
     "fetchMessagesError": "Failed to load messages",
     "sendError": "Failed to send message",
-    "startConversationError": "Failed to start conversation"
+    "startConversationError": "Failed to start conversation",
+    "contactUnlocked": "Contact info unlocked",
+    "contactLocked": "Contact details hidden",
+    "contactLockedHint": "Win the auction and complete payment to unlock full contact details"
   },
   "reviews": {
     "reviews": "Reviews",

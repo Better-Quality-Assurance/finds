@@ -9,6 +9,17 @@ const bidsQuerySchema = z.object({
   status: z.enum(['all', 'active', 'won', 'lost']).default('all'),
 })
 
+/**
+ * Mask email for privacy - show domain only
+ * e.g., "john.doe@example.com" -> "j***@example.com"
+ */
+function maskEmail(email: string): string {
+  const [local, domain] = email.split('@')
+  if (!domain) {return '***@***.com'}
+  const maskedLocal = local.length > 1 ? local[0] + '***' : '***'
+  return `${maskedLocal}@${domain}`
+}
+
 // GET - Fetch user's bid history with auction details
 export async function GET(request: NextRequest) {
   try {
@@ -90,8 +101,11 @@ export async function GET(request: NextRequest) {
               status: true,
               currentBid: true,
               finalPrice: true,
+              buyerFeeAmount: true,
               winnerId: true,
               currentEndTime: true,
+              paymentStatus: true,
+              paymentDeadline: true,
               listing: {
                 select: {
                   id: true,
@@ -99,6 +113,7 @@ export async function GET(request: NextRequest) {
                   make: true,
                   model: true,
                   year: true,
+                  currency: true,
                   media: {
                     where: {
                       isPrimary: true,
@@ -108,6 +123,14 @@ export async function GET(request: NextRequest) {
                       thumbnailUrl: true,
                     },
                     take: 1,
+                  },
+                  seller: {
+                    select: {
+                      id: true,
+                      name: true,
+                      email: true,
+                      phone: true,
+                    },
                   },
                 },
               },
@@ -129,6 +152,7 @@ export async function GET(request: NextRequest) {
       const auction = bid.auction
       const listing = auction.listing
       const isWinner = auction.winnerId === session.user.id
+      const isPaid = auction.paymentStatus === 'PAID'
 
       // Determine bid status
       let bidStatus: 'active' | 'won' | 'lost' | 'outbid'
@@ -139,6 +163,20 @@ export async function GET(request: NextRequest) {
       } else {
         bidStatus = 'lost'
       }
+
+      // Only reveal seller contact if winner has paid
+      const canSeeSellerContact = isWinner && isPaid
+      const sellerContact = canSeeSellerContact && listing.seller ? {
+        name: listing.seller.name,
+        email: listing.seller.email,
+        phone: listing.seller.phone,
+        contactRevealed: true,
+      } : listing.seller ? {
+        name: listing.seller.name,
+        email: maskEmail(listing.seller.email),
+        phone: null,
+        contactRevealed: false,
+      } : null
 
       return {
         id: bid.id,
@@ -151,7 +189,11 @@ export async function GET(request: NextRequest) {
           status: auction.status,
           currentBid: auction.currentBid,
           finalPrice: auction.finalPrice,
+          buyerFeeAmount: auction.buyerFeeAmount,
           endTime: auction.currentEndTime,
+          // Payment info for winners
+          paymentStatus: isWinner ? auction.paymentStatus : null,
+          paymentDeadline: isWinner ? auction.paymentDeadline : null,
         },
         listing: {
           id: listing.id,
@@ -159,8 +201,11 @@ export async function GET(request: NextRequest) {
           make: listing.make,
           model: listing.model,
           year: listing.year,
+          currency: listing.currency,
           image: listing.media[0]?.thumbnailUrl || listing.media[0]?.publicUrl || null,
         },
+        // Seller contact for winners only
+        seller: isWinner ? sellerContact : null,
       }
     })
 

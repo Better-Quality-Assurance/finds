@@ -124,6 +124,7 @@ model User {
   reviewsGiven   SellerReview[]  @relation("ReviewsGiven")
   following      SellerFollow[]  @relation("Following")
   followers      SellerFollow[]  @relation("Followers")
+  wonAuctions    Auction[]       @relation("AuctionWinner")
 
   @@map("users")
 
@@ -332,6 +333,7 @@ model Auction {
 
   // Winner
   winnerId     String?  @map("winner_id")
+  winner       User?    @relation("AuctionWinner", fields: [winnerId], references: [id])
   winningBidId String?  @map("winning_bid_id")
   finalPrice   Decimal? @map("final_price") @db.Decimal(12, 2)
 
@@ -405,7 +407,8 @@ model Bid {
 enum DepositStatus {
   PENDING
   HELD
-  CAPTURED
+  CAPTURED   // Winner paid fee, deposit was captured as part of payment
+  FORFEITED  // Winner failed to pay fee, deposit was captured as penalty
   RELEASED
   FAILED
 }
@@ -424,9 +427,12 @@ model BidDeposit {
 
   status DepositStatus @default(PENDING)
 
-  heldAt     DateTime? @map("held_at")
-  releasedAt DateTime? @map("released_at")
-  capturedAt DateTime? @map("captured_at")
+  heldAt      DateTime? @map("held_at")
+  releasedAt  DateTime? @map("released_at")
+  capturedAt  DateTime? @map("captured_at")
+  forfeitedAt DateTime? @map("forfeited_at")
+
+  forfeitReason String? @map("forfeit_reason") // Reason for forfeiture (e.g., "payment_deadline_missed")
 
   createdAt DateTime @default(now()) @map("created_at")
 

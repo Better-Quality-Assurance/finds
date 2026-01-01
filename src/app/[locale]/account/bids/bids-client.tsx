@@ -19,6 +19,11 @@ import {
   XCircle,
   Clock,
   TrendingUp,
+  CreditCard,
+  Mail,
+  Phone,
+  Lock,
+  CheckCircle,
 } from 'lucide-react'
 import { formatDistanceToNow } from 'date-fns'
 import { enUS, ro } from 'date-fns/locale'
@@ -38,7 +43,10 @@ interface Bid {
     status: string
     currentBid: number | null
     finalPrice: number | null
+    buyerFeeAmount: number | null
     endTime: string
+    paymentStatus: string | null
+    paymentDeadline: string | null
   }
   listing: {
     id: string
@@ -46,8 +54,15 @@ interface Bid {
     make: string
     model: string
     year: number
+    currency: string
     image: string | null
   }
+  seller: {
+    name: string | null
+    email: string
+    phone: string | null
+    contactRevealed: boolean
+  } | null
 }
 
 interface BidsResponse {
@@ -313,6 +328,90 @@ export default function BidsClient() {
                     </div>
                   </div>
                 </Link>
+
+                {/* Winner Payment & Contact Section */}
+                {bid.status === 'won' && (
+                  <div className="border-t px-6 py-4">
+                    {bid.auction.paymentStatus === 'PAID' ? (
+                      // Paid - Show seller contact
+                      <div className="space-y-3">
+                        <div className="flex items-center gap-2 text-sm">
+                          <CheckCircle className="h-4 w-4 text-success" />
+                          <span className="font-medium text-success">
+                            {t('paymentComplete')}
+                          </span>
+                        </div>
+                        {bid.seller && (
+                          <div className="rounded-lg border bg-muted/30 p-3">
+                            <p className="mb-2 text-xs font-medium text-muted-foreground">
+                              {t('sellerContact')}
+                            </p>
+                            <div className="space-y-1.5 text-sm">
+                              <p className="font-medium">{bid.seller.name || t('seller')}</p>
+                              <div className="flex items-center gap-1.5">
+                                <Mail className="h-3.5 w-3.5 text-muted-foreground" />
+                                <a
+                                  href={`mailto:${bid.seller.email}`}
+                                  className="text-primary hover:underline"
+                                  onClick={(e) => e.stopPropagation()}
+                                >
+                                  {bid.seller.email}
+                                </a>
+                              </div>
+                              {bid.seller.phone && (
+                                <div className="flex items-center gap-1.5">
+                                  <Phone className="h-3.5 w-3.5 text-muted-foreground" />
+                                  <a
+                                    href={`tel:${bid.seller.phone}`}
+                                    className="text-primary hover:underline"
+                                    onClick={(e) => e.stopPropagation()}
+                                  >
+                                    {bid.seller.phone}
+                                  </a>
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    ) : (
+                      // Unpaid - Show pay button
+                      <div className="space-y-3">
+                        <div className="flex items-center gap-2 text-sm">
+                          <Lock className="h-4 w-4 text-amber-500" />
+                          <span className="font-medium text-amber-600">
+                            {t('paymentRequired')}
+                          </span>
+                        </div>
+                        <div className="flex flex-wrap items-center justify-between gap-3">
+                          <div className="text-sm">
+                            <p className="text-muted-foreground">{t('buyerFee')} (5%)</p>
+                            <p className="text-lg font-semibold">
+                              {bid.auction.buyerFeeAmount
+                                ? formatCurrency(Number(bid.auction.buyerFeeAmount), bid.listing.currency)
+                                : formatCurrency(Number(bid.auction.finalPrice) * 0.05, bid.listing.currency)}
+                            </p>
+                            {bid.auction.paymentDeadline && (
+                              <p className="text-xs text-muted-foreground">
+                                {t('payBy')}{' '}
+                                {new Date(bid.auction.paymentDeadline).toLocaleDateString()}
+                              </p>
+                            )}
+                          </div>
+                          <Button asChild variant="premium" size="sm">
+                            <Link href={`/auctions/${bid.auction.id}/checkout`}>
+                              <CreditCard className="mr-2 h-4 w-4" />
+                              {t('payNow')}
+                            </Link>
+                          </Button>
+                        </div>
+                        <p className="text-xs text-muted-foreground">
+                          {t('payToUnlockContact')}
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                )}
               </CardContent>
             </Card>
           ))}
