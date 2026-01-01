@@ -5,6 +5,7 @@ import { EVENTS } from '@/lib/pusher'
 import { prisma } from '@/lib/db'
 import { formatBidderDisplay } from './bidder-number.service'
 import * as emailService from '@/lib/email'
+import { notificationLogger, logError } from '@/lib/logger'
 
 export type NotificationType =
   | 'AUCTION_STARTED'
@@ -160,6 +161,69 @@ export async function notifyListingChangesRequested(
     },
     link: `/seller/listings/${listingId}`,
   })
+}
+
+/**
+ * Notify seller that their auction expired without sale
+ * Includes top improvement suggestions
+ */
+export async function notifySellerAuctionExpired(
+  sellerId: string,
+  auctionId: string,
+  listingId: string,
+  listingTitle: string,
+  reason: 'no_bids' | 'reserve_not_met',
+  topSuggestions: string[] = []
+): Promise<void> {
+  try {
+    const reasonText = reason === 'no_bids'
+      ? 'received no bids'
+      : 'did not meet the reserve price'
+
+    let message = `Your auction "${listingTitle}" ${reasonText}.`
+
+    if (topSuggestions.length > 0) {
+      message += ' We have suggestions to help you sell next time.'
+    }
+
+    // TODO: Add Notification model to schema to enable in-app notifications
+    // await prisma.notification.create({
+    //   data: {
+    //     userId: sellerId,
+    //     type: 'AUCTION_EXPIRED',
+    //     title: 'Auction Ended - No Sale',
+    //     message,
+    //     data: {
+    //       auctionId,
+    //       listingId,
+    //       reason,
+    //       topSuggestions,
+    //       link: `/account/listings?id=${listingId}`,
+    //     },
+    //   },
+    // })
+
+    // Send real-time notification
+    await transport.sendToUser(sellerId, EVENTS.AUCTION_ENDED, {
+      type: 'auction_expired',
+      auctionId,
+      listingId,
+      listingTitle,
+      reason,
+      topSuggestions,
+      message,
+    })
+
+    notificationLogger.info(
+      { sellerId, auctionId, listingId, reason },
+      'Notified seller about expired auction'
+    )
+  } catch (error) {
+    logError(notificationLogger, 'Failed to notify seller of expired auction', error, {
+      sellerId,
+      auctionId,
+    })
+  }
 }
 
 /**

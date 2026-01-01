@@ -441,6 +441,95 @@ export class DepositService implements IBidDepositService {
     const deposit = await this.getAuctionDeposit(userId, auctionId)
     return deposit?.status === 'HELD'
   }
+
+  /**
+   * Get the winner's held deposit for an auction
+   */
+  async getWinnerDeposit(auctionId: string, winnerId: string): Promise<BidDeposit | null> {
+    return this.prisma.bidDeposit.findFirst({
+      where: {
+        auctionId,
+        userId: winnerId,
+        status: 'HELD',
+      },
+    })
+  }
+
+  /**
+   * Forfeit a deposit when winner fails to complete payment
+   * This captures the deposit as a penalty and records the reason
+   */
+  async forfeitDeposit(
+    depositId: string,
+    reason: string = 'Payment deadline expired'
+  ): Promise<{ success: boolean; error?: string }> {
+    const deposit = await this.prisma.bidDeposit.findUnique({
+      where: { id: depositId },
+      include: {
+        user: { select: { id: true, email: true } },
+      },
+    })
+
+    if (!deposit) {
+      return { success: false, error: 'Deposit not found' }
+    }
+
+    if (deposit.status !== 'HELD') {
+      return { success: false, error: `Cannot forfeit deposit in status: ${deposit.status}` }
+    }
+
+    try {
+      // Capture the held funds as forfeiture
+      await this.paymentProcessor.capturePayment(deposit.stripePaymentIntentId)
+
+      // Update deposit status - use CAPTURED status for forfeiture
+      await this.prisma.bidDeposit.update({
+        where: { id: depositId },
+        data: {
+          status: 'CAPTURED',
+          capturedAt: new Date(),
+        },
+      })
+
+      // Log the forfeiture for audit
+      paymentLogger.info({
+        depositId,
+        userId: deposit.userId,
+        auctionId: deposit.auctionId,
+        amount: deposit.amount,
+        reason,
+      }, 'Deposit forfeited due to non-payment')
+
+      return { success: true }
+    } catch (error) {
+      logError(
+        paymentLogger,
+        'Failed to forfeit deposit',
+        error,
+        { depositId, reason }
+      )
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Failed to forfeit deposit',
+      }
+    }
+  }
+
+  /**
+   * Credit winner's deposit toward their payment (release the hold)
+   * This is used when the winner successfully completes the external payment
+   */
+  async creditWinnerDeposit(auctionId: string, winnerId: string): Promise<boolean> {
+    const deposit = await this.getWinnerDeposit(auctionId, winnerId)
+
+    if (!deposit) {
+      paymentLogger.warn({ auctionId, winnerId }, 'No held deposit found for winner')
+      return false
+    }
+
+    // Release the deposit since payment was completed outside platform
+    return this.releaseBidDeposit(deposit.id)
+  }
 }
 
 // Factory function for creating deposit service with default dependencies
@@ -495,3 +584,12 @@ export const getAuctionDeposit = (userId: string, auctionId: string) =>
 
 export const hasValidDeposit = (userId: string, auctionId: string) =>
   depositService.hasValidDeposit(userId, auctionId)
+
+export const getWinnerDeposit = (auctionId: string, winnerId: string) =>
+  depositService.getWinnerDeposit(auctionId, winnerId)
+
+export const forfeitDeposit = (depositId: string, reason?: string) =>
+  depositService.forfeitDeposit(depositId, reason)
+
+export const creditWinnerDeposit = (auctionId: string, winnerId: string) =>
+  depositService.creditWinnerDeposit(auctionId, winnerId)

@@ -223,12 +223,13 @@ model Listing {
   searchVector Unsupported("tsvector")? @map("search_vector")
 
   // Relations
-  media         ListingMedia[]
-  auction       Auction?
-  comments      Comment[]
-  aiAnalysis    AIListingAnalysis?
-  aiCarReview   AICarReview?
-  conversations Conversation[]
+  media          ListingMedia[]
+  auction        Auction?
+  comments       Comment[]
+  aiAnalysis     AIListingAnalysis?
+  aiCarReview    AICarReview?
+  aiImprovements AIListingImprovement[]
+  conversations  Conversation[]
 
   @@index([status])
   @@index([sellerId])
@@ -945,4 +946,87 @@ model Message {
   @@index([conversationId, createdAt])
   @@index([senderId])
   @@map("messages")
+}
+
+// ============================================================================
+// AI LISTING IMPROVEMENTS (for expired/unsold auctions)
+// ============================================================================
+
+model AIListingImprovement {
+  id        String  @id @default(cuid())
+  listingId String  @map("listing_id")
+  listing   Listing @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  auctionId String  @map("auction_id")
+
+  // Why it didn't sell
+  reason String // 'no_bids' | 'reserve_not_met'
+
+  // Pricing suggestions
+  suggestedStartingPrice Decimal? @map("suggested_starting_price") @db.Decimal(12, 2)
+  suggestedReserve       Decimal? @map("suggested_reserve") @db.Decimal(12, 2)
+  avgMarketPrice         Decimal? @map("avg_market_price") @db.Decimal(12, 2)
+  pricingReasoning       String?  @map("pricing_reasoning") @db.Text
+
+  // Full suggestions as JSON
+  suggestions Json @default("{}")
+
+  // Top priorities for quick display
+  topPriorities String[] @map("top_priorities")
+
+  // Market data used for analysis
+  localSalesCount  Int @default(0) @map("local_sales_count")
+  globalSalesCount Int @default(0) @map("global_sales_count")
+  marketData       Json @default("{}") @map("market_data")
+
+  // AI metadata
+  status           AIAnalysisStatus @default(PENDING)
+  modelUsed        String?          @map("model_used")
+  tokensUsed       Int?             @map("tokens_used")
+  processingTimeMs Int?             @map("processing_time_ms")
+  errorMessage     String?          @map("error_message") @db.Text
+
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@index([listingId])
+  @@index([auctionId])
+  @@index([status])
+  @@map("ai_listing_improvements")
+}
+
+// ============================================================================
+// EXTERNAL AUCTION SALES (from BaT, Catawiki, etc.)
+// ============================================================================
+
+model ExternalAuctionSale {
+  id        String @id @default(cuid())
+  source    String // "Bring a Trailer", "Catawiki", "RM Sothebys"
+  sourceUrl String @map("source_url") @db.Text
+
+  // Vehicle info
+  title String
+  make  String
+  model String
+  year  Int
+
+  // Pricing
+  soldPrice Decimal @map("sold_price") @db.Decimal(12, 2)
+  currency  String // Original currency (USD, EUR, GBP)
+  priceEur  Decimal @map("price_eur") @db.Decimal(12, 2) // Converted to EUR
+
+  // Sale details
+  saleDate  DateTime @map("sale_date")
+  location  String?
+  condition String?
+  mileage   Int?
+  imageUrl  String?  @map("image_url") @db.Text
+
+  // Metadata
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@unique([sourceUrl]) // Don't duplicate same auction
+  @@index([make, model])
+  @@index([saleDate(sort: Desc)])
+  @@index([source])
+  @@index([year])
+  @@map("external_auction_sales")
 }

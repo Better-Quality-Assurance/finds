@@ -6,9 +6,10 @@ import { auth } from '@/lib/auth'
 import { prisma } from '@/lib/db'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent } from '@/components/ui/card'
 import { formatCurrency } from '@/lib/utils'
-import { Plus, Car, Eye, Edit, Trash2, Clock, CheckCircle, XCircle, AlertCircle } from 'lucide-react'
+import { Plus, Car, Eye, Edit, Trash2, Clock, CheckCircle, XCircle, AlertCircle, Lightbulb } from 'lucide-react'
+import { RelistButton } from '@/components/listing/relist-button'
 
 export async function generateMetadata() {
   const t = await getTranslations('sellerDashboard')
@@ -57,6 +58,22 @@ export default async function SellerDashboardPage() {
           currentBid: true,
           startTime: true,
           currentEndTime: true,
+        },
+      },
+      aiImprovements: {
+        where: { status: 'COMPLETED' },
+        orderBy: { createdAt: 'desc' },
+        take: 1,
+        select: {
+          id: true,
+          suggestedStartingPrice: true,
+          suggestedReserve: true,
+          avgMarketPrice: true,
+          pricingReasoning: true,
+          topPriorities: true,
+          reason: true,
+          localSalesCount: true,
+          globalSalesCount: true,
         },
       },
     },
@@ -177,6 +194,19 @@ export default async function SellerDashboardPage() {
                             <strong>Rejection reason:</strong> {listing.rejectionReason}
                           </div>
                         )}
+                        {(status === 'EXPIRED' || status === 'WITHDRAWN') && listing.aiImprovements[0] && (
+                          <div className="mt-4 rounded-lg border border-primary/20 bg-primary/5 p-3">
+                            <div className="flex items-center gap-2 text-sm font-medium text-primary">
+                              <Lightbulb className="h-4 w-4" />
+                              {t('aiSuggestionsAvailable')}
+                            </div>
+                            <ul className="mt-2 space-y-1 text-sm text-muted-foreground">
+                              {listing.aiImprovements[0].topPriorities.slice(0, 2).map((tip, i) => (
+                                <li key={i}>• {tip}</li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
                       </div>
 
                       {/* Actions */}
@@ -188,6 +218,32 @@ export default async function SellerDashboardPage() {
                               {t('editListing')}
                             </Link>
                           </Button>
+                        )}
+                        {(status === 'EXPIRED' || status === 'WITHDRAWN') && (
+                          <RelistButton
+                            listingId={listing.id}
+                            listingTitle={listing.title || `${listing.year} ${listing.make} ${listing.model}`}
+                            currentStartingPrice={Number(listing.startingPrice)}
+                            currentReserve={listing.reservePrice ? Number(listing.reservePrice) : null}
+                            currency={listing.currency}
+                            improvement={listing.aiImprovements[0] ? {
+                              id: listing.aiImprovements[0].id,
+                              suggestedStartingPrice: listing.aiImprovements[0].suggestedStartingPrice
+                                ? Number(listing.aiImprovements[0].suggestedStartingPrice)
+                                : null,
+                              suggestedReserve: listing.aiImprovements[0].suggestedReserve
+                                ? Number(listing.aiImprovements[0].suggestedReserve)
+                                : null,
+                              avgMarketPrice: listing.aiImprovements[0].avgMarketPrice
+                                ? Number(listing.aiImprovements[0].avgMarketPrice)
+                                : null,
+                              pricingReasoning: listing.aiImprovements[0].pricingReasoning,
+                              topPriorities: listing.aiImprovements[0].topPriorities,
+                              reason: listing.aiImprovements[0].reason,
+                              localSalesCount: listing.aiImprovements[0].localSalesCount,
+                              globalSalesCount: listing.aiImprovements[0].globalSalesCount,
+                            } : null}
+                          />
                         )}
                         {status === 'ACTIVE' && listing.auction && (
                           <Button asChild size="sm" variant="outline">

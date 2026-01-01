@@ -714,7 +714,8 @@ export async function endAuction(auctionId: string): Promise<Auction> {
     include: {
       listing: true,
       bids: {
-        where: { isWinning: true },
+        where: { isWinning: true, isValid: true },
+        orderBy: { createdAt: 'desc' },
         take: 1,
       },
     },
@@ -745,6 +746,7 @@ export async function endAuction(auctionId: string): Promise<Auction> {
     data: {
       status: result,
       winnerId: result === 'SOLD' ? winningBid?.bidderId : null,
+      winningBidId: result === 'SOLD' ? winningBid?.id : null,
       finalPrice: result === 'SOLD' ? currentBid : null,
       buyerFeeAmount: buyerFee,
       paymentDeadline,
@@ -797,6 +799,51 @@ export async function endAuction(auctionId: string): Promise<Auction> {
         { auctionId }
       )
     })
+
+  // Handle unsold auctions: notify seller and generate AI suggestions
+  if (result === 'NO_SALE') {
+    const improvementReason = currentBid === null ? 'no_bids' : 'reserve_not_met'
+
+    // Notify seller immediately (non-blocking)
+    import('./notification.service')
+      .then(({ notifySellerAuctionExpired }) => {
+        return notifySellerAuctionExpired(
+          auction.listing.sellerId,
+          auctionId,
+          auction.listingId,
+          auction.listing.title,
+          improvementReason,
+          [] // Suggestions will be available later
+        )
+      })
+      .catch(error => {
+        logError(auctionLogger, 'Failed to notify seller of expired auction', error, { auctionId })
+      })
+
+    // Generate AI improvement suggestions (non-blocking, takes longer)
+    import('./ai/listing-improvement.service')
+      .then(({ generateListingImprovements }) => {
+        return generateListingImprovements(
+          auction.listingId,
+          auctionId,
+          improvementReason
+        )
+      })
+      .then(() => {
+        auctionLogger.info(
+          { auctionId, listingId: auction.listingId, reason: improvementReason },
+          'Generated listing improvement suggestions'
+        )
+      })
+      .catch(error => {
+        logError(
+          auctionLogger,
+          'Failed to generate listing improvements',
+          error,
+          { auctionId, listingId: auction.listingId }
+        )
+      })
+  }
 
   return updatedAuction
 }

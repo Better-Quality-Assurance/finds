@@ -29,6 +29,7 @@
   "nav": {
     "home": "Home",
     "auctions": "Auctions",
+    "recentSales": "Recent Sales",
     "sell": "Sell Your Car",
     "account": "My Account",
     "login": "Log In",
@@ -384,7 +385,28 @@
     "sold": "Sold",
     "editListing": "Edit",
     "viewListing": "View",
-    "deleteListing": "Delete"
+    "deleteListing": "Delete",
+    "aiSuggestionsAvailable": "AI Improvement Suggestions Available",
+    "relistListing": "Relist"
+  },
+  "recentSales": {
+    "title": "Recent Auction Sales",
+    "description": "What classic cars sold for at auctions across Europe",
+    "viewOnSource": "View on {source}",
+    "seeSimilar": "See similar on Finds",
+    "noSalesYet": "No sales data yet",
+    "noSalesDescription": "We're collecting auction results from Bring a Trailer, Catawiki, and other sources. Check back soon!",
+    "filterByMake": "Make",
+    "filterByDays": "Time period",
+    "last7Days": "Last 7 days",
+    "last30Days": "Last 30 days",
+    "last60Days": "Last 60 days",
+    "last90Days": "Last 90 days",
+    "sellCta": {
+      "title": "Have a classic car to sell?",
+      "description": "List it on Finds and reach thousands of enthusiasts across Europe.",
+      "button": "Start Selling"
+    }
   },
   "errors": {
     "required": "This field is required",
@@ -621,6 +643,16 @@
       "viewAll": "View All Auctions",
       "latestBid": "Latest Bid",
       "bidder": "Bidder #{number}"
+    },
+    "recentSales": {
+      "badge": "Market Insights",
+      "title": "What's Selling in Europe",
+      "subtitle": "Recent auction results from Bring a Trailer, Catawiki, and more",
+      "viewAll": "View All Sales",
+      "viewOnSource": "View auction",
+      "findSimilar": "Find similar",
+      "sellPrompt": "Have a classic car like these? Reach thousands of collectors on Finds.",
+      "startSelling": "Start Selling"
     }
   },
   "stats": {

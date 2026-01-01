@@ -15,6 +15,10 @@
     {
       "path": "/api/cron/release-deposits",
       "schedule": "0 * * * *"
+    },
+    {
+      "path": "/api/cron/fetch-global-sales",
+      "schedule": "0 6 * * *"
     }
   ]
 }

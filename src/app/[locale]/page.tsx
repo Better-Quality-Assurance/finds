@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { ArrowRight, Car, Shield, Clock, CheckCircle, Sparkles } from 'lucide-react'
 import { LatestBidsSection } from '@/components/home/latest-bids-section'
+import { RecentSalesSection } from '@/components/home/recent-sales-section'
 import { PlatformStats } from '@/components/stats/platform-stats'
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -188,6 +189,9 @@ export default function HomePage() {
 
       {/* Latest Bids Section */}
       <LatestBidsSection />
+
+      {/* Recent Sales Section - Shows what sold on BaT, Catawiki, etc. */}
+      <RecentSalesSection />
 
       {/* CTA Section */}
       <section className="relative overflow-hidden py-24">

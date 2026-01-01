@@ -29,6 +29,7 @@
   "nav": {
     "home": "Acasa",
     "auctions": "Licitatii",
+    "recentSales": "Vanzari Recente",
     "sell": "Vinde-ti Masina",
     "account": "Contul Meu",
     "login": "Autentificare",
@@ -384,7 +385,28 @@
     "sold": "Vandut",
     "editListing": "Editeaza",
     "viewListing": "Vizualizeaza",
-    "deleteListing": "Sterge"
+    "deleteListing": "Sterge",
+    "aiSuggestionsAvailable": "Sugestii AI de Imbunatatire Disponibile",
+    "relistListing": "Republica"
+  },
+  "recentSales": {
+    "title": "Vanzari Recente la Licitatii",
+    "description": "Ce preturi au obtinut masinile clasice la licitatii in Europa",
+    "viewOnSource": "Vezi pe {source}",
+    "seeSimilar": "Vezi similare pe Finds",
+    "noSalesYet": "Inca nu avem date de vanzari",
+    "noSalesDescription": "Colectam rezultate de la Bring a Trailer, Catawiki si alte surse. Revino curand!",
+    "filterByMake": "Marca",
+    "filterByDays": "Perioada",
+    "last7Days": "Ultimele 7 zile",
+    "last30Days": "Ultimele 30 de zile",
+    "last60Days": "Ultimele 60 de zile",
+    "last90Days": "Ultimele 90 de zile",
+    "sellCta": {
+      "title": "Ai o masina clasica de vanzare?",
+      "description": "Listeaz-o pe Finds si ajungi la mii de pasionati din toata Europa.",
+      "button": "Incepe sa Vinzi"
+    }
   },
   "errors": {
     "required": "Acest camp este obligatoriu",
@@ -621,6 +643,16 @@
       "viewAll": "Vezi Toate Licitatiile",
       "latestBid": "Ultima Licitatie",
       "bidder": "Licitator #{number}"
+    },
+    "recentSales": {
+      "badge": "Informatii de Piata",
+      "title": "Ce se Vinde in Europa",
+      "subtitle": "Rezultate recente de la Bring a Trailer, Catawiki si altele",
+      "viewAll": "Vezi Toate Vanzarile",
+      "viewOnSource": "Vezi licitatia",
+      "findSimilar": "Gaseste similare",
+      "sellPrompt": "Ai o masina clasica ca acestea? Ajungi la mii de colectionari pe Finds.",
+      "startSelling": "Incepe sa Vinzi"
     }
   },
   "stats": {

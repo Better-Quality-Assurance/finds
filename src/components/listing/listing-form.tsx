@@ -11,6 +11,7 @@ import { Progress } from '@/components/ui/progress'
 import { toast } from 'sonner'
 import { Loader2, ArrowLeft, ArrowRight, Check } from 'lucide-react'
 import { listingFormSchema, type ListingFormData } from '@/lib/validation-schemas'
+import { validatePhotos } from '@/domain/listing/rules'
 import { VehicleInfoStep } from './steps/vehicle-info-step'
 import { ConditionStep } from './steps/condition-step'
 import { LocationStep } from './steps/location-step'
@@ -135,6 +136,22 @@ export function ListingForm({ listingId, initialData }: ListingFormProps) {
 
     try {
       setIsSubmitting(true)
+
+      // Fetch listing to validate photos before submission
+      const listingResponse = await fetch(`/api/listings/${createdListingId}`)
+      if (!listingResponse.ok) {
+        throw new Error('Failed to fetch listing data')
+      }
+      const listing = await listingResponse.json()
+
+      // Validate photo requirements
+      const photoValidation = validatePhotos(listing.photos || [])
+      if (!photoValidation.isValid) {
+        toast.error(photoValidation.error || 'Photo requirements not met')
+        setCurrentStep(4) // Go to photos step
+        setIsSubmitting(false)
+        return
+      }
 
       // Update listing with final data
       const values = form.getValues()
