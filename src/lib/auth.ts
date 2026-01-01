@@ -80,13 +80,32 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     }),
   ],
   callbacks: {
-    async jwt({ token, user }) {
+    async jwt({ token, user, trigger }) {
       if (user) {
         token.id = user.id
         token.role = user.role
         token.biddingEnabled = user.biddingEnabled
         token.emailVerified = user.emailVerified
       }
+
+      // Refresh emailVerified from database on each request to catch verification updates
+      // This ensures users don't need to re-login after verifying their email
+      if (token.id && (trigger === 'update' || !token.emailVerified)) {
+        try {
+          const freshUser = await prisma.user.findUnique({
+            where: { id: token.id as string },
+            select: { emailVerified: true, biddingEnabled: true, role: true },
+          })
+          if (freshUser) {
+            token.emailVerified = freshUser.emailVerified
+            token.biddingEnabled = freshUser.biddingEnabled
+            token.role = freshUser.role
+          }
+        } catch {
+          // If db lookup fails, keep existing token values
+        }
+      }
+
       return token
     },
     async session({ session, token }) {
