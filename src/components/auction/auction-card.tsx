@@ -1,7 +1,9 @@
 'use client'
 
+import { useState } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
+import { useSession } from 'next-auth/react'
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { formatCurrency } from '@/lib/utils'
@@ -9,6 +11,7 @@ import { useAuctionTimer } from '@/hooks/use-pusher'
 import { Clock, Gavel, MapPin, Eye } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { SellerRatingBadge } from '@/components/seller/seller-rating-badge'
+import { toast } from 'sonner'
 
 type AuctionCardProps = {
   auction: {
@@ -44,11 +47,74 @@ type AuctionCardProps = {
 export function AuctionCard({
   auction,
   showWatchButton = false,
-  isWatching = false,
+  isWatching: initialIsWatching = false,
   onWatch,
 }: AuctionCardProps) {
+  const { data: session } = useSession()
+  const [isWatching, setIsWatching] = useState(initialIsWatching)
+  const [isLoading, setIsLoading] = useState(false)
   const { timeRemaining, isEnded, seconds } = useAuctionTimer(auction.currentEndTime)
   const isEndingSoon = seconds > 0 && seconds < 600 // Less than 10 minutes
+
+  const handleWatch = async () => {
+    // If parent provides onWatch, use that instead
+    if (onWatch) {
+      onWatch()
+      return
+    }
+
+    // Otherwise handle it internally
+    if (!session) {
+      toast.error('Please log in to add to watchlist')
+      return
+    }
+
+    setIsLoading(true)
+    try {
+      if (isWatching) {
+        const response = await fetch(`/api/watchlist?auctionId=${auction.id}`, {
+          method: 'DELETE',
+          credentials: 'include',
+        })
+        if (!response.ok) {
+          let errorMessage = 'Failed to remove from watchlist'
+          try {
+            const errorData = await response.json()
+            errorMessage = errorData.error?.message || errorMessage
+          } catch {
+            // Response wasn't JSON
+          }
+          throw new Error(errorMessage)
+        }
+        setIsWatching(false)
+        toast.success('Removed from watchlist')
+      } else {
+        const response = await fetch('/api/watchlist', {
+          method: 'POST',
+          credentials: 'include',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ auctionId: auction.id }),
+        })
+        if (!response.ok) {
+          let errorMessage = 'Failed to add to watchlist'
+          try {
+            const errorData = await response.json()
+            errorMessage = errorData.error?.message || errorMessage
+          } catch {
+            // Response wasn't JSON
+          }
+          throw new Error(errorMessage)
+        }
+        setIsWatching(true)
+        toast.success('Added to watchlist')
+      }
+    } catch (error) {
+      console.error('Watch error:', error)
+      toast.error(error instanceof Error ? error.message : 'Failed to update watchlist')
+    } finally {
+      setIsLoading(false)
+    }
+  }
 
   const currentPrice = auction.currentBid
     ? Number(auction.currentBid)
@@ -176,19 +242,22 @@ export function AuctionCard({
           <button
             onClick={(e) => {
               e.preventDefault()
-              onWatch?.()
+              e.stopPropagation()
+              handleWatch()
             }}
+            disabled={isLoading}
             className={cn(
               'flex w-full items-center justify-center gap-1 rounded py-1.5 text-sm transition-colors',
               isWatching
                 ? 'bg-primary/10 text-primary'
-                : 'hover:bg-muted'
+                : 'hover:bg-muted',
+              isLoading && 'opacity-50 cursor-not-allowed'
             )}
             aria-label={isWatching ? `Stop watching ${auction.listing.title}` : `Watch ${auction.listing.title}`}
             aria-pressed={isWatching}
           >
-            <Eye className="h-4 w-4" aria-hidden="true" />
-            {isWatching ? 'Watching' : 'Watch'}
+            <Eye className={cn('h-4 w-4', isLoading && 'animate-pulse')} aria-hidden="true" />
+            {isLoading ? 'Loading...' : isWatching ? 'Watching' : 'Watch'}
           </button>
         </div>
       )}

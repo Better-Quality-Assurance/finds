@@ -52,22 +52,16 @@ export function WatchlistButton({
   }, [channel])
 
   const handleToggleWatchlist = async () => {
-    console.log('[Watchlist] Click - status:', status, 'session:', !!session, 'isWatching:', isWatching)
-
     if (status === 'loading') {
-      console.log('[Watchlist] Returning early - status is loading')
       return
     }
 
     if (!session) {
-      console.log('[Watchlist] No session - showing login error')
       toast.error('Please log in to add to watchlist')
       return
     }
 
-    console.log('[Watchlist] Starting transition...')
     startTransition(async () => {
-      console.log('[Watchlist] Inside transition, isWatching:', isWatching)
       try {
         if (isWatching) {
           // Remove from watchlist
@@ -92,7 +86,6 @@ export function WatchlistButton({
           toast.success('Removed from watchlist')
         } else {
           // Add to watchlist
-          console.log('[Watchlist] Making POST request to add auction:', auctionId)
           const response = await fetch('/api/watchlist', {
             method: 'POST',
             credentials: 'include',
@@ -102,13 +95,10 @@ export function WatchlistButton({
             body: JSON.stringify({ auctionId }),
           })
 
-          console.log('[Watchlist] Response status:', response.status, response.ok)
-
           if (!response.ok) {
             let errorMessage = 'Failed to add to watchlist'
             try {
               const errorData = await response.json()
-              console.log('[Watchlist] Error response:', errorData)
               errorMessage = errorData.error?.message || errorMessage
             } catch {
               // Response wasn't JSON, use default message
@@ -116,7 +106,6 @@ export function WatchlistButton({
             throw new Error(errorMessage)
           }
 
-          console.log('[Watchlist] Success! Updating state...')
           setIsWatching(true)
           setWatchlistCount((prev) => prev + 1)
           toast.success('Added to watchlist')
