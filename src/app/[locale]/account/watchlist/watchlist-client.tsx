@@ -46,8 +46,8 @@ interface WatchlistItem {
   createdAt: string
   auction: {
     id: string
-    currentPrice: number
-    endTime: string
+    currentBid: number | null
+    currentEndTime: string
     status: string
     listing: {
       id: string
@@ -55,9 +55,11 @@ interface WatchlistItem {
       year: number
       make: string
       model: string
+      startingPrice: number
+      currency: string
       media: Array<{
         id: string
-        url: string
+        publicUrl: string
         type: string
       }>
     }
@@ -80,10 +82,13 @@ export default function WatchlistClient() {
 
   const fetchWatchlist = async () => {
     try {
-      const response = await fetch('/api/watchlist')
+      const response = await fetch('/api/watchlist', {
+        credentials: 'include',
+      })
       if (!response.ok) {throw new Error('Failed to fetch watchlist')}
-      const data = await response.json()
-      setWatchlist(data.watchlist || [])
+      const result = await response.json()
+      // API returns { success: true, data: { watchlist: [...] } }
+      setWatchlist(result.data?.watchlist || [])
     } catch (error) {
       console.error('Error fetching watchlist:', error)
       toast.error(t('watchlistFetchError'))
@@ -101,6 +106,7 @@ export default function WatchlistClient() {
     try {
       const response = await fetch('/api/watchlist', {
         method: 'PATCH',
+        credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           auctionId,
@@ -128,6 +134,7 @@ export default function WatchlistClient() {
     try {
       const response = await fetch(`/api/watchlist?auctionId=${auctionId}`, {
         method: 'DELETE',
+        credentials: 'include',
       })
 
       if (!response.ok) {throw new Error('Failed to remove from watchlist')}
@@ -248,7 +255,8 @@ function WatchlistItemCard({
   const { auction } = item
   const { listing } = auction
   const isActive = auction.status === 'ACTIVE' || auction.status === 'EXTENDED'
-  const imageUrl = listing.media[0]?.url || '/placeholder-car.jpg'
+  const imageUrl = listing.media[0]?.publicUrl || '/placeholder-car.jpg'
+  const currentPrice = auction.currentBid ?? listing.startingPrice
   const isUpdating = updatingId === item.auctionId
 
   return (
@@ -283,7 +291,7 @@ function WatchlistItemCard({
             <div className="mt-1 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-muted-foreground">
               <span className="flex items-center gap-1">
                 <Gavel className="h-3.5 w-3.5" />
-                {formatCurrency(auction.currentPrice, 'EUR')}
+                {formatCurrency(currentPrice, listing.currency)}
               </span>
               <span className="flex items-center gap-1">
                 {auction._count.bids} {tCommon('bids')}
@@ -291,7 +299,7 @@ function WatchlistItemCard({
               {isActive && (
                 <span className="flex items-center gap-1">
                   <Clock className="h-3.5 w-3.5" />
-                  {getTimeRemaining(new Date(auction.endTime))}
+                  {getTimeRemaining(new Date(auction.currentEndTime))}
                 </span>
               )}
             </div>
