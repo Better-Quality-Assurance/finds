@@ -16,7 +16,7 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { toast } from 'sonner'
-import { User, Mail, Phone, Globe, CheckCircle, Loader2 } from 'lucide-react'
+import { User, Mail, Phone, Globe, CheckCircle, Loader2, AlertTriangle } from 'lucide-react'
 
 interface UserProfile {
   id: string
@@ -65,6 +65,7 @@ export function ProfileSection() {
   const [profile, setProfile] = useState<UserProfile | null>(null)
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
+  const [error, setError] = useState<string | null>(null)
   const [formData, setFormData] = useState({
     name: '',
     phone: '',
@@ -86,8 +87,9 @@ export function ProfileSection() {
         phone: data.user.phone || '',
         country: data.user.country || '',
       })
-    } catch (error) {
-      console.error('Error fetching profile:', error)
+    } catch (err) {
+      console.error('Error fetching profile:', err)
+      setError(err instanceof Error ? err.message : 'Failed to load profile')
       toast.error(t('profileFetchError'))
     } finally {
       setLoading(false)
@@ -144,8 +146,23 @@ export function ProfileSection() {
     )
   }
 
-  if (!profile) {
-    return null
+  if (error || !profile) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <User className="h-5 w-5" />
+            {t('profileTitle')}
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="flex items-center gap-2 text-amber-600">
+            <AlertTriangle className="h-5 w-5" />
+            <span>{error || t('profileFetchError')}</span>
+          </div>
+        </CardContent>
+      </Card>
+    )
   }
 
   return (

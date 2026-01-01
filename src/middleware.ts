@@ -51,15 +51,43 @@ export default async function middleware(request: NextRequest) {
     }
 
     // Check email verification for specific routes
-    if (requiresEmailVerification && session?.user && !session.user.emailVerified) {
-      const locale = pathname.match(/^\/(en|ro)/)?.[1] || 'en'
-      const callbackUrl = encodeURIComponent(pathname)
-      return NextResponse.redirect(
-        new URL(
-          `/${locale}/verify-email?required=true&callbackUrl=${callbackUrl}`,
-          request.url
+    // Fetch fresh status from API to handle case where user verified but session isn't updated
+    if (requiresEmailVerification && session?.user) {
+      try {
+        const verificationResponse = await fetch(
+          new URL('/api/user/verification-status', request.url),
+          {
+            headers: {
+              cookie: request.headers.get('cookie') || '',
+            },
+          }
         )
-      )
+        if (verificationResponse.ok) {
+          const data = await verificationResponse.json()
+          if (!data.emailVerified) {
+            const locale = pathname.match(/^\/(en|ro)/)?.[1] || 'en'
+            const callbackUrl = encodeURIComponent(pathname)
+            return NextResponse.redirect(
+              new URL(
+                `/${locale}/verify-email?required=true&callbackUrl=${callbackUrl}`,
+                request.url
+              )
+            )
+          }
+        }
+      } catch {
+        // If verification check fails, fall back to session check
+        if (!session.user.emailVerified) {
+          const locale = pathname.match(/^\/(en|ro)/)?.[1] || 'en'
+          const callbackUrl = encodeURIComponent(pathname)
+          return NextResponse.redirect(
+            new URL(
+              `/${locale}/verify-email?required=true&callbackUrl=${callbackUrl}`,
+              request.url
+            )
+          )
+        }
+      }
     }
 
     // Protect admin routes
