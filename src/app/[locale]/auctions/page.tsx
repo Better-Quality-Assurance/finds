@@ -3,6 +3,8 @@ import { getTranslations } from 'next-intl/server'
 import { AuctionCard } from '@/components/auction/auction-card'
 import { AuctionFilters } from './auction-filters'
 import { Loader2 } from 'lucide-react'
+import { auth } from '@/lib/auth'
+import { prisma } from '@/lib/db'
 
 export async function generateMetadata() {
   const t = await getTranslations('auction')
@@ -55,7 +57,20 @@ export default async function AuctionsPage({
   searchParams: Promise<SearchParams>
 }) {
   const params = await searchParams
-  const { auctions, pagination } = await getAuctions(params)
+  const [{ auctions, pagination }, session] = await Promise.all([
+    getAuctions(params),
+    auth(),
+  ])
+
+  // Get user's watchlist to show which auctions they're watching
+  let watchedAuctionIds: Set<string> = new Set()
+  if (session?.user?.id) {
+    const watchlist = await prisma.watchlist.findMany({
+      where: { userId: session.user.id },
+      select: { auctionId: true },
+    })
+    watchedAuctionIds = new Set(watchlist.map((w) => w.auctionId))
+  }
 
   const searchQuery = params.q
 
@@ -130,6 +145,7 @@ export default async function AuctionsPage({
                   },
                 }}
                 showWatchButton
+                isWatching={watchedAuctionIds.has(auction.id)}
               />
             ))}
           </div>
