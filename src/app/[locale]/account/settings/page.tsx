@@ -20,6 +20,8 @@ import { toast } from 'sonner'
 import { Download, Trash2, FileText, Clock, CheckCircle, XCircle, AlertCircle, Shield } from 'lucide-react'
 import { formatDistanceToNow } from 'date-fns'
 import { UserActivityStats } from '@/components/stats/user-activity-stats'
+import { ProfileSection } from '@/components/settings/profile-section'
+import { PaymentMethodsSection } from '@/components/settings/payment-methods-section'
 
 type DataRequestType = 'EXPORT' | 'DELETE'
 type DataRequestStatus = 'PENDING' | 'PROCESSING' | 'COMPLETED' | 'REJECTED'
@@ -136,6 +138,16 @@ export default function SettingsPage() {
       <div className="mb-8">
         <h1 className="text-3xl font-bold">{t('title')}</h1>
         <p className="mt-1 text-muted-foreground">{t('description')}</p>
+      </div>
+
+      {/* Profile Section */}
+      <div className="mb-6">
+        <ProfileSection />
+      </div>
+
+      {/* Payment Methods Section */}
+      <div className="mb-6">
+        <PaymentMethodsSection />
       </div>
 
       {/* User Activity Stats */}
