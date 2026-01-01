@@ -439,7 +439,7 @@ export async function generateListingImprovements(
   listingId: string,
   auctionId: string,
   reason: 'no_bids' | 'reserve_not_met'
-): Promise<void> {
+): Promise<AIListingImprovement> {
   const service = createListingImprovementService()
-  await service.generateSuggestions(listingId, auctionId, reason)
+  return service.generateSuggestions(listingId, auctionId, reason)
 }

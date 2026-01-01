@@ -3,7 +3,16 @@
  *
  * Fetches recently sold items directly from auction sites
  * instead of using search engines (which block scrapers).
+ *
+ * - BaT: Server-rendered, works with simple HTTP fetch
+ * - Catawiki, Collecting Cars: JavaScript-rendered, requires Puppeteer
  */
+
+import {
+  extractUrlsWithPuppeteer,
+  fetchWithPuppeteer,
+  closeBrowser,
+} from './puppeteer-scraper'
 
 export interface ScrapedAuctionLink {
   url: string
@@ -77,47 +86,88 @@ async function scrapeBringATrailer(): Promise<ScrapedAuctionLink[]> {
 }
 
 /**
- * Scrape Catawiki's classic cars category
- * URL: https://www.catawiki.com/en/c/439-cars
+ * Scrape Catawiki's classic cars category (requires Puppeteer)
+ * URL: https://www.catawiki.com/en/c/439-classic-cars
  */
 async function scrapeCatawiki(): Promise<ScrapedAuctionLink[]> {
-  console.log('[Scraper] Fetching Catawiki...')
-  const html = await fetchWithTimeout('https://www.catawiki.com/en/c/439-classic-cars')
-  if (!html) {return []}
+  console.log('[Scraper] Fetching Catawiki with Puppeteer...')
 
-  // Catawiki auction URLs: /en/l/XXXXX-title
-  const urlPattern = /href="(\/en\/l\/\d+-[^"]+)"/g
-  const paths = extractUrls(html, urlPattern)
+  try {
+    // Use Puppeteer to extract auction URLs
+    // Don't wait for specific selector - just let the page fully load
+    const urls = await extractUrlsWithPuppeteer(
+      'https://www.catawiki.com/en/c/439-classic-cars',
+      'a[href*="/l/"]', // Selector for auction links (more generic)
+      {
+        // No waitForSelector - just wait for network idle
+        limit: 20,
+        timeout: 30000,
+      }
+    )
 
-  const uniquePaths = Array.from(new Set(paths)).slice(0, 20)
+    if (urls.length === 0) {
+      console.log('[Scraper] Catawiki: No URLs found')
+      return []
+    }
 
-  return uniquePaths.map(path => ({
-    url: `https://www.catawiki.com${path}`,
-    title: path.split('/').pop()?.replace(/-/g, ' ') || 'Unknown',
-    source: 'Catawiki',
-  }))
+    // Filter to only auction lot URLs (contains /l/ followed by digits)
+    const auctionUrls = urls.filter(url => /\/l\/\d+/.test(url))
+
+    return auctionUrls.map(url => ({
+      url,
+      title: url.split('/').pop()?.replace(/-/g, ' ') || 'Unknown',
+      source: 'Catawiki',
+    }))
+  } catch (error) {
+    console.error('[Scraper] Catawiki error:', error)
+    return []
+  }
 }
 
 /**
- * Scrape Collecting Cars completed auctions
+ * Scrape Collecting Cars completed auctions (requires Puppeteer)
  * URL: https://collectingcars.com/search?status=Sold
  */
 async function scrapeCollectingCars(): Promise<ScrapedAuctionLink[]> {
-  console.log('[Scraper] Fetching Collecting Cars...')
-  const html = await fetchWithTimeout('https://collectingcars.com/search?status=Sold')
-  if (!html) {return []}
+  console.log('[Scraper] Fetching Collecting Cars with Puppeteer...')
 
-  // Collecting Cars URLs: /car/title-slug
-  const urlPattern = /href="(\/car\/[^"]+)"/g
-  const paths = extractUrls(html, urlPattern)
+  try {
+    // Use Puppeteer to extract auction URLs
+    // Don't wait for specific selector - just let the page fully load
+    const urls = await extractUrlsWithPuppeteer(
+      'https://collectingcars.com/search?status=Sold',
+      'a[href*="/car/"]', // Selector for car listing links
+      {
+        // No waitForSelector - just wait for network idle
+        limit: 20,
+        timeout: 30000,
+      }
+    )
 
-  const uniquePaths = Array.from(new Set(paths)).slice(0, 20)
+    if (urls.length === 0) {
+      console.log('[Scraper] Collecting Cars: No URLs found')
+      return []
+    }
 
-  return uniquePaths.map(path => ({
-    url: `https://collectingcars.com${path}`,
-    title: path.split('/car/')[1]?.replace(/-/g, ' ') || 'Unknown',
-    source: 'Collecting Cars',
-  }))
+    // Filter to only car listing URLs (contains /car/ followed by year or slug)
+    const carUrls = urls.filter(url => {
+      try {
+        const path = new URL(url).pathname
+        return path.startsWith('/car/') && !path.includes('auction') && path.length > 6
+      } catch {
+        return false
+      }
+    })
+
+    return carUrls.map(url => ({
+      url,
+      title: new URL(url).pathname.split('/car/')[1]?.replace(/-/g, ' ') || 'Unknown',
+      source: 'Collecting Cars',
+    }))
+  } catch (error) {
+    console.error('[Scraper] Collecting Cars error:', error)
+    return []
+  }
 }
 
 /**
@@ -144,37 +194,65 @@ async function scrapeBonhams(): Promise<ScrapedAuctionLink[]> {
 /**
  * Main function to scrape all auction sites
  *
- * Note: Only BaT works with simple HTTP scraping.
- * Other sites (Catawiki, Collecting Cars, Bonhams) require JavaScript rendering
- * and would need a headless browser (Puppeteer/Playwright) to scrape.
+ * - BaT: Server-rendered (simple HTTP fetch)
+ * - Catawiki, Collecting Cars: JavaScript-rendered (Puppeteer)
  */
 export async function scrapeAllAuctionSites(): Promise<ScrapedAuctionLink[]> {
   const results: ScrapedAuctionLink[] = []
 
-  // Only BaT works with server-side scraping (returns actual HTML)
-  // Other sites are JavaScript-rendered and return empty data
-  const [bat] = await Promise.allSettled([
-    scrapeBringATrailer(),
-    // Disabled: These sites require JavaScript rendering
-    // scrapeCatawiki(),
-    // scrapeCollectingCars(),
-    // scrapeBonhams(),
-  ])
+  try {
+    // Run all scrapers in parallel
+    // BaT uses simple HTTP, Catawiki/Collecting Cars use Puppeteer
+    const [bat, catawiki, collectingCars] = await Promise.allSettled([
+      scrapeBringATrailer(),
+      scrapeCatawiki(),
+      scrapeCollectingCars(),
+    ])
 
-  if (bat.status === 'fulfilled') {
-    console.log(`[Scraper] BaT: ${bat.value.length} links`)
-    results.push(...bat.value)
-  } else {
-    console.error('[Scraper] BaT failed:', bat.reason)
+    if (bat.status === 'fulfilled') {
+      console.log(`[Scraper] BaT: ${bat.value.length} links`)
+      results.push(...bat.value)
+    } else {
+      console.error('[Scraper] BaT failed:', bat.reason)
+    }
+
+    if (catawiki.status === 'fulfilled') {
+      console.log(`[Scraper] Catawiki: ${catawiki.value.length} links`)
+      results.push(...catawiki.value)
+    } else {
+      console.error('[Scraper] Catawiki failed:', catawiki.reason)
+    }
+
+    if (collectingCars.status === 'fulfilled') {
+      console.log(`[Scraper] Collecting Cars: ${collectingCars.value.length} links`)
+      results.push(...collectingCars.value)
+    } else {
+      console.error('[Scraper] Collecting Cars failed:', collectingCars.reason)
+    }
+
+    console.log(`[Scraper] Total links found: ${results.length}`)
+    return results
+  } finally {
+    // Always close the Puppeteer browser to free resources
+    await closeBrowser()
   }
-
-  console.log(`[Scraper] Total links found: ${results.length}`)
-  return results
 }
 
 /**
  * Fetch content from a single auction page
+ * Uses Puppeteer for JS-rendered sites, simple HTTP for others
  */
 export async function fetchAuctionPage(url: string): Promise<string | null> {
+  // Check if URL requires Puppeteer (JS-rendered sites)
+  const jsRenderedDomains = ['catawiki.com', 'collectingcars.com']
+  const needsPuppeteer = jsRenderedDomains.some(domain => url.includes(domain))
+
+  if (needsPuppeteer) {
+    return fetchWithPuppeteer(url, {
+      waitTime: 3000,
+      timeout: 20000,
+    })
+  }
+
   return fetchWithTimeout(url, 15000)
 }
