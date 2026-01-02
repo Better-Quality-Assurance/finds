@@ -10,16 +10,16 @@ import type { PrismaClient, ExternalAuctionSale } from '@prisma/client'
 import type { IAIProvider } from '@/services/contracts/ai-provider.interface'
 import { paymentLogger as logger, logError } from '@/lib/logger'
 
-// Supported auction sources - EU focused
+// Supported auction sources - Global (showing all regions)
 export const AUCTION_SOURCES = [
-  // EU-only sources (always include)
+  // EU-focused sources
   { name: 'Catawiki', domain: 'catawiki.com', region: 'EU', requiresLocationCheck: false },
   { name: 'Artcurial', domain: 'artcurial.com', region: 'EU', requiresLocationCheck: false },
   { name: 'Collecting Cars', domain: 'collectingcars.com', region: 'EU', requiresLocationCheck: false },
-  // Global sources (need location check for EU)
-  { name: 'Bring a Trailer', domain: 'bringatrailer.com', region: 'Global', requiresLocationCheck: true },
-  { name: 'RM Sothebys', domain: 'rmsothebys.com', region: 'Global', requiresLocationCheck: true },
-  { name: 'Bonhams', domain: 'bonhams.com', region: 'Global', requiresLocationCheck: true },
+  // Global sources (include all sales, not just EU)
+  { name: 'Bring a Trailer', domain: 'bringatrailer.com', region: 'Global', requiresLocationCheck: false },
+  { name: 'RM Sothebys', domain: 'rmsothebys.com', region: 'Global', requiresLocationCheck: false },
+  { name: 'Bonhams', domain: 'bonhams.com', region: 'Global', requiresLocationCheck: false },
 ] as const
 
 // Exchange rates (approximate, could be fetched from API)

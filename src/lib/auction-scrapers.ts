@@ -132,41 +132,119 @@ async function scrapeCollectingCars(): Promise<ScrapedAuctionLink[]> {
   console.log('[Scraper] Fetching Collecting Cars with Puppeteer...')
 
   try {
-    // Use Puppeteer to extract auction URLs
-    // Don't wait for specific selector - just let the page fully load
-    const urls = await extractUrlsWithPuppeteer(
-      'https://collectingcars.com/search?status=Sold',
-      'a[href*="/car/"]', // Selector for car listing links
-      {
-        // No waitForSelector - just wait for network idle
-        limit: 20,
-        timeout: 30000,
-      }
-    )
+    // Use custom Puppeteer logic to handle cookie consent
+    const urls = await scrapeCollectingCarsWithCookies()
 
     if (urls.length === 0) {
       console.log('[Scraper] Collecting Cars: No URLs found')
       return []
     }
 
-    // Filter to only car listing URLs (contains /car/ followed by year or slug)
-    const carUrls = urls.filter(url => {
-      try {
-        const path = new URL(url).pathname
-        return path.startsWith('/car/') && !path.includes('auction') && path.length > 6
-      } catch {
-        return false
-      }
-    })
-
-    return carUrls.map(url => ({
+    return urls.map(url => ({
       url,
-      title: new URL(url).pathname.split('/car/')[1]?.replace(/-/g, ' ') || 'Unknown',
+      title: new URL(url).pathname.split('/for-sale/')[1]?.replace(/-/g, ' ') || 'Unknown',
       source: 'Collecting Cars',
     }))
   } catch (error) {
     console.error('[Scraper] Collecting Cars error:', error)
     return []
+  }
+}
+
+/**
+ * Helper to scrape Collecting Cars with stealth mode and realistic user behavior
+ */
+async function scrapeCollectingCarsWithCookies(): Promise<string[]> {
+  // Use puppeteer-extra with stealth plugin to avoid detection
+  const puppeteerExtra = await import('puppeteer-extra')
+  const StealthPlugin = await import('puppeteer-extra-plugin-stealth')
+
+  puppeteerExtra.default.use(StealthPlugin.default())
+
+  let browser = null
+
+  try {
+    const executablePath = process.env.PUPPETEER_EXECUTABLE_PATH
+
+    browser = await puppeteerExtra.default.launch({
+      headless: 'new', // Use new headless mode (less detectable)
+      executablePath: executablePath || undefined,
+      args: [
+        '--no-sandbox',
+        '--disable-setuid-sandbox',
+        '--disable-dev-shm-usage',
+        '--disable-blink-features=AutomationControlled',
+        '--window-size=1920,1080',
+      ],
+    })
+
+    const page = await browser.newPage()
+    await page.setViewport({ width: 1920, height: 1080 })
+
+    // Add realistic delays between actions
+    const randomDelay = () => new Promise(r => setTimeout(r, 500 + Math.random() * 1500))
+
+    // Navigate to the sold listings page
+    console.log('[Scraper] Collecting Cars: Navigating to sold page...')
+    await page.goto('https://collectingcars.com/buy/?refinementList[listingStage][0]=sold', {
+      waitUntil: 'networkidle2',
+      timeout: 45000,
+    })
+
+    await randomDelay()
+
+    // Click "Accept all" cookies button if present
+    try {
+      const acceptButton = await page.$('#cookiesAgree')
+      if (acceptButton) {
+        // Move mouse to button before clicking (more human-like)
+        const box = await acceptButton.boundingBox()
+        if (box) {
+          await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2)
+          await randomDelay()
+        }
+        await acceptButton.click()
+        console.log('[Scraper] Collecting Cars: Accepted cookies')
+        await randomDelay()
+      }
+    } catch {
+      // Cookie button not found or already accepted
+    }
+
+    // Wait for content and scroll to trigger lazy loading
+    await new Promise(resolve => setTimeout(resolve, 3000))
+
+    // Scroll down like a real user
+    for (let i = 0; i < 3; i++) {
+      await page.evaluate(() => window.scrollBy(0, 500))
+      await randomDelay()
+    }
+
+    // Wait for any lazy-loaded content
+    await new Promise(resolve => setTimeout(resolve, 3000))
+
+    // Extract all auction URLs - look for /for-sale/ pattern
+    const urls = await page.evaluate(() => {
+      const links = document.querySelectorAll('a[href]')
+      return Array.from(links)
+        .map(link => (link as HTMLAnchorElement).href)
+        .filter(href => {
+          if (!href || !href.includes('collectingcars.com')) {return false}
+          // Match URLs like /for-sale/2021-suzuki-jimny-sierra
+          return href.includes('/for-sale/') && href.split('/for-sale/')[1]?.length > 5
+        })
+    })
+
+    const uniqueUrls = Array.from(new Set(urls)).slice(0, 20)
+    console.log(`[Scraper] Collecting Cars: Found ${uniqueUrls.length} URLs with stealth mode`)
+    return uniqueUrls
+  } catch (error) {
+    console.error('[Scraper] Collecting Cars stealth error:', error)
+    return []
+  } finally {
+    if (browser) {
+      await browser.close()
+    }
   }
 }
 
@@ -210,30 +288,31 @@ export async function scrapeAllAuctionSites(): Promise<ScrapedAuctionLink[]> {
     console.log(`[Scraper] BaT: ${batResult.length} links`)
     results.push(...batResult)
 
-    // Optionally run Puppeteer-based scrapers
+    // Optionally run Puppeteer-based scrapers (sequentially to avoid browser conflicts)
     if (usePuppeteer) {
       console.log('[Scraper] Puppeteer enabled, scraping Catawiki...')
-      const [catawiki, collectingCars] = await Promise.allSettled([
-        scrapeCatawiki(),
-        scrapeCollectingCars(),
-      ])
 
-      if (catawiki.status === 'fulfilled') {
-        console.log(`[Scraper] Catawiki: ${catawiki.value.length} links`)
-        results.push(...catawiki.value)
-      } else {
-        console.error('[Scraper] Catawiki failed:', catawiki.reason)
+      // Run Catawiki first
+      try {
+        const catawikiResult = await scrapeCatawiki()
+        console.log(`[Scraper] Catawiki: ${catawikiResult.length} links`)
+        results.push(...catawikiResult)
+      } catch (error) {
+        console.error('[Scraper] Catawiki failed:', error)
       }
 
-      if (collectingCars.status === 'fulfilled') {
-        console.log(`[Scraper] Collecting Cars: ${collectingCars.value.length} links`)
-        results.push(...collectingCars.value)
-      } else {
-        console.error('[Scraper] Collecting Cars failed:', collectingCars.reason)
-      }
-
-      // Close browser when done
+      // Close first browser before starting second
       await closeBrowser()
+
+      // Then run Collecting Cars with stealth mode
+      console.log('[Scraper] Scraping Collecting Cars with stealth...')
+      try {
+        const collectingCarsResult = await scrapeCollectingCars()
+        console.log(`[Scraper] Collecting Cars: ${collectingCarsResult.length} links`)
+        results.push(...collectingCarsResult)
+      } catch (error) {
+        console.error('[Scraper] Collecting Cars failed:', error)
+      }
     } else {
       console.log('[Scraper] Puppeteer disabled (set USE_PUPPETEER=true to enable)')
     }
