@@ -2,10 +2,40 @@ import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@/lib/auth'
 import { prisma } from '@/lib/db'
 import { z } from 'zod'
-import { pusher, CHANNELS, EVENTS } from '@/lib/pusher'
+import { pusher } from '@/lib/pusher'
 
 type RouteContext = {
   params: Promise<{ id: string }>
+}
+
+/**
+ * Check if contact details can be revealed for this conversation
+ * Contact is only revealed when buyer has won the auction AND paid the fee
+ */
+async function canSeeContactDetails(
+  listingId: string,
+  buyerId: string
+): Promise<boolean> {
+  const auction = await prisma.auction.findFirst({
+    where: {
+      listingId,
+      status: 'SOLD',
+      winnerId: buyerId,
+      paymentStatus: 'PAID',
+    },
+    select: { id: true },
+  })
+  return !!auction
+}
+
+/**
+ * Mask email for privacy - show first char + domain only
+ */
+function maskEmail(email: string): string {
+  const [local, domain] = email.split('@')
+  if (!domain) {return '***@***.com'}
+  const maskedLocal = local.length > 1 ? local[0] + '***' : '***'
+  return `${maskedLocal}@${domain}`
 }
 
 // GET /api/conversations/:id/messages - Get messages in a conversation
@@ -27,6 +57,7 @@ export async function GET(request: NextRequest, context: RouteContext) {
         id: true,
         buyerId: true,
         sellerId: true,
+        listingId: true,
       },
     })
 
@@ -44,6 +75,12 @@ export async function GET(request: NextRequest, context: RouteContext) {
       )
     }
 
+    // Check if contact details can be revealed (buyer won + paid)
+    const canRevealContact = await canSeeContactDetails(
+      conversation.listingId,
+      conversation.buyerId
+    )
+
     // Fetch messages
     const messages = await prisma.message.findMany({
       where: { conversationId },
@@ -60,6 +97,19 @@ export async function GET(request: NextRequest, context: RouteContext) {
       orderBy: { createdAt: 'asc' },
     })
 
+    // Mask email addresses if contact not yet revealed
+    // User can always see their own email, but other party's email is masked
+    const safeMessages = messages.map((msg) => ({
+      ...msg,
+      sender: {
+        ...msg.sender,
+        email:
+          msg.senderId === userId || canRevealContact
+            ? msg.sender.email
+            : maskEmail(msg.sender.email),
+      },
+    }))
+
     // Mark unread messages as read (messages sent by the other party)
     await prisma.message.updateMany({
       where: {
@@ -70,7 +120,7 @@ export async function GET(request: NextRequest, context: RouteContext) {
       data: { isRead: true },
     })
 
-    return NextResponse.json({ messages })
+    return NextResponse.json({ messages: safeMessages })
   } catch (error) {
     console.error('Error fetching messages:', error)
     return NextResponse.json(
@@ -105,6 +155,7 @@ export async function POST(request: NextRequest, context: RouteContext) {
         id: true,
         buyerId: true,
         sellerId: true,
+        listingId: true,
         listing: {
           select: {
             id: true,
@@ -127,6 +178,12 @@ export async function POST(request: NextRequest, context: RouteContext) {
         { status: 403 }
       )
     }
+
+    // Check if contact details can be revealed (buyer won + paid)
+    const canRevealContact = await canSeeContactDetails(
+      conversation.listingId,
+      conversation.buyerId
+    )
 
     // Create message
     const message = await prisma.message.create({
@@ -157,6 +214,13 @@ export async function POST(request: NextRequest, context: RouteContext) {
     const recipientId =
       conversation.buyerId === userId ? conversation.sellerId : conversation.buyerId
 
+    // Mask sender email for Pusher if contact not revealed
+    // (recipient shouldn't see sender's email until payment complete)
+    const safeSenderForPusher = {
+      ...message.sender,
+      email: canRevealContact ? message.sender.email : maskEmail(message.sender.email),
+    }
+
     try {
       await pusher.trigger(
         `private-conversation-${conversationId}`,
@@ -166,7 +230,7 @@ export async function POST(request: NextRequest, context: RouteContext) {
             id: message.id,
             content: message.content,
             senderId: message.senderId,
-            sender: message.sender,
+            sender: safeSenderForPusher,
             createdAt: message.createdAt,
             isRead: message.isRead,
           },
@@ -174,10 +238,11 @@ export async function POST(request: NextRequest, context: RouteContext) {
       )
 
       // Also trigger a notification event for the recipient
+      // Use name only, never email in notification preview
       await pusher.trigger(`private-user-${recipientId}-notifications`, 'new-message', {
         conversationId,
         listingTitle: conversation.listing.title,
-        senderName: message.sender.name || message.sender.email,
+        senderName: message.sender.name || 'User',
         preview: content.slice(0, 100),
       })
     } catch (pusherError) {
