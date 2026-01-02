@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 import { auth } from '@/lib/auth'
-import { authenticateChannel } from '@/lib/pusher'
+import { authenticateChannel, authenticateConversationChannel } from '@/lib/pusher'
 
 export async function POST(request: Request) {
   try {
@@ -23,7 +23,19 @@ export async function POST(request: Request) {
       )
     }
 
-    const authResponse = authenticateChannel(socketId, channelName, session.user.id)
+    let authResponse
+
+    // Conversation channels require async DB verification (payment check)
+    if (channelName.startsWith('private-conversation-')) {
+      authResponse = await authenticateConversationChannel(
+        socketId,
+        channelName,
+        session.user.id
+      )
+    } else {
+      // Other channels use sync auth
+      authResponse = authenticateChannel(socketId, channelName, session.user.id)
+    }
 
     if (!authResponse) {
       return NextResponse.json(

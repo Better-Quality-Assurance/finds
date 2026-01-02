@@ -13,6 +13,70 @@ export interface ContactDetectionResult {
   suggestion?: string
 }
 
+// ============================================================================
+// Unicode/Encoding Normalization
+// ============================================================================
+
+/**
+ * Normalize unicode lookalikes to ASCII equivalents
+ * Catches homoglyph attacks (Cyrillic 'о' looks like Latin 'o')
+ */
+const HOMOGLYPH_MAP: Record<string, string> = {
+  // Cyrillic lookalikes
+  'а': 'a', 'е': 'e', 'о': 'o', 'р': 'p', 'с': 'c', 'у': 'y', 'х': 'x',
+  'А': 'A', 'Е': 'E', 'О': 'O', 'Р': 'P', 'С': 'C', 'У': 'Y', 'Х': 'X',
+  // Greek lookalikes
+  'α': 'a', 'ο': 'o', 'ρ': 'p',
+  // Special characters that look like numbers
+  '０': '0', '１': '1', '２': '2', '３': '3', '４': '4',
+  '５': '5', '６': '6', '７': '7', '８': '8', '９': '9',
+  // Subscript/superscript numbers
+  '⁰': '0', '¹': '1', '²': '2', '³': '3', '⁴': '4',
+  '⁵': '5', '⁶': '6', '⁷': '7', '⁸': '8', '⁹': '9',
+  '₀': '0', '₁': '1', '₂': '2', '₃': '3', '₄': '4',
+  '₅': '5', '₆': '6', '₇': '7', '₈': '8', '₉': '9',
+  // Circled numbers
+  '①': '1', '②': '2', '③': '3', '④': '4', '⑤': '5',
+  '⑥': '6', '⑦': '7', '⑧': '8', '⑨': '9', '⓪': '0',
+  // Special @ symbols
+  '＠': '@', '©': 'c', '®': 'r',
+}
+
+function normalizeHomoglyphs(text: string): string {
+  return text.split('').map(char => HOMOGLYPH_MAP[char] || char).join('')
+}
+
+/**
+ * Normalize leetspeak (1337) to normal text
+ */
+function normalizeLeetspeak(text: string): string {
+  const leetMap: Record<string, string> = {
+    '0': 'o', '1': 'i', '3': 'e', '4': 'a', '5': 's',
+    '7': 't', '8': 'b', '@': 'a', '$': 's',
+  }
+  return text.split('').map(char => leetMap[char] || char).join('')
+}
+
+/**
+ * Remove invisible/zero-width characters
+ */
+function removeInvisibleChars(text: string): string {
+  // Remove zero-width chars, soft hyphens, etc.
+  return text.replace(/[\u200B-\u200D\u2060\uFEFF\u00AD]/g, '')
+}
+
+/**
+ * Normalize text for detection (apply all normalizations)
+ */
+function normalizeForDetection(text: string): string {
+  let normalized = text
+  normalized = removeInvisibleChars(normalized)
+  normalized = normalizeHomoglyphs(normalized)
+  // Don't apply leetspeak normalization to the main text as it might cause false positives
+  // Only use it for specific checks
+  return normalized
+}
+
 // Phone number patterns (international formats)
 const PHONE_PATTERNS = [
   // Standard formats with separators
@@ -81,12 +145,23 @@ export function detectContactInfo(text: string): ContactDetectionResult {
   const detectedTypes: string[] = []
   const matches: string[] = []
 
-  // Normalize text for detection
-  const normalizedText = text.toLowerCase()
+  // Apply unicode normalization to catch obfuscation attempts
+  const cleanText = normalizeForDetection(text)
+  const normalizedText = cleanText.toLowerCase()
 
-  // Check phone patterns
+  // Check if original differs from normalized (potential obfuscation)
+  if (text !== cleanText && text.length === cleanText.length) {
+    // Check if the difference reveals hidden content
+    const hiddenChars = text.length - cleanText.replace(/[\u200B-\u200D\u2060\uFEFF\u00AD]/g, '').length
+    if (hiddenChars > 0) {
+      detectedTypes.push('obfuscation_attempt')
+      matches.push(`[${hiddenChars} hidden characters detected]`)
+    }
+  }
+
+  // Check phone patterns (use normalized text to catch unicode tricks)
   for (const pattern of PHONE_PATTERNS) {
-    const phoneMatches = text.match(pattern)
+    const phoneMatches = cleanText.match(pattern)
     if (phoneMatches) {
       // Filter out likely non-phone numbers (years, prices, etc.)
       const realPhones = phoneMatches.filter(m => {

@@ -8,6 +8,7 @@ import { UnauthorizedError, NotFoundError, BadRequestError } from '@/lib/errors'
 import { moderateComment } from '@/services/ai-moderation.service'
 import { broadcastNewComment } from '@/services/notification.service'
 import { detectContactInfo } from '@/lib/contact-detection'
+import { logFeeProtectionEvent } from '@/services/contact-authorization.service'
 
 type RouteParams = { params: Promise<{ id: string }> }
 
@@ -149,6 +150,24 @@ export const POST = withErrorHandler<{ id: string }>(
     // Private messaging is only available after winning + paying the 5% fee
     const contactCheck = detectContactInfo(content)
     if (contactCheck.hasContactInfo) {
+      // AUDIT: Log fee protection event (HIGH severity - potential fee circumvention attempt)
+      const clientIp = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ||
+                       request.headers.get('x-real-ip') || 'unknown'
+      logFeeProtectionEvent({
+        event: 'CONTACT_INFO_DETECTED',
+        userId: session.user.id,
+        userEmail: session.user.email || undefined,
+        listingId,
+        ip: clientIp,
+        userAgent: request.headers.get('user-agent') || undefined,
+        details: {
+          detectedTypes: contactCheck.detectedTypes,
+          confidence: contactCheck.confidence,
+          // Don't log actual matches for privacy
+          matchCount: contactCheck.matches.length,
+        },
+      }).catch(err => console.error('Audit log failed:', err))
+
       throw new BadRequestError(
         contactCheck.suggestion ||
           'Sharing contact information (phone numbers, emails, social media) is not allowed in comments. ' +

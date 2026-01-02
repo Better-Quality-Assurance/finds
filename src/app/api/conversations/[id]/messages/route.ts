@@ -3,39 +3,14 @@ import { auth } from '@/lib/auth'
 import { prisma } from '@/lib/db'
 import { z } from 'zod'
 import { pusher } from '@/lib/pusher'
+import {
+  canSeeContactDetails,
+  maskEmail,
+  logFeeProtectionEvent,
+} from '@/services/contact-authorization.service'
 
 type RouteContext = {
   params: Promise<{ id: string }>
-}
-
-/**
- * Check if contact details can be revealed for this conversation
- * Contact is only revealed when buyer has won the auction AND paid the fee
- */
-async function canSeeContactDetails(
-  listingId: string,
-  buyerId: string
-): Promise<boolean> {
-  const auction = await prisma.auction.findFirst({
-    where: {
-      listingId,
-      status: 'SOLD',
-      winnerId: buyerId,
-      paymentStatus: 'PAID',
-    },
-    select: { id: true },
-  })
-  return !!auction
-}
-
-/**
- * Mask email for privacy - show first char + domain only
- */
-function maskEmail(email: string): string {
-  const [local, domain] = email.split('@')
-  if (!domain) {return '***@***.com'}
-  const maskedLocal = local.length > 1 ? local[0] + '***' : '***'
-  return `${maskedLocal}@${domain}`
 }
 
 // GET /api/conversations/:id/messages - Get messages in a conversation
@@ -187,6 +162,19 @@ export async function POST(request: NextRequest, context: RouteContext) {
 
     // Block messaging until payment is complete
     if (!canRevealContact) {
+      // AUDIT: Log fee protection event
+      const clientIp = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ||
+                       request.headers.get('x-real-ip') || 'unknown'
+      logFeeProtectionEvent({
+        event: 'MESSAGING_BLOCKED',
+        userId,
+        userEmail: session.user.email || undefined,
+        listingId: conversation.listingId,
+        ip: clientIp,
+        userAgent: request.headers.get('user-agent') || undefined,
+        details: { conversationId, reason: 'payment_not_complete' },
+      }).catch(err => console.error('Audit log failed:', err))
+
       return NextResponse.json(
         {
           error: 'Private messaging is only available after auction payment is complete',

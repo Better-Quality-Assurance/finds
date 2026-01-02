@@ -198,6 +198,19 @@ export async function POST(request: NextRequest) {
 
     // Block messaging until payment is complete
     if (!canAccessMessaging && !isSellerForPaidAuction) {
+      // AUDIT: Log fee protection event
+      const clientIp = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ||
+                       request.headers.get('x-real-ip') || 'unknown'
+      logFeeProtectionEvent({
+        event: 'CONVERSATION_BLOCKED',
+        userId,
+        userEmail: session.user.email || undefined,
+        listingId,
+        ip: clientIp,
+        userAgent: request.headers.get('user-agent') || undefined,
+        details: { reason: 'payment_not_complete' },
+      }).catch(err => console.error('Audit log failed:', err))
+
       return NextResponse.json(
         {
           error: 'Private messaging is only available after auction payment is complete',

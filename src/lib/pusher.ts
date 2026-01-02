@@ -91,7 +91,17 @@ export function getPusherServer() {
 }
 
 /**
+ * Channel authorization result
+ */
+export type ChannelAuthResult =
+  | { authorized: true; response: Pusher.AuthResponse }
+  | { authorized: false; reason: string }
+
+/**
  * Authenticate a user for private channels
+ * Returns null if not authorized
+ *
+ * Security: Verifies user has legitimate access to channel
  */
 export function authenticateChannel(
   socketId: string,
@@ -100,10 +110,78 @@ export function authenticateChannel(
 ): Pusher.AuthResponse | null {
   // Verify user has access to this channel
   if (channelName.startsWith('private-user-')) {
+    // User notification channels: private-user-{userId}-notifications
     const channelUserId = channelName.split('-')[2]
     if (channelUserId !== userId) {
       return null
     }
+  }
+
+  // Conversation channels require async DB check - done separately
+  // See authenticateConversationChannel for conversation access
+  if (channelName.startsWith('private-conversation-')) {
+    // Conversation channel authorization is handled by authenticateConversationChannel
+    // which must be called before this function
+    // If we get here without prior verification, deny access
+    return null
+  }
+
+  return pusher.authorizeChannel(socketId, channelName)
+}
+
+/**
+ * Verify user can access a conversation channel
+ * Must be called before authenticateChannel for conversation channels
+ */
+export async function verifyConversationAccess(
+  conversationId: string,
+  userId: string
+): Promise<boolean> {
+  // Import prisma dynamically to avoid circular dependency
+  const { prisma } = await import('@/lib/db')
+
+  const conversation = await prisma.conversation.findUnique({
+    where: { id: conversationId },
+    select: {
+      buyerId: true,
+      sellerId: true,
+      listingId: true,
+    },
+  })
+
+  if (!conversation) {
+    return false
+  }
+
+  // User must be participant in conversation
+  if (conversation.buyerId !== userId && conversation.sellerId !== userId) {
+    return false
+  }
+
+  // Additional check: payment must be complete for messaging
+  const { canSeeContactDetails } = await import('@/services/contact-authorization.service')
+  const paymentComplete = await canSeeContactDetails(conversation.buyerId, conversation.listingId)
+
+  return paymentComplete
+}
+
+/**
+ * Authenticate user for conversation channel (async version)
+ */
+export async function authenticateConversationChannel(
+  socketId: string,
+  channelName: string,
+  userId: string
+): Promise<Pusher.AuthResponse | null> {
+  if (!channelName.startsWith('private-conversation-')) {
+    return null
+  }
+
+  const conversationId = channelName.replace('private-conversation-', '')
+  const hasAccess = await verifyConversationAccess(conversationId, userId)
+
+  if (!hasAccess) {
+    return null
   }
 
   return pusher.authorizeChannel(socketId, channelName)
