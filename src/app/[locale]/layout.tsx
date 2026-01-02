@@ -189,7 +189,7 @@ export default async function RootLayout({ children, params }: Props) {
             </a>
             <div className="relative flex min-h-screen flex-col">
               <Header />
-              <main id="main-content" className="flex-1 pt-0">{children}</main>
+              <main id="main-content" className="flex-1 pt-16">{children}</main>
               <Footer />
             </div>
             <Toaster />
