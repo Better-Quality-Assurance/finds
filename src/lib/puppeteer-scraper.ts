@@ -15,8 +15,13 @@ let browserInstance: Browser | null = null
 async function getBrowser(): Promise<Browser> {
   if (!browserInstance || !browserInstance.isConnected()) {
     console.log('[Puppeteer] Launching browser...')
+
+    // Use system Chromium if available (set via PUPPETEER_EXECUTABLE_PATH)
+    const executablePath = process.env.PUPPETEER_EXECUTABLE_PATH
+
     browserInstance = await puppeteer.launch({
       headless: true,
+      executablePath: executablePath || undefined,
       args: [
         '--no-sandbox',
         '--disable-setuid-sandbox',
@@ -24,8 +29,10 @@ async function getBrowser(): Promise<Browser> {
         '--disable-accelerated-2d-canvas',
         '--disable-gpu',
         '--window-size=1920x1080',
+        '--single-process', // Helps with resource constraints
       ],
     })
+    console.log('[Puppeteer] Browser launched successfully')
   }
   return browserInstance
 }
