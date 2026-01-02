@@ -204,8 +204,6 @@ export async function scrapeAllAuctionSites(): Promise<ScrapedAuctionLink[]> {
   const results: ScrapedAuctionLink[] = []
   const usePuppeteer = process.env.USE_PUPPETEER === 'true'
 
-  console.log(`[Scraper] USE_PUPPETEER=${process.env.USE_PUPPETEER}, enabled=${usePuppeteer}`)
-
   try {
     // Always run BaT (works without Puppeteer)
     const batResult = await scrapeBringATrailer()
