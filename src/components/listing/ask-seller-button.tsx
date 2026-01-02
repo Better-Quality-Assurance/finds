@@ -56,6 +56,15 @@ export function AskSellerButton({
           return
         }
 
+        // Handle messaging locked error (buyer hasn't won + paid yet)
+        if (response.status === 403 && data.code === 'MESSAGING_LOCKED') {
+          toast.error(t('messagingLocked'), {
+            description: t('messagingLockedHint'),
+            duration: 6000,
+          })
+          return
+        }
+
         throw new Error(data.error || 'Failed to start conversation')
       }
 

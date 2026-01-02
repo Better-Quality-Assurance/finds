@@ -2,40 +2,13 @@ import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@/lib/auth'
 import { prisma } from '@/lib/db'
 import { z } from 'zod'
-
-/**
- * Check if a user can see full contact details for a listing
- * Contact is only revealed when:
- * 1. User is the auction winner AND
- * 2. Payment status is PAID
- */
-async function canSeeContactDetails(
-  userId: string,
-  listingId: string
-): Promise<boolean> {
-  const auction = await prisma.auction.findFirst({
-    where: {
-      listingId,
-      status: 'SOLD',
-      winnerId: userId,
-      paymentStatus: 'PAID',
-    },
-    select: { id: true },
-  })
-
-  return !!auction
-}
-
-/**
- * Mask email for privacy - show domain only
- * e.g., "john.doe@example.com" -> "j***@example.com"
- */
-function maskEmail(email: string): string {
-  const [local, domain] = email.split('@')
-  if (!domain) {return '***@***.com'}
-  const maskedLocal = local.length > 1 ? local[0] + '***' : '***'
-  return `${maskedLocal}@${domain}`
-}
+import {
+  canSeeContactDetails,
+  canRevealContactBatch,
+  maskEmail,
+  getContactInfo,
+  logFeeProtectionEvent,
+} from '@/services/contact-authorization.service'
 
 // GET /api/conversations - List user's conversations
 export async function GET() {
