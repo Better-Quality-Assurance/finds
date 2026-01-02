@@ -562,10 +562,18 @@ export async function moderateComment(commentId: string): Promise<AICommentModer
     let autoActioned = false
     let actionTaken: string | null = null
 
-    if (result.confidenceScore >= config.commentAutoApproveThreshold && result.decision === 'APPROVE') {
+    // Check if personal info (contact details) was detected - ALWAYS hide to prevent fee circumvention
+    const hasContactInfo = result.flaggedCategories?.includes('personal_info') ||
+                           result.flaggedCategories?.includes('scam')
+
+    if (result.confidenceScore >= config.commentAutoApproveThreshold && result.decision === 'APPROVE' && !hasContactInfo) {
       autoActioned = true
       actionTaken = 'approved'
-    } else if (result.spamScore >= config.commentAutoRejectThreshold || result.toxicityScore >= 0.9) {
+    } else if (
+      result.spamScore >= config.commentAutoRejectThreshold ||
+      result.toxicityScore >= 0.9 ||
+      hasContactInfo // Auto-hide contact info attempts
+    ) {
       autoActioned = true
       actionTaken = 'hidden'
       // Hide the comment

@@ -7,6 +7,7 @@ import { successResponse } from '@/lib/api-response'
 import { UnauthorizedError, NotFoundError, BadRequestError } from '@/lib/errors'
 import { moderateComment } from '@/services/ai-moderation.service'
 import { broadcastNewComment } from '@/services/notification.service'
+import { detectContactInfo } from '@/lib/contact-detection'
 
 type RouteParams = { params: Promise<{ id: string }> }
 
@@ -142,6 +143,17 @@ export const POST = withErrorHandler<{ id: string }>(
       if (parentComment.parentId !== null) {
         throw new BadRequestError('Cannot reply to a reply. Maximum 2 levels of nesting.')
       }
+    }
+
+    // CRITICAL: Block contact info sharing to prevent fee circumvention
+    // Private messaging is only available after winning + paying the 5% fee
+    const contactCheck = detectContactInfo(content)
+    if (contactCheck.hasContactInfo) {
+      throw new BadRequestError(
+        contactCheck.suggestion ||
+          'Sharing contact information (phone numbers, emails, social media) is not allowed in comments. ' +
+          'Private contact details are shared automatically after the buyer wins and completes payment.'
+      )
     }
 
     // Create the comment

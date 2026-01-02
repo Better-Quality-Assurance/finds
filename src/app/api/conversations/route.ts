@@ -172,6 +172,7 @@ export async function GET() {
 }
 
 // POST /api/conversations - Create new conversation
+// IMPORTANT: Private messaging is only available after buyer wins auction AND pays 5% fee
 const createConversationSchema = z.object({
   listingId: z.string().min(1),
 })
@@ -206,8 +207,36 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Check if buyer can see seller contact (won + paid)
-    const canSeeContact = await canSeeContactDetails(userId, listingId)
+    // Check if buyer has won + paid (required for private messaging)
+    const canAccessMessaging = await canSeeContactDetails(userId, listingId)
+
+    // Also check if user is the seller (sellers can message after buyer pays)
+    const isSellerForPaidAuction = listing.sellerId === userId
+      ? false // Already blocked above
+      : await prisma.auction.findFirst({
+          where: {
+            listingId,
+            status: 'SOLD',
+            paymentStatus: 'PAID',
+            listing: { sellerId: userId },
+          },
+          select: { id: true },
+        }).then(a => !!a)
+
+    // Block messaging until payment is complete
+    if (!canAccessMessaging && !isSellerForPaidAuction) {
+      return NextResponse.json(
+        {
+          error: 'Private messaging is only available after auction payment is complete',
+          code: 'MESSAGING_LOCKED',
+          message: 'Win the auction and complete payment to unlock private messaging with the seller. Until then, you can ask questions in the public comments section.',
+        },
+        { status: 403 }
+      )
+    }
+
+    // At this point, either buyer paid or seller is responding to paid buyer
+    const canSeeContact = true // Payment complete = contact revealed
 
     // Check if conversation already exists
     const existingConversation = await prisma.conversation.findUnique({

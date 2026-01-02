@@ -179,11 +179,23 @@ export async function POST(request: NextRequest, context: RouteContext) {
       )
     }
 
-    // Check if contact details can be revealed (buyer won + paid)
+    // Check if payment is complete (required for messaging)
     const canRevealContact = await canSeeContactDetails(
       conversation.listingId,
       conversation.buyerId
     )
+
+    // Block messaging until payment is complete
+    if (!canRevealContact) {
+      return NextResponse.json(
+        {
+          error: 'Private messaging is only available after auction payment is complete',
+          code: 'MESSAGING_LOCKED',
+          message: 'Complete payment to unlock private messaging. Until then, use the public comments section.',
+        },
+        { status: 403 }
+      )
+    }
 
     // Create message
     const message = await prisma.message.create({
