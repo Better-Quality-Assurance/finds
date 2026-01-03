@@ -807,6 +807,8 @@ async function scrapeClassicDriverWithStealth(): Promise<string[]> {
 export async function scrapeAllAuctionSites(): Promise<ScrapedAuctionLink[]> {
   const results: ScrapedAuctionLink[] = []
   const usePuppeteer = process.env.USE_PUPPETEER === 'true'
+  // Limit Puppeteer scrapers per run to avoid timeout (each takes 15-30s)
+  const maxPuppeteerScrapers = 2
 
   try {
     // Always run BaT (works without Puppeteer)
@@ -815,79 +817,38 @@ export async function scrapeAllAuctionSites(): Promise<ScrapedAuctionLink[]> {
     results.push(...batResult)
 
     // Optionally run Puppeteer-based scrapers (sequentially to avoid browser conflicts)
+    // Randomly pick 2 scrapers per run to get variety while staying under timeout
     if (usePuppeteer) {
-      console.log('[Scraper] Puppeteer enabled, scraping Catawiki...')
+      const puppeteerScrapers = [
+        { name: 'Catawiki', fn: scrapeCatawiki },
+        { name: 'Collecting Cars', fn: scrapeCollectingCars },
+        { name: 'Cars and Bids', fn: scrapeCarsAndBids },
+        { name: 'Bonhams', fn: scrapeBonhams },
+        { name: 'Silverstone', fn: scrapeSilverstoneAuctions },
+        { name: 'RM Sothebys', fn: scrapeRMSothebys },
+        { name: 'Classic Driver', fn: scrapeClassicDriver },
+      ]
 
-      // Run Catawiki first
-      try {
-        const catawikiResult = await scrapeCatawiki()
-        console.log(`[Scraper] Catawiki: ${catawikiResult.length} links`)
-        results.push(...catawikiResult)
-      } catch (error) {
-        console.error('[Scraper] Catawiki failed:', error)
+      // Shuffle and pick first N scrapers
+      for (let i = puppeteerScrapers.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1))
+        ;[puppeteerScrapers[i], puppeteerScrapers[j]] = [puppeteerScrapers[j], puppeteerScrapers[i]]
       }
 
-      // Close first browser before starting second
-      await closeBrowser()
+      const selectedScrapers = puppeteerScrapers.slice(0, maxPuppeteerScrapers)
+      console.log(`[Scraper] Running ${selectedScrapers.length} Puppeteer scrapers: ${selectedScrapers.map(s => s.name).join(', ')}`)
 
-      // Then run Collecting Cars with stealth mode
-      console.log('[Scraper] Scraping Collecting Cars with stealth...')
-      try {
-        const collectingCarsResult = await scrapeCollectingCars()
-        console.log(`[Scraper] Collecting Cars: ${collectingCarsResult.length} links`)
-        results.push(...collectingCarsResult)
-      } catch (error) {
-        console.error('[Scraper] Collecting Cars failed:', error)
-      }
-
-      // Run Cars and Bids with stealth mode (Cloudflare protected)
-      console.log('[Scraper] Scraping Cars and Bids with stealth...')
-      try {
-        const carsAndBidsResult = await scrapeCarsAndBids()
-        console.log(`[Scraper] Cars and Bids: ${carsAndBidsResult.length} links`)
-        results.push(...carsAndBidsResult)
-      } catch (error) {
-        console.error('[Scraper] Cars and Bids failed:', error)
-      }
-
-      // Run Bonhams with stealth mode (403 blocked without it)
-      console.log('[Scraper] Scraping Bonhams with stealth...')
-      try {
-        const bonhamsResult = await scrapeBonhams()
-        console.log(`[Scraper] Bonhams: ${bonhamsResult.length} links`)
-        results.push(...bonhamsResult)
-      } catch (error) {
-        console.error('[Scraper] Bonhams failed:', error)
-      }
-
-      // Run Silverstone Auctions (Vue.js rendered, needs Puppeteer)
-      console.log('[Scraper] Scraping Silverstone Auctions with Puppeteer...')
-      try {
-        const silverstoneResult = await scrapeSilverstoneAuctions()
-        console.log(`[Scraper] Silverstone Auctions: ${silverstoneResult.length} links`)
-        results.push(...silverstoneResult)
-      } catch (error) {
-        console.error('[Scraper] Silverstone Auctions failed:', error)
-      }
-
-      // Run RM Sotheby's (Angular app, needs Puppeteer)
-      console.log('[Scraper] Scraping RM Sotheby\'s with Puppeteer...')
-      try {
-        const rmSothebysResult = await scrapeRMSothebys()
-        console.log(`[Scraper] RM Sotheby's: ${rmSothebysResult.length} links`)
-        results.push(...rmSothebysResult)
-      } catch (error) {
-        console.error('[Scraper] RM Sotheby\'s failed:', error)
-      }
-
-      // Run Classic Driver (stealth mode required)
-      console.log('[Scraper] Scraping Classic Driver with Puppeteer...')
-      try {
-        const classicDriverResult = await scrapeClassicDriver()
-        console.log(`[Scraper] Classic Driver: ${classicDriverResult.length} links`)
-        results.push(...classicDriverResult)
-      } catch (error) {
-        console.error('[Scraper] Classic Driver failed:', error)
+      for (const scraper of selectedScrapers) {
+        console.log(`[Scraper] Scraping ${scraper.name}...`)
+        try {
+          const scraperResult = await scraper.fn()
+          console.log(`[Scraper] ${scraper.name}: ${scraperResult.length} links`)
+          results.push(...scraperResult)
+        } catch (error) {
+          console.error(`[Scraper] ${scraper.name} failed:`, error)
+        }
+        // Close browser between scrapers
+        await closeBrowser()
       }
     } else {
       console.log('[Scraper] Puppeteer disabled (set USE_PUPPETEER=true to enable)')
