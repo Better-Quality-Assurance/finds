@@ -10,7 +10,7 @@ import Link from 'next/link'
 export async function generateMetadata() {
   return {
     title: 'Recent Sales - Classic Car Auction Results | Finds',
-    description: 'See what classic cars sold for at auctions across Europe. Real prices from Bring a Trailer, Catawiki, and more.',
+    description: 'See what classic cars sold for at auctions worldwide. Real prices from Bring a Trailer, Catawiki, Collecting Cars, and more.',
   }
 }
 
@@ -21,24 +21,6 @@ type SearchParams = {
   days?: string
 }
 
-// EU-only sources that don't need location filtering
-const EU_ONLY_SOURCES = ['Catawiki', 'Artcurial', 'Collecting Cars']
-
-// EU countries/cities for location filtering
-const EU_LOCATIONS = ['austria', 'belgium', 'bulgaria', 'croatia', 'cyprus', 'czech',
-  'denmark', 'estonia', 'finland', 'france', 'germany', 'greece', 'hungary',
-  'ireland', 'italy', 'latvia', 'lithuania', 'luxembourg', 'malta', 'netherlands',
-  'poland', 'portugal', 'romania', 'slovakia', 'slovenia', 'spain', 'sweden',
-  'uk', 'united kingdom', 'switzerland', 'norway', 'monaco', 'paris', 'london',
-  'amsterdam', 'munich', 'berlin', 'milan', 'rome', 'barcelona', 'madrid']
-
-function isEuropeanSale(sale: { source: string; location: string | null }): boolean {
-  if (EU_ONLY_SOURCES.includes(sale.source)) {return true}
-  if (!sale.location) {return false}
-  const loc = sale.location.toLowerCase()
-  return EU_LOCATIONS.some(country => loc.includes(country))
-}
-
 async function getRecentSales(searchParams: SearchParams) {
   const daysBack = Math.min(parseInt(searchParams.days || '30'), 90)
   const cutoffDate = new Date()
@@ -46,11 +28,6 @@ async function getRecentSales(searchParams: SearchParams) {
 
   const where: Record<string, unknown> = {
     saleDate: { gte: cutoffDate },
-    // Include EU-only sources OR sources with location set
-    OR: [
-      { source: { in: EU_ONLY_SOURCES } },
-      { source: { notIn: EU_ONLY_SOURCES }, location: { not: null } },
-    ],
   }
 
   if (searchParams.make) {
@@ -65,14 +42,11 @@ async function getRecentSales(searchParams: SearchParams) {
     where.priceEur = { ...where.priceEur as object, lte: parseInt(searchParams.max_price) }
   }
 
-  const sales = await prisma.externalAuctionSale.findMany({
+  return prisma.externalAuctionSale.findMany({
     where,
     orderBy: { saleDate: 'desc' },
-    take: 100, // Fetch more to filter
+    take: 50,
   })
-
-  // Filter to EU-only and limit
-  return sales.filter(isEuropeanSale).slice(0, 50)
 }
 
 function SaleCard({ sale }: { sale: Awaited<ReturnType<typeof getRecentSales>>[0] }) {
@@ -211,7 +185,7 @@ export default async function RecentSalesPage({
       <div className="mb-8">
         <h1 className="text-3xl font-bold mb-2">Recent Auction Sales</h1>
         <p className="text-muted-foreground">
-          What classic cars sold for at auctions across Europe. Data from Bring a Trailer, Catawiki, RM Sotheby&apos;s, and more.
+          What classic cars sold for at auctions worldwide. Data from Bring a Trailer, Catawiki, Collecting Cars, and more.
         </p>
       </div>
 
