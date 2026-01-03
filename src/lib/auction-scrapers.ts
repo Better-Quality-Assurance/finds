@@ -370,7 +370,12 @@ async function scrapeCollectingCarsWithCookies(): Promise<string[]> {
         .filter(href => {
           if (!href || !href.includes('collectingcars.com')) {return false}
           // Match URLs like /for-sale/2021-suzuki-jimny-sierra
-          return href.includes('/for-sale/') && href.split('/for-sale/')[1]?.length > 5
+          if (!href.includes('/for-sale/') || (href.split('/for-sale/')[1]?.length || 0) <= 5) {return false}
+          // Exclude number plates and memorabilia
+          const slug = href.toLowerCase()
+          if (slug.includes('number-plate') || slug.includes('numberplate')) {return false}
+          if (slug.includes('memorabilia') || slug.includes('artwork') || slug.includes('poster')) {return false}
+          return true
         })
     })
 
@@ -479,14 +484,70 @@ export async function scrapeAllAuctionSites(): Promise<ScrapedAuctionLink[]> {
 }
 
 /**
+ * Fetch page content using Puppeteer with stealth mode (for Cloudflare-protected sites)
+ */
+async function fetchWithStealth(url: string): Promise<string | null> {
+  const puppeteerExtra = await import('puppeteer-extra')
+  const StealthPlugin = await import('puppeteer-extra-plugin-stealth')
+
+  puppeteerExtra.default.use(StealthPlugin.default())
+
+  let browser = null
+
+  try {
+    const executablePath = process.env.PUPPETEER_EXECUTABLE_PATH
+
+    browser = await puppeteerExtra.default.launch({
+      headless: true,
+      executablePath: executablePath || undefined,
+      args: [
+        '--no-sandbox',
+        '--disable-setuid-sandbox',
+        '--disable-dev-shm-usage',
+        '--disable-blink-features=AutomationControlled',
+      ],
+    })
+
+    const page = await browser.newPage()
+    await page.setViewport({ width: 1920, height: 1080 })
+
+    await page.goto(url, {
+      waitUntil: 'networkidle2',
+      timeout: 30000,
+    })
+
+    // Wait for content
+    await new Promise(resolve => setTimeout(resolve, 3000))
+
+    const html = await page.content()
+    return html
+  } catch (error) {
+    console.error(`[Scraper] Stealth fetch error for ${url}:`, error)
+    return null
+  } finally {
+    if (browser) {
+      await browser.close()
+    }
+  }
+}
+
+/**
  * Fetch content from a single auction page
  * Uses Puppeteer for JS-rendered sites when enabled, simple HTTP for others
  */
 export async function fetchAuctionPage(url: string): Promise<string | null> {
   const usePuppeteer = process.env.USE_PUPPETEER === 'true'
 
-  // Check if URL requires Puppeteer (JS-rendered sites)
-  const jsRenderedDomains = ['catawiki.com', 'collectingcars.com', 'carsandbids.com']
+  // Sites that need stealth mode (Cloudflare protected)
+  const stealthDomains = ['carsandbids.com', 'collectingcars.com']
+  const needsStealth = usePuppeteer && stealthDomains.some(domain => url.includes(domain))
+
+  if (needsStealth) {
+    return fetchWithStealth(url)
+  }
+
+  // Sites that just need JS rendering (no Cloudflare)
+  const jsRenderedDomains = ['catawiki.com']
   const needsPuppeteer = usePuppeteer && jsRenderedDomains.some(domain => url.includes(domain))
 
   if (needsPuppeteer) {
