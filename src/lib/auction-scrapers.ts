@@ -87,15 +87,16 @@ async function scrapeBringATrailer(): Promise<ScrapedAuctionLink[]> {
 
 /**
  * Scrape Catawiki's classic cars category (requires Puppeteer)
- * Uses closed auctions to get sold items only
+ * Uses proper category filter (object_type=1167) to get only cars, not memorabilia
  */
 async function scrapeCatawiki(): Promise<ScrapedAuctionLink[]> {
   console.log('[Scraper] Fetching Catawiki with Puppeteer...')
 
   try {
-    // Use Puppeteer to extract auction URLs from closed auctions
+    // Use category 423 with object_type filter for actual cars (not memorabilia)
+    // Adding show=closed to get sold auctions only
     const urls = await extractUrlsWithPuppeteer(
-      'https://www.catawiki.com/en/c/439-classic-cars?show=closed',
+      'https://www.catawiki.com/en/c/423-classic-cars?filters=object_type%5B%5D=1167&show=closed',
       'a[href*="/l/"]',
       {
         limit: 30,
