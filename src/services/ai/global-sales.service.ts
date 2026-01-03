@@ -18,6 +18,7 @@ export const AUCTION_SOURCES = [
   { name: 'Collecting Cars', domain: 'collectingcars.com', region: 'EU', requiresLocationCheck: false },
   // Global sources (include all sales, not just EU)
   { name: 'Bring a Trailer', domain: 'bringatrailer.com', region: 'Global', requiresLocationCheck: false },
+  { name: 'Cars and Bids', domain: 'carsandbids.com', region: 'Global', requiresLocationCheck: false },
   { name: 'RM Sothebys', domain: 'rmsothebys.com', region: 'Global', requiresLocationCheck: false },
   { name: 'Bonhams', domain: 'bonhams.com', region: 'Global', requiresLocationCheck: false },
 ] as const

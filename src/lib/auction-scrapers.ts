@@ -152,6 +152,107 @@ async function scrapeCollectingCars(): Promise<ScrapedAuctionLink[]> {
 }
 
 /**
+ * Scrape Cars and Bids past auctions (requires Puppeteer with stealth)
+ * URL: https://carsandbids.com/past-auctions/
+ */
+async function scrapeCarsAndBids(): Promise<ScrapedAuctionLink[]> {
+  console.log('[Scraper] Fetching Cars and Bids with Puppeteer stealth...')
+
+  try {
+    const urls = await scrapeCarsAndBidsWithStealth()
+
+    if (urls.length === 0) {
+      console.log('[Scraper] Cars and Bids: No URLs found')
+      return []
+    }
+
+    return urls.map(url => ({
+      url,
+      title: url.split('/auctions/')[1]?.replace(/-/g, ' ') || 'Unknown',
+      source: 'Cars and Bids',
+    }))
+  } catch (error) {
+    console.error('[Scraper] Cars and Bids error:', error)
+    return []
+  }
+}
+
+/**
+ * Helper to scrape Cars and Bids with stealth mode
+ */
+async function scrapeCarsAndBidsWithStealth(): Promise<string[]> {
+  const puppeteerExtra = await import('puppeteer-extra')
+  const StealthPlugin = await import('puppeteer-extra-plugin-stealth')
+
+  puppeteerExtra.default.use(StealthPlugin.default())
+
+  let browser = null
+
+  try {
+    const executablePath = process.env.PUPPETEER_EXECUTABLE_PATH
+
+    browser = await puppeteerExtra.default.launch({
+      headless: true,
+      executablePath: executablePath || undefined,
+      args: [
+        '--no-sandbox',
+        '--disable-setuid-sandbox',
+        '--disable-dev-shm-usage',
+        '--disable-blink-features=AutomationControlled',
+        '--window-size=1920,1080',
+      ],
+    })
+
+    const page = await browser.newPage()
+    await page.setViewport({ width: 1920, height: 1080 })
+
+    const randomDelay = () => new Promise(r => setTimeout(r, 500 + Math.random() * 1500))
+
+    console.log('[Scraper] Cars and Bids: Navigating to past auctions...')
+    await page.goto('https://carsandbids.com/past-auctions/', {
+      waitUntil: 'networkidle2',
+      timeout: 45000,
+    })
+
+    await randomDelay()
+
+    // Wait for content to load
+    await new Promise(resolve => setTimeout(resolve, 3000))
+
+    // Scroll to trigger lazy loading
+    for (let i = 0; i < 3; i++) {
+      await page.evaluate(() => window.scrollBy(0, 500))
+      await randomDelay()
+    }
+
+    await new Promise(resolve => setTimeout(resolve, 2000))
+
+    // Extract auction URLs - Cars and Bids uses /auctions/{slug} pattern
+    const urls = await page.evaluate(() => {
+      const links = document.querySelectorAll('a[href]')
+      return Array.from(links)
+        .map(link => (link as HTMLAnchorElement).href)
+        .filter(href => {
+          if (!href || !href.includes('carsandbids.com')) {return false}
+          // Match URLs like /auctions/2024-toyota-gr86
+          return href.includes('/auctions/') && !href.includes('/past-auctions') && href.split('/auctions/')[1]?.length > 5
+        })
+    })
+
+    const uniqueUrls = Array.from(new Set(urls)).slice(0, 20)
+    console.log(`[Scraper] Cars and Bids: Found ${uniqueUrls.length} URLs`)
+    return uniqueUrls
+  } catch (error) {
+    console.error('[Scraper] Cars and Bids stealth error:', error)
+    return []
+  } finally {
+    if (browser) {
+      await browser.close()
+    }
+  }
+}
+
+/**
  * Helper to scrape Collecting Cars with stealth mode and realistic user behavior
  */
 async function scrapeCollectingCarsWithCookies(): Promise<string[]> {
@@ -273,7 +374,7 @@ async function scrapeBonhams(): Promise<ScrapedAuctionLink[]> {
  * Main function to scrape all auction sites
  *
  * - BaT: Server-rendered (simple HTTP fetch) - always works
- * - Catawiki, Collecting Cars: JavaScript-rendered (Puppeteer) - optional
+ * - Catawiki, Collecting Cars, Cars and Bids: JavaScript-rendered (Puppeteer) - optional
  *
  * Set USE_PUPPETEER=true env var to enable Puppeteer-based scrapers.
  * Puppeteer requires Chromium dependencies that may not be available on all platforms.
@@ -313,6 +414,16 @@ export async function scrapeAllAuctionSites(): Promise<ScrapedAuctionLink[]> {
       } catch (error) {
         console.error('[Scraper] Collecting Cars failed:', error)
       }
+
+      // Run Cars and Bids with stealth mode (Cloudflare protected)
+      console.log('[Scraper] Scraping Cars and Bids with stealth...')
+      try {
+        const carsAndBidsResult = await scrapeCarsAndBids()
+        console.log(`[Scraper] Cars and Bids: ${carsAndBidsResult.length} links`)
+        results.push(...carsAndBidsResult)
+      } catch (error) {
+        console.error('[Scraper] Cars and Bids failed:', error)
+      }
     } else {
       console.log('[Scraper] Puppeteer disabled (set USE_PUPPETEER=true to enable)')
     }
@@ -337,7 +448,7 @@ export async function fetchAuctionPage(url: string): Promise<string | null> {
   const usePuppeteer = process.env.USE_PUPPETEER === 'true'
 
   // Check if URL requires Puppeteer (JS-rendered sites)
-  const jsRenderedDomains = ['catawiki.com', 'collectingcars.com']
+  const jsRenderedDomains = ['catawiki.com', 'collectingcars.com', 'carsandbids.com']
   const needsPuppeteer = usePuppeteer && jsRenderedDomains.some(domain => url.includes(domain))
 
   if (needsPuppeteer) {
