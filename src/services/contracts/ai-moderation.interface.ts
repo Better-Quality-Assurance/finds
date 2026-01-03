@@ -331,7 +331,7 @@ export const DEFAULT_AI_MODERATION_CONFIG: AIModerationConfig = {
   listingFlagThreshold: 0.70,
   bidAnalysisWindowMinutes: 60,
   suspicionScoreThreshold: 0.75,
-  defaultModel: 'anthropic/claude-3.5-sonnet',
+  defaultModel: '@preset/finds',
   visionModel: 'openai/gpt-4o',
   maxRequestsPerMinute: 50,
 }

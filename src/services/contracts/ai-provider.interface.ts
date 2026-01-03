@@ -76,7 +76,7 @@ export interface AIProviderConfig {
 }
 
 export const DEFAULT_AI_PROVIDER_CONFIG: AIProviderConfig = {
-  defaultModel: 'anthropic/claude-3.5-sonnet',
+  defaultModel: '@preset/finds',
   visionModel: 'openai/gpt-4o',
   maxRetries: 3,
   retryDelayMs: 1000,
