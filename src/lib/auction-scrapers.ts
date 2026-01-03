@@ -415,6 +415,145 @@ async function scrapeBonhams(): Promise<ScrapedAuctionLink[]> {
 }
 
 /**
+ * Scrape Silverstone Auctions sold lots
+ * URL: https://www.silverstoneauctions.com/sold-lots
+ */
+async function scrapeSilverstoneAuctions(): Promise<ScrapedAuctionLink[]> {
+  console.log('[Scraper] Fetching Silverstone Auctions...')
+  const html = await fetchWithTimeout('https://www.silverstoneauctions.com/sold-lots')
+  if (!html) {return []}
+
+  // Silverstone lot URLs look like: /lot/XXXXX or /buy-now/lot/XXXXX
+  const urlPattern = /href="(https:\/\/www\.silverstoneauctions\.com\/(?:buy-now\/)?lot\/[^"]+)"/g
+  const urls = extractUrls(html, urlPattern)
+
+  // Get unique URLs, limit to first 20
+  const uniqueUrls = Array.from(new Set(urls)).slice(0, 20)
+
+  return uniqueUrls.map(url => ({
+    url,
+    title: url.split('/lot/')[1]?.replace(/-/g, ' ')?.replace(/\/$/, '') || 'Unknown',
+    source: 'Silverstone Auctions',
+  }))
+}
+
+/**
+ * Scrape RM Sotheby's results page
+ * URL: https://rmsothebys.com/en/results
+ */
+async function scrapeRMSothebys(): Promise<ScrapedAuctionLink[]> {
+  console.log('[Scraper] Fetching RM Sotheby\'s...')
+  const html = await fetchWithTimeout('https://rmsothebys.com/en/results')
+  if (!html) {return []}
+
+  // RM Sotheby's lot URLs look like: /en/auctions/XXXX/lots/XXXX
+  const urlPattern = /href="(\/en\/auctions\/[^/]+\/lots\/\d+[^"]*)"/g
+  const paths = extractUrls(html, urlPattern)
+
+  const uniquePaths = Array.from(new Set(paths)).slice(0, 20)
+
+  return uniquePaths.map(path => ({
+    url: `https://rmsothebys.com${path}`,
+    title: 'RM Sotheby\'s Lot',
+    source: 'RM Sothebys',
+  }))
+}
+
+/**
+ * Scrape Artcurial motorcars results
+ * URL: https://www.artcurial.com/en/results?department=21
+ */
+async function scrapeArtcurial(): Promise<ScrapedAuctionLink[]> {
+  console.log('[Scraper] Fetching Artcurial...')
+  const html = await fetchWithTimeout('https://www.artcurial.com/en/results?department=21')
+  if (!html) {return []}
+
+  // Artcurial lot URLs look like: /en/lot-XXXXX
+  const urlPattern = /href="(\/en\/lot-\d+[^"]*)"/g
+  const paths = extractUrls(html, urlPattern)
+
+  const uniquePaths = Array.from(new Set(paths)).slice(0, 20)
+
+  return uniquePaths.map(path => ({
+    url: `https://www.artcurial.com${path}`,
+    title: path.split('/lot-')[1]?.replace(/-/g, ' ') || 'Artcurial Lot',
+    source: 'Artcurial',
+  }))
+}
+/**
+ * Scrape Classic Driver sold cars (requires Puppeteer)
+ * URL: https://www.classicdriver.com/en/cars?sale_status=sold
+ */
+async function scrapeClassicDriver(): Promise<ScrapedAuctionLink[]> {
+  console.log('[Scraper] Fetching Classic Driver with Puppeteer...')
+
+  try {
+    // Try simple HTTP fetch first
+    const html = await fetchWithTimeout('https://www.classicdriver.com/en/cars?sale_status=sold')
+
+    if (html && html.includes('/en/car/')) {
+      // If we got HTML with car URLs, extract them
+      console.log('[Scraper] Classic Driver: Simple HTTP fetch succeeded')
+
+      // Classic Driver URLs look like: /en/car/MAKE/MODEL/YEAR/ID
+      const urlPattern = /href="(\/en\/car\/[^"]+)"/g
+      const paths = extractUrls(html, urlPattern)
+
+      const uniquePaths = Array.from(new Set(paths)).slice(0, 20)
+
+      return uniquePaths.map(path => {
+        // Extract make/model from path: /en/car/porsche/911/1989/123456
+        const parts = path.split('/').filter(Boolean)
+        const make = parts[2] || ''
+        const model = parts[3] || ''
+        const year = parts[4] || ''
+
+        return {
+          url: `https://www.classicdriver.com${path}`,
+          title: `${make} ${model} ${year}`.trim() || 'Classic Driver Listing',
+          source: 'Classic Driver',
+        }
+      })
+    }
+
+    // If simple fetch didn't work, fall back to Puppeteer
+    console.log('[Scraper] Classic Driver: Falling back to Puppeteer...')
+    const urls = await extractUrlsWithPuppeteer(
+      'https://www.classicdriver.com/en/cars?sale_status=sold',
+      'a[href*="/en/car/"]',
+      {
+        limit: 20,
+        timeout: 30000,
+      }
+    )
+
+    if (urls.length === 0) {
+      console.log('[Scraper] Classic Driver: No URLs found')
+      return []
+    }
+
+    return urls.map(url => {
+      // Extract make/model from URL
+      const urlObj = new URL(url)
+      const parts = urlObj.pathname.split('/').filter(Boolean)
+      const make = parts[2] || ''
+      const model = parts[3] || ''
+      const year = parts[4] || ''
+
+      return {
+        url,
+        title: `${make} ${model} ${year}`.trim() || 'Classic Driver Listing',
+        source: 'Classic Driver',
+      }
+    })
+  } catch (error) {
+    console.error('[Scraper] Classic Driver error:', error)
+    return []
+  }
+}
+
+
+/**
  * Main function to scrape all auction sites
  *
  * - BaT: Server-rendered (simple HTTP fetch) - always works
@@ -470,6 +609,56 @@ export async function scrapeAllAuctionSites(): Promise<ScrapedAuctionLink[]> {
       }
     } else {
       console.log('[Scraper] Puppeteer disabled (set USE_PUPPETEER=true to enable)')
+    }
+
+    // Run Bonhams (simple HTTP, no Puppeteer needed)
+    console.log('[Scraper] Scraping Bonhams...')
+    try {
+      const bonhamsResult = await scrapeBonhams()
+      console.log(`[Scraper] Bonhams: ${bonhamsResult.length} links`)
+      results.push(...bonhamsResult)
+    } catch (error) {
+      console.error('[Scraper] Bonhams failed:', error)
+    }
+
+    // Run Silverstone Auctions (simple HTTP, no Puppeteer needed)
+    console.log('[Scraper] Scraping Silverstone Auctions...')
+    try {
+      const silverstoneResult = await scrapeSilverstoneAuctions()
+      console.log(`[Scraper] Silverstone Auctions: ${silverstoneResult.length} links`)
+      results.push(...silverstoneResult)
+    } catch (error) {
+      console.error('[Scraper] Silverstone Auctions failed:', error)
+    }
+
+    // Run RM Sotheby's (simple HTTP, no Puppeteer needed)
+    console.log('[Scraper] Scraping RM Sotheby\'s...')
+    try {
+      const rmSothebysResult = await scrapeRMSothebys()
+      console.log(`[Scraper] RM Sotheby's: ${rmSothebysResult.length} links`)
+      results.push(...rmSothebysResult)
+    } catch (error) {
+      console.error('[Scraper] RM Sotheby\'s failed:', error)
+    }
+
+    // Run Artcurial (simple HTTP, no Puppeteer needed)
+    console.log('[Scraper] Scraping Artcurial...')
+    try {
+      const artcurialResult = await scrapeArtcurial()
+      console.log(`[Scraper] Artcurial: ${artcurialResult.length} links`)
+      results.push(...artcurialResult)
+    } catch (error) {
+      console.error('[Scraper] Artcurial failed:', error)
+    }
+
+    // Run Classic Driver (tries simple HTTP first, falls back to Puppeteer)
+    console.log('[Scraper] Scraping Classic Driver...')
+    try {
+      const classicDriverResult = await scrapeClassicDriver()
+      console.log(`[Scraper] Classic Driver: ${classicDriverResult.length} links`)
+      results.push(...classicDriverResult)
+    } catch (error) {
+      console.error('[Scraper] Classic Driver failed:', error)
     }
 
     console.log(`[Scraper] Total links found: ${results.length}`)
@@ -548,7 +737,7 @@ export async function fetchAuctionPage(url: string): Promise<string | null> {
   }
 
   // Sites that just need JS rendering (no Cloudflare)
-  const jsRenderedDomains = ['catawiki.com']
+  const jsRenderedDomains = ['catawiki.com', 'classicdriver.com']
   const needsPuppeteer = usePuppeteer && jsRenderedDomains.some(domain => url.includes(domain))
 
   if (needsPuppeteer) {
