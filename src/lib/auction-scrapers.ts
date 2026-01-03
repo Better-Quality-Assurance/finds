@@ -551,32 +551,116 @@ async function scrapeSilverstoneAuctions(): Promise<ScrapedAuctionLink[]> {
 }
 
 /**
- * Scrape RM Sotheby's results page
+ * Scrape RM Sotheby's results page (requires Puppeteer - Angular app)
  * URL: https://rmsothebys.com/en/results
  */
 async function scrapeRMSothebys(): Promise<ScrapedAuctionLink[]> {
-  console.log('[Scraper] Fetching RM Sotheby\'s...')
-  const html = await fetchWithTimeout('https://rmsothebys.com/en/results')
-  if (!html) {return []}
+  console.log('[Scraper] Fetching RM Sotheby\'s with Puppeteer...')
 
-  // RM Sotheby's lot URLs look like: /auctions/pt25/lots/n0001-car-description/
-  // Note: URLs don't include /en/ in the path, just /auctions/
-  const urlPattern = /href="(\/auctions\/[a-z0-9]+\/lots\/[a-z0-9]+-[^"]+)"/gi
-  const paths = extractUrls(html, urlPattern)
+  const usePuppeteer = process.env.USE_PUPPETEER === 'true'
+  if (!usePuppeteer) {
+    console.log('[Scraper] RM Sotheby\'s: Skipping (requires Puppeteer)')
+    return []
+  }
 
-  const uniquePaths = Array.from(new Set(paths)).slice(0, 20)
+  try {
+    const urls = await scrapeRMSothebysWithPuppeteer()
 
-  return uniquePaths.map(path => {
-    // Extract car description from path: /auctions/pt25/lots/n0001-car-description/
-    const lotPart = path.split('/lots/')[1]?.replace(/\/$/, '') || ''
-    const title = lotPart.split('-').slice(1).join(' ').replace(/-/g, ' ') || 'RM Sotheby\'s Lot'
-
-    return {
-      url: `https://rmsothebys.com${path}`,
-      title,
-      source: 'RM Sothebys',
+    if (urls.length === 0) {
+      console.log('[Scraper] RM Sotheby\'s: No URLs found')
+      return []
     }
-  })
+
+    return urls.map(url => {
+      // Extract car description from path: /auctions/pt25/lots/n0001-car-description/
+      const lotPart = url.split('/lots/')[1]?.replace(/\/$/, '') || ''
+      const title = lotPart.split('-').slice(1).join(' ').replace(/-/g, ' ') || 'RM Sotheby\'s Lot'
+
+      return {
+        url,
+        title,
+        source: 'RM Sothebys',
+      }
+    })
+  } catch (error) {
+    console.error('[Scraper] RM Sotheby\'s error:', error)
+    return []
+  }
+}
+
+/**
+ * Helper to scrape RM Sotheby's with Puppeteer (Angular app needs JS rendering)
+ */
+async function scrapeRMSothebysWithPuppeteer(): Promise<string[]> {
+  const puppeteerExtra = await import('puppeteer-extra')
+  const StealthPlugin = await import('puppeteer-extra-plugin-stealth')
+
+  puppeteerExtra.default.use(StealthPlugin.default())
+
+  let browser = null
+
+  try {
+    const executablePath = process.env.PUPPETEER_EXECUTABLE_PATH
+
+    browser = await puppeteerExtra.default.launch({
+      headless: true,
+      executablePath: executablePath || undefined,
+      args: [
+        '--no-sandbox',
+        '--disable-setuid-sandbox',
+        '--disable-dev-shm-usage',
+        '--disable-blink-features=AutomationControlled',
+        '--window-size=1920,1080',
+      ],
+    })
+
+    const page = await browser.newPage()
+    await page.setViewport({ width: 1920, height: 1080 })
+
+    const randomDelay = () => new Promise(r => setTimeout(r, 500 + Math.random() * 1500))
+
+    console.log('[Scraper] RM Sotheby\'s: Navigating to results page...')
+    await page.goto('https://rmsothebys.com/en/results', {
+      waitUntil: 'networkidle2',
+      timeout: 45000,
+    })
+
+    await randomDelay()
+
+    // Wait for Angular app to load
+    await new Promise(resolve => setTimeout(resolve, 5000))
+
+    // Scroll to trigger lazy loading
+    for (let i = 0; i < 3; i++) {
+      await page.evaluate(() => window.scrollBy(0, 500))
+      await randomDelay()
+    }
+
+    await new Promise(resolve => setTimeout(resolve, 3000))
+
+    // Extract lot URLs - RM Sotheby's uses /auctions/{auction-id}/lots/{lot-id}-{description}/ pattern
+    const urls = await page.evaluate(() => {
+      const links = document.querySelectorAll('a[href]')
+      return Array.from(links)
+        .map(link => (link as HTMLAnchorElement).href)
+        .filter(href => {
+          if (!href || !href.includes('rmsothebys.com')) {return false}
+          // Match URLs like /auctions/pt25/lots/n0001-1965-ferrari-275/
+          return /\/auctions\/[a-z0-9]+\/lots\/[a-z0-9]+-/.test(href)
+        })
+    })
+
+    const uniqueUrls = Array.from(new Set(urls)).slice(0, 20)
+    console.log(`[Scraper] RM Sotheby's: Found ${uniqueUrls.length} URLs`)
+    return uniqueUrls
+  } catch (error) {
+    console.error('[Scraper] RM Sotheby\'s Puppeteer error:', error)
+    return []
+  } finally {
+    if (browser) {
+      await browser.close()
+    }
+  }
 }
 
 /**
@@ -785,18 +869,28 @@ export async function scrapeAllAuctionSites(): Promise<ScrapedAuctionLink[]> {
       } catch (error) {
         console.error('[Scraper] Silverstone Auctions failed:', error)
       }
+
+      // Run RM Sotheby's (Angular app, needs Puppeteer)
+      console.log('[Scraper] Scraping RM Sotheby\'s with Puppeteer...')
+      try {
+        const rmSothebysResult = await scrapeRMSothebys()
+        console.log(`[Scraper] RM Sotheby's: ${rmSothebysResult.length} links`)
+        results.push(...rmSothebysResult)
+      } catch (error) {
+        console.error('[Scraper] RM Sotheby\'s failed:', error)
+      }
+
+      // Run Classic Driver (stealth mode required)
+      console.log('[Scraper] Scraping Classic Driver with Puppeteer...')
+      try {
+        const classicDriverResult = await scrapeClassicDriver()
+        console.log(`[Scraper] Classic Driver: ${classicDriverResult.length} links`)
+        results.push(...classicDriverResult)
+      } catch (error) {
+        console.error('[Scraper] Classic Driver failed:', error)
+      }
     } else {
       console.log('[Scraper] Puppeteer disabled (set USE_PUPPETEER=true to enable)')
-    }
-
-    // Run RM Sotheby's (simple HTTP, no Puppeteer needed)
-    console.log('[Scraper] Scraping RM Sotheby\'s...')
-    try {
-      const rmSothebysResult = await scrapeRMSothebys()
-      console.log(`[Scraper] RM Sotheby's: ${rmSothebysResult.length} links`)
-      results.push(...rmSothebysResult)
-    } catch (error) {
-      console.error('[Scraper] RM Sotheby\'s failed:', error)
     }
 
     // Run Artcurial (simple HTTP, no Puppeteer needed)
@@ -807,16 +901,6 @@ export async function scrapeAllAuctionSites(): Promise<ScrapedAuctionLink[]> {
       results.push(...artcurialResult)
     } catch (error) {
       console.error('[Scraper] Artcurial failed:', error)
-    }
-
-    // Run Classic Driver (tries simple HTTP first, falls back to Puppeteer)
-    console.log('[Scraper] Scraping Classic Driver...')
-    try {
-      const classicDriverResult = await scrapeClassicDriver()
-      console.log(`[Scraper] Classic Driver: ${classicDriverResult.length} links`)
-      results.push(...classicDriverResult)
-    } catch (error) {
-      console.error('[Scraper] Classic Driver failed:', error)
     }
 
     console.log(`[Scraper] Total links found: ${results.length}`)
@@ -895,7 +979,7 @@ export async function fetchAuctionPage(url: string): Promise<string | null> {
   }
 
   // Sites that just need JS rendering (no Cloudflare)
-  const jsRenderedDomains = ['catawiki.com', 'classicdriver.com']
+  const jsRenderedDomains = ['catawiki.com', 'classicdriver.com', 'rmsothebys.com']
   const needsPuppeteer = usePuppeteer && jsRenderedDomains.some(domain => url.includes(domain))
 
   if (needsPuppeteer) {
