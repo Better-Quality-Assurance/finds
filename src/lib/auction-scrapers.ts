@@ -87,20 +87,18 @@ async function scrapeBringATrailer(): Promise<ScrapedAuctionLink[]> {
 
 /**
  * Scrape Catawiki's classic cars category (requires Puppeteer)
- * URL: https://www.catawiki.com/en/c/439-classic-cars
+ * Uses closed auctions to get sold items only
  */
 async function scrapeCatawiki(): Promise<ScrapedAuctionLink[]> {
   console.log('[Scraper] Fetching Catawiki with Puppeteer...')
 
   try {
-    // Use Puppeteer to extract auction URLs
-    // Don't wait for specific selector - just let the page fully load
+    // Use Puppeteer to extract auction URLs from closed auctions
     const urls = await extractUrlsWithPuppeteer(
-      'https://www.catawiki.com/en/c/439-classic-cars',
-      'a[href*="/l/"]', // Selector for auction links (more generic)
+      'https://www.catawiki.com/en/c/439-classic-cars?show=closed',
+      'a[href*="/l/"]',
       {
-        // No waitForSelector - just wait for network idle
-        limit: 20,
+        limit: 30,
         timeout: 30000,
       }
     )
@@ -110,10 +108,29 @@ async function scrapeCatawiki(): Promise<ScrapedAuctionLink[]> {
       return []
     }
 
-    // Filter to only auction lot URLs (contains /l/ followed by digits)
-    const auctionUrls = urls.filter(url => /\/l\/\d+/.test(url))
+    // Filter to only auction lot URLs and exclude non-car items
+    // Catawiki URLs contain item description - filter for car-related terms
+    const carKeywords = [
+      'porsche', 'ferrari', 'bmw', 'mercedes', 'audi', 'jaguar', 'alfa',
+      'fiat', 'lancia', 'maserati', 'lamborghini', 'aston', 'bentley',
+      'rolls', 'lotus', 'triumph', 'mg', 'austin', 'ford', 'chevrolet',
+      'cadillac', 'buick', 'oldsmobile', 'pontiac', 'dodge', 'plymouth',
+      'volkswagen', 'vw', 'opel', 'peugeot', 'citroen', 'renault', 'volvo',
+      'saab', 'datsun', 'nissan', 'toyota', 'honda', 'mazda', 'subaru',
+      'corvette', 'mustang', 'camaro', 'challenger', 'charger',
+      'coupe', 'sedan', 'cabriolet', 'convertible', 'roadster', 'spider',
+      'touring', 'estate', 'wagon', 'pickup', 'truck',
+    ]
 
-    return auctionUrls.map(url => ({
+    const auctionUrls = urls.filter(url => {
+      if (!/\/l\/\d+/.test(url)) {return false}
+      const urlLower = url.toLowerCase()
+      return carKeywords.some(keyword => urlLower.includes(keyword))
+    })
+
+    console.log(`[Scraper] Catawiki: Filtered ${urls.length} URLs to ${auctionUrls.length} car-related`)
+
+    return auctionUrls.slice(0, 20).map(url => ({
       url,
       title: url.split('/').pop()?.replace(/-/g, ' ') || 'Unknown',
       source: 'Catawiki',
