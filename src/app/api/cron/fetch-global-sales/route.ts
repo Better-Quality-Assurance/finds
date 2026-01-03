@@ -201,6 +201,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({
       success: true,
+      version: 'v3-no-eu-filter',
       duration,
       results: finalResults,
     })
