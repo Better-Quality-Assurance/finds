@@ -167,7 +167,7 @@ async function scrapeCollectingCarsWithCookies(): Promise<string[]> {
     const executablePath = process.env.PUPPETEER_EXECUTABLE_PATH
 
     browser = await puppeteerExtra.default.launch({
-      headless: 'new', // Use new headless mode (less detectable)
+      headless: true,
       executablePath: executablePath || undefined,
       args: [
         '--no-sandbox',

@@ -73,11 +73,17 @@ function getCSP() {
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // Mark twilio as an external package - it's optional and only used if installed
+  // Mark certain packages as external - they're server-only or have webpack incompatibilities
   webpack: (config, { isServer }) => {
     if (isServer) {
       config.externals = config.externals || []
-      config.externals.push('twilio')
+      config.externals.push(
+        'twilio',
+        'puppeteer',
+        'puppeteer-extra',
+        'puppeteer-extra-plugin-stealth',
+        'puppeteer-extra-plugin',
+      )
     }
     return config
   },
