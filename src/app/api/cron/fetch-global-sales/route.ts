@@ -26,9 +26,10 @@ import { isEuropeanLocation } from '@/lib/duckduckgo-search'
 export const dynamic = 'force-dynamic'
 
 // Rate limiting: delay between fetches to be respectful
-// Keep under Cloudflare's 100s timeout: 10 pages * 2s delay + AI parsing (~5s each) = ~70s
-const FETCH_DELAY_MS = 2000
-const MAX_PAGES_PER_RUN = 10
+// Cloudflare has 100s timeout. With Puppeteer scrapers taking ~60s,
+// we need fast page processing: 5 pages * 1s delay + AI parsing = ~30s remaining
+const FETCH_DELAY_MS = 1000
+const MAX_PAGES_PER_RUN = 5
 
 function sleep(ms: number): Promise<void> {
   return new Promise(resolve => setTimeout(resolve, ms))
