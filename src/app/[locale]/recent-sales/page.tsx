@@ -106,7 +106,7 @@ function SaleCard({ sale }: { sale: Awaited<ReturnType<typeof getRecentSales>>[0
           )}
         </div>
 
-        <div className="flex justify-between items-center pt-2 border-t">
+        <div className="pt-2 border-t">
           <a
             href={sale.sourceUrl}
             target="_blank"
@@ -116,12 +116,6 @@ function SaleCard({ sale }: { sale: Awaited<ReturnType<typeof getRecentSales>>[0
             View on {sale.source}
             <ExternalLink className="h-3 w-3" />
           </a>
-          <Link
-            href={`/auctions?make=${encodeURIComponent(sale.make)}&model=${encodeURIComponent(sale.model)}`}
-            className="text-sm text-muted-foreground hover:text-primary"
-          >
-            See similar on Finds
-          </Link>
         </div>
       </CardContent>
     </Card>
