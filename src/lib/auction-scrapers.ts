@@ -394,47 +394,160 @@ async function scrapeCollectingCarsWithCookies(): Promise<string[]> {
 }
 
 /**
- * Scrape Bonhams motoring auctions
+ * Scrape Bonhams motoring auctions with stealth mode
  */
 async function scrapeBonhams(): Promise<ScrapedAuctionLink[]> {
-  console.log('[Scraper] Fetching Bonhams...')
-  const html = await fetchWithTimeout('https://www.bonhams.com/department/MOT-CAR/')
-  if (!html) {return []}
+  console.log('[Scraper] Fetching Bonhams with Puppeteer stealth...')
 
-  // Bonhams lot URLs: /auction/XXXXX/lot/XXXXX/
-  const urlPattern = /href="(\/auction\/\d+\/lot\/\d+[^"]*)"/g
-  const paths = extractUrls(html, urlPattern)
+  try {
+    const urls = await scrapeBonhamsWithStealth()
 
-  const uniquePaths = Array.from(new Set(paths)).slice(0, 20)
+    if (urls.length === 0) {
+      console.log('[Scraper] Bonhams: No URLs found')
+      return []
+    }
 
-  return uniquePaths.map(path => ({
-    url: `https://www.bonhams.com${path}`,
-    title: 'Bonhams Lot',
-    source: 'Bonhams',
-  }))
+    return urls.map(url => {
+      // Extract title from URL path if possible
+      const match = url.match(/\/lot\/\d+\/(.+?)\/?$/)
+      const title = match ? match[1].replace(/-/g, ' ') : 'Bonhams Lot'
+
+      return {
+        url,
+        title,
+        source: 'Bonhams',
+      }
+    })
+  } catch (error) {
+    console.error('[Scraper] Bonhams error:', error)
+    return []
+  }
 }
 
 /**
- * Scrape Silverstone Auctions sold lots
- * URL: https://www.silverstoneauctions.com/sold-lots
+ * Helper to scrape Bonhams with stealth mode to bypass 403 blocking
+ */
+async function scrapeBonhamsWithStealth(): Promise<string[]> {
+  const puppeteerExtra = await import('puppeteer-extra')
+  const StealthPlugin = await import('puppeteer-extra-plugin-stealth')
+
+  puppeteerExtra.default.use(StealthPlugin.default())
+
+  let browser = null
+
+  try {
+    const executablePath = process.env.PUPPETEER_EXECUTABLE_PATH
+
+    browser = await puppeteerExtra.default.launch({
+      headless: true,
+      executablePath: executablePath || undefined,
+      args: [
+        '--no-sandbox',
+        '--disable-setuid-sandbox',
+        '--disable-dev-shm-usage',
+        '--disable-blink-features=AutomationControlled',
+        '--window-size=1920,1080',
+      ],
+    })
+
+    const page = await browser.newPage()
+    await page.setViewport({ width: 1920, height: 1080 })
+
+    const randomDelay = () => new Promise(r => setTimeout(r, 500 + Math.random() * 1500))
+
+    console.log('[Scraper] Bonhams: Navigating to auction results...')
+    // Try auction results page which may be more accessible
+    await page.goto('https://www.bonhams.com/auctions/results/?department=MOT-CAR', {
+      waitUntil: 'networkidle2',
+      timeout: 45000,
+    })
+
+    await randomDelay()
+
+    // Wait for content to load
+    await new Promise(resolve => setTimeout(resolve, 3000))
+
+    // Scroll to trigger lazy loading
+    for (let i = 0; i < 3; i++) {
+      await page.evaluate(() => window.scrollBy(0, 500))
+      await randomDelay()
+    }
+
+    await new Promise(resolve => setTimeout(resolve, 2000))
+
+    // Extract auction lot URLs - Bonhams uses /auction/{id}/lot/{id}/ pattern
+    const urls = await page.evaluate(() => {
+      const links = document.querySelectorAll('a[href]')
+      return Array.from(links)
+        .map(link => (link as HTMLAnchorElement).href)
+        .filter(href => {
+          if (!href || !href.includes('bonhams.com')) {return false}
+          // Match URLs like /auction/29123/lot/123/1965-jaguar-e-type/
+          const hasAuctionLot = /\/auction\/\d+\/lot\/\d+/.test(href)
+          return hasAuctionLot
+        })
+    })
+
+    const uniqueUrls = Array.from(new Set(urls)).slice(0, 20)
+    console.log(`[Scraper] Bonhams: Found ${uniqueUrls.length} URLs`)
+    return uniqueUrls
+  } catch (error) {
+    console.error('[Scraper] Bonhams stealth error:', error)
+    return []
+  } finally {
+    if (browser) {
+      await browser.close()
+    }
+  }
+}
+
+/**
+ * Scrape Silverstone Auctions (now Iconic Auctioneers) sold lots
+ * URL: https://www.silverstoneauctions.com/auction/archive-auctions-cars
+ * Note: Site is JS-rendered with Vue.js, requires Puppeteer
  */
 async function scrapeSilverstoneAuctions(): Promise<ScrapedAuctionLink[]> {
-  console.log('[Scraper] Fetching Silverstone Auctions...')
-  const html = await fetchWithTimeout('https://www.silverstoneauctions.com/sold-lots')
-  if (!html) {return []}
+  console.log('[Scraper] Fetching Silverstone Auctions (Iconic Auctioneers)...')
 
-  // Silverstone lot URLs look like: /lot/XXXXX or /buy-now/lot/XXXXX
-  const urlPattern = /href="(https:\/\/www\.silverstoneauctions\.com\/(?:buy-now\/)?lot\/[^"]+)"/g
-  const urls = extractUrls(html, urlPattern)
+  const usePuppeteer = process.env.USE_PUPPETEER === 'true'
 
-  // Get unique URLs, limit to first 20
-  const uniqueUrls = Array.from(new Set(urls)).slice(0, 20)
+  if (!usePuppeteer) {
+    console.log('[Scraper] Silverstone: Skipping (requires Puppeteer - set USE_PUPPETEER=true)')
+    return []
+  }
 
-  return uniqueUrls.map(url => ({
-    url,
-    title: url.split('/lot/')[1]?.replace(/-/g, ' ')?.replace(/\/$/, '') || 'Unknown',
-    source: 'Silverstone Auctions',
-  }))
+  try {
+    // The site is now iconicauctioneers.com and uses Vue.js for rendering
+    // silverstoneauctions.com redirects to iconicauctioneers.com
+    const urls = await extractUrlsWithPuppeteer(
+      'https://www.silverstoneauctions.com/auction/archive-auctions-cars',
+      'a[href*="/lot/"]',
+      {
+        limit: 20,
+        timeout: 30000,
+      }
+    )
+
+    if (urls.length === 0) {
+      console.log('[Scraper] Silverstone: No URLs found')
+      return []
+    }
+
+    // Filter to only lot URLs (exclude navigation, footer, etc.)
+    const lotUrls = urls.filter(url => {
+      // Lot URLs should contain /lot/ followed by a number or slug
+      return /\/lot\/\d+/.test(url) || /\/lot\/[a-z0-9-]+/.test(url)
+    })
+
+    return lotUrls.slice(0, 20).map(url => ({
+      url,
+      title: url.split('/lot/')[1]?.replace(/-/g, ' ')?.replace(/\/$/, '') || 'Silverstone Lot',
+      source: 'Silverstone Auctions',
+    }))
+  } catch (error) {
+    console.error('[Scraper] Silverstone Auctions error:', error)
+    return []
+  }
 }
 
 /**
@@ -446,86 +559,56 @@ async function scrapeRMSothebys(): Promise<ScrapedAuctionLink[]> {
   const html = await fetchWithTimeout('https://rmsothebys.com/en/results')
   if (!html) {return []}
 
-  // RM Sotheby's lot URLs look like: /en/auctions/XXXX/lots/XXXX
-  const urlPattern = /href="(\/en\/auctions\/[^/]+\/lots\/\d+[^"]*)"/g
+  // RM Sotheby's lot URLs look like: /auctions/pt25/lots/n0001-car-description/
+  // Note: URLs don't include /en/ in the path, just /auctions/
+  const urlPattern = /href="(\/auctions\/[a-z0-9]+\/lots\/[a-z0-9]+-[^"]+)"/gi
   const paths = extractUrls(html, urlPattern)
 
   const uniquePaths = Array.from(new Set(paths)).slice(0, 20)
 
-  return uniquePaths.map(path => ({
-    url: `https://rmsothebys.com${path}`,
-    title: 'RM Sotheby\'s Lot',
-    source: 'RM Sothebys',
-  }))
+  return uniquePaths.map(path => {
+    // Extract car description from path: /auctions/pt25/lots/n0001-car-description/
+    const lotPart = path.split('/lots/')[1]?.replace(/\/$/, '') || ''
+    const title = lotPart.split('-').slice(1).join(' ').replace(/-/g, ' ') || 'RM Sotheby\'s Lot'
+
+    return {
+      url: `https://rmsothebys.com${path}`,
+      title,
+      source: 'RM Sothebys',
+    }
+  })
 }
 
 /**
  * Scrape Artcurial motorcars results
- * URL: https://www.artcurial.com/en/results?department=21
+ * URL: https://www.artcurial.com/en/search?specialties=artcurial-motorcars
  */
 async function scrapeArtcurial(): Promise<ScrapedAuctionLink[]> {
   console.log('[Scraper] Fetching Artcurial...')
-  const html = await fetchWithTimeout('https://www.artcurial.com/en/results?department=21')
+  const html = await fetchWithTimeout('https://www.artcurial.com/en/search?specialties=artcurial-motorcars')
   if (!html) {return []}
 
-  // Artcurial lot URLs look like: /en/lot-XXXXX
-  const urlPattern = /href="(\/en\/lot-\d+[^"]*)"/g
+  // Artcurial lot URLs look like: /en/sales/XXXXX/lots/XXX-a
+  const urlPattern = /href="(\/en\/sales\/[^"]+\/lots\/[^"]+)"/g
   const paths = extractUrls(html, urlPattern)
 
   const uniquePaths = Array.from(new Set(paths)).slice(0, 20)
 
   return uniquePaths.map(path => ({
     url: `https://www.artcurial.com${path}`,
-    title: path.split('/lot-')[1]?.replace(/-/g, ' ') || 'Artcurial Lot',
+    title: path.split('/lots/')[1]?.replace(/-/g, ' ') || 'Artcurial Lot',
     source: 'Artcurial',
   }))
 }
 /**
- * Scrape Classic Driver sold cars (requires Puppeteer)
+ * Scrape Classic Driver sold cars (requires Puppeteer with stealth)
  * URL: https://www.classicdriver.com/en/cars?sale_status=sold
  */
 async function scrapeClassicDriver(): Promise<ScrapedAuctionLink[]> {
-  console.log('[Scraper] Fetching Classic Driver with Puppeteer...')
+  console.log('[Scraper] Fetching Classic Driver with Puppeteer stealth...')
 
   try {
-    // Try simple HTTP fetch first
-    const html = await fetchWithTimeout('https://www.classicdriver.com/en/cars?sale_status=sold')
-
-    if (html && html.includes('/en/car/')) {
-      // If we got HTML with car URLs, extract them
-      console.log('[Scraper] Classic Driver: Simple HTTP fetch succeeded')
-
-      // Classic Driver URLs look like: /en/car/MAKE/MODEL/YEAR/ID
-      const urlPattern = /href="(\/en\/car\/[^"]+)"/g
-      const paths = extractUrls(html, urlPattern)
-
-      const uniquePaths = Array.from(new Set(paths)).slice(0, 20)
-
-      return uniquePaths.map(path => {
-        // Extract make/model from path: /en/car/porsche/911/1989/123456
-        const parts = path.split('/').filter(Boolean)
-        const make = parts[2] || ''
-        const model = parts[3] || ''
-        const year = parts[4] || ''
-
-        return {
-          url: `https://www.classicdriver.com${path}`,
-          title: `${make} ${model} ${year}`.trim() || 'Classic Driver Listing',
-          source: 'Classic Driver',
-        }
-      })
-    }
-
-    // If simple fetch didn't work, fall back to Puppeteer
-    console.log('[Scraper] Classic Driver: Falling back to Puppeteer...')
-    const urls = await extractUrlsWithPuppeteer(
-      'https://www.classicdriver.com/en/cars?sale_status=sold',
-      'a[href*="/en/car/"]',
-      {
-        limit: 20,
-        timeout: 30000,
-      }
-    )
+    const urls = await scrapeClassicDriverWithStealth()
 
     if (urls.length === 0) {
       console.log('[Scraper] Classic Driver: No URLs found')
@@ -533,7 +616,7 @@ async function scrapeClassicDriver(): Promise<ScrapedAuctionLink[]> {
     }
 
     return urls.map(url => {
-      // Extract make/model from URL
+      // Extract make/model from URL: /en/car/MAKE/MODEL/YEAR/ID
       const urlObj = new URL(url)
       const parts = urlObj.pathname.split('/').filter(Boolean)
       const make = parts[2] || ''
@@ -552,12 +635,87 @@ async function scrapeClassicDriver(): Promise<ScrapedAuctionLink[]> {
   }
 }
 
+/**
+ * Helper to scrape Classic Driver with stealth mode
+ */
+async function scrapeClassicDriverWithStealth(): Promise<string[]> {
+  const puppeteerExtra = await import('puppeteer-extra')
+  const StealthPlugin = await import('puppeteer-extra-plugin-stealth')
+
+  puppeteerExtra.default.use(StealthPlugin.default())
+
+  let browser = null
+
+  try {
+    const executablePath = process.env.PUPPETEER_EXECUTABLE_PATH
+
+    browser = await puppeteerExtra.default.launch({
+      headless: true,
+      executablePath: executablePath || undefined,
+      args: [
+        '--no-sandbox',
+        '--disable-setuid-sandbox',
+        '--disable-dev-shm-usage',
+        '--disable-blink-features=AutomationControlled',
+        '--window-size=1920,1080',
+      ],
+    })
+
+    const page = await browser.newPage()
+    await page.setViewport({ width: 1920, height: 1080 })
+
+    const randomDelay = () => new Promise(r => setTimeout(r, 500 + Math.random() * 1500))
+
+    console.log('[Scraper] Classic Driver: Navigating to sold cars page...')
+    await page.goto('https://www.classicdriver.com/en/cars?sale_status=sold', {
+      waitUntil: 'networkidle2',
+      timeout: 45000,
+    })
+
+    await randomDelay()
+
+    // Wait for content to load
+    await new Promise(resolve => setTimeout(resolve, 3000))
+
+    // Scroll to trigger lazy loading
+    for (let i = 0; i < 3; i++) {
+      await page.evaluate(() => window.scrollBy(0, 500))
+      await randomDelay()
+    }
+
+    await new Promise(resolve => setTimeout(resolve, 2000))
+
+    // Extract car URLs - Classic Driver uses /en/car/MAKE/MODEL/YEAR/ID pattern
+    const urls = await page.evaluate(() => {
+      const links = document.querySelectorAll('a[href]')
+      return Array.from(links)
+        .map(link => (link as HTMLAnchorElement).href)
+        .filter(href => {
+          if (!href || !href.includes('classicdriver.com')) {return false}
+          // Match URLs like /en/car/porsche/911/1989/123456
+          return href.includes('/en/car/') && href.split('/en/car/')[1]?.split('/').length >= 4
+        })
+    })
+
+    const uniqueUrls = Array.from(new Set(urls)).slice(0, 20)
+    console.log(`[Scraper] Classic Driver: Found ${uniqueUrls.length} URLs`)
+    return uniqueUrls
+  } catch (error) {
+    console.error('[Scraper] Classic Driver stealth error:', error)
+    return []
+  } finally {
+    if (browser) {
+      await browser.close()
+    }
+  }
+}
+
 
 /**
  * Main function to scrape all auction sites
  *
  * - BaT: Server-rendered (simple HTTP fetch) - always works
- * - Catawiki, Collecting Cars, Cars and Bids: JavaScript-rendered (Puppeteer) - optional
+ * - Catawiki, Collecting Cars, Cars and Bids, Bonhams: JavaScript-rendered or bot-protected (Puppeteer with stealth) - optional
  *
  * Set USE_PUPPETEER=true env var to enable Puppeteer-based scrapers.
  * Puppeteer requires Chromium dependencies that may not be available on all platforms.
@@ -607,28 +765,28 @@ export async function scrapeAllAuctionSites(): Promise<ScrapedAuctionLink[]> {
       } catch (error) {
         console.error('[Scraper] Cars and Bids failed:', error)
       }
+
+      // Run Bonhams with stealth mode (403 blocked without it)
+      console.log('[Scraper] Scraping Bonhams with stealth...')
+      try {
+        const bonhamsResult = await scrapeBonhams()
+        console.log(`[Scraper] Bonhams: ${bonhamsResult.length} links`)
+        results.push(...bonhamsResult)
+      } catch (error) {
+        console.error('[Scraper] Bonhams failed:', error)
+      }
+
+      // Run Silverstone Auctions (Vue.js rendered, needs Puppeteer)
+      console.log('[Scraper] Scraping Silverstone Auctions with Puppeteer...')
+      try {
+        const silverstoneResult = await scrapeSilverstoneAuctions()
+        console.log(`[Scraper] Silverstone Auctions: ${silverstoneResult.length} links`)
+        results.push(...silverstoneResult)
+      } catch (error) {
+        console.error('[Scraper] Silverstone Auctions failed:', error)
+      }
     } else {
       console.log('[Scraper] Puppeteer disabled (set USE_PUPPETEER=true to enable)')
-    }
-
-    // Run Bonhams (simple HTTP, no Puppeteer needed)
-    console.log('[Scraper] Scraping Bonhams...')
-    try {
-      const bonhamsResult = await scrapeBonhams()
-      console.log(`[Scraper] Bonhams: ${bonhamsResult.length} links`)
-      results.push(...bonhamsResult)
-    } catch (error) {
-      console.error('[Scraper] Bonhams failed:', error)
-    }
-
-    // Run Silverstone Auctions (simple HTTP, no Puppeteer needed)
-    console.log('[Scraper] Scraping Silverstone Auctions...')
-    try {
-      const silverstoneResult = await scrapeSilverstoneAuctions()
-      console.log(`[Scraper] Silverstone Auctions: ${silverstoneResult.length} links`)
-      results.push(...silverstoneResult)
-    } catch (error) {
-      console.error('[Scraper] Silverstone Auctions failed:', error)
     }
 
     // Run RM Sotheby's (simple HTTP, no Puppeteer needed)
@@ -728,8 +886,8 @@ async function fetchWithStealth(url: string): Promise<string | null> {
 export async function fetchAuctionPage(url: string): Promise<string | null> {
   const usePuppeteer = process.env.USE_PUPPETEER === 'true'
 
-  // Sites that need stealth mode (Cloudflare protected)
-  const stealthDomains = ['carsandbids.com', 'collectingcars.com']
+  // Sites that need stealth mode (Cloudflare protected or bot-blocked)
+  const stealthDomains = ['carsandbids.com', 'collectingcars.com', 'bonhams.com']
   const needsStealth = usePuppeteer && stealthDomains.some(domain => url.includes(domain))
 
   if (needsStealth) {

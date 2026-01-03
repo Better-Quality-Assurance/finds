@@ -6,6 +6,7 @@ import { ExternalLink, Calendar, MapPin, TrendingUp } from 'lucide-react'
 import { prisma } from '@/lib/db'
 import { formatCurrency } from '@/lib/utils'
 import Link from 'next/link'
+import { SalesStatistics } from '@/components/sales/sales-statistics'
 
 export async function generateMetadata() {
   return {
@@ -47,6 +48,26 @@ async function getRecentSales(searchParams: SearchParams) {
     orderBy: { saleDate: 'desc' },
     take: 50,
   })
+}
+
+async function getSalesStatistics() {
+  try {
+    const response = await fetch(
+      `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/api/global-sales/stats`,
+      {
+        cache: 'no-store',
+      }
+    )
+
+    if (!response.ok) {
+      throw new Error('Failed to fetch statistics')
+    }
+
+    return response.json()
+  } catch (error) {
+    console.error('Error fetching sales statistics:', error)
+    return null
+  }
 }
 
 function SaleCard({ sale }: { sale: Awaited<ReturnType<typeof getRecentSales>>[0] }) {
@@ -142,6 +163,39 @@ function SalesSkeleton() {
   )
 }
 
+function StatisticsSkeleton() {
+  return (
+    <div className="space-y-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        {[...Array(4)].map((_, i) => (
+          <Card key={i}>
+            <CardHeader className="pb-2">
+              <Skeleton className="h-4 w-24" />
+            </CardHeader>
+            <CardContent>
+              <Skeleton className="h-8 w-32 mb-2" />
+              <Skeleton className="h-4 w-20" />
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {[...Array(2)].map((_, i) => (
+          <Card key={i}>
+            <CardHeader>
+              <Skeleton className="h-6 w-40" />
+              <Skeleton className="h-4 w-32 mt-2" />
+            </CardHeader>
+            <CardContent>
+              <Skeleton className="h-64 w-full" />
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+    </div>
+  )
+}
+
 async function RecentSalesContent({ searchParams }: { searchParams: SearchParams }) {
   const sales = await getRecentSales(searchParams)
 
@@ -167,6 +221,16 @@ async function RecentSalesContent({ searchParams }: { searchParams: SearchParams
   )
 }
 
+async function StatisticsContent() {
+  const stats = await getSalesStatistics()
+
+  if (!stats || stats.totalSales === 0) {
+    return null
+  }
+
+  return <SalesStatistics data={stats} />
+}
+
 export default async function RecentSalesPage({
   searchParams,
 }: {
@@ -181,6 +245,14 @@ export default async function RecentSalesPage({
         <p className="text-muted-foreground">
           What classic cars sold for at auctions worldwide. Data from Bring a Trailer, Catawiki, Collecting Cars, and more.
         </p>
+      </div>
+
+      {/* Statistics Section */}
+      <div className="mb-12">
+        <h2 className="text-2xl font-bold mb-6">Market Overview</h2>
+        <Suspense fallback={<StatisticsSkeleton />}>
+          <StatisticsContent />
+        </Suspense>
       </div>
 
       {/* Filters */}
@@ -209,6 +281,9 @@ export default async function RecentSalesPage({
       </div>
 
       {/* Results */}
+      <div className="mb-4">
+        <h2 className="text-2xl font-bold">Individual Sales</h2>
+      </div>
       <Suspense fallback={<SalesSkeleton />}>
         <RecentSalesContent searchParams={params} />
       </Suspense>
