@@ -88,10 +88,18 @@ export async function GET(request: NextRequest) {
 
     console.log(`[CRON] Found ${auctionLinks.length} auction links`)
 
+    // Shuffle links to get a mix of sources in each run
+    // Fisher-Yates shuffle
+    const shuffledLinks = [...auctionLinks]
+    for (let i = shuffledLinks.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1))
+      ;[shuffledLinks[i], shuffledLinks[j]] = [shuffledLinks[j], shuffledLinks[i]]
+    }
+
     // Step 2: Process each auction page
     const processedUrls = new Set<string>()
 
-    for (const link of auctionLinks) {
+    for (const link of shuffledLinks) {
       if (results.fetched >= MAX_PAGES_PER_RUN) {
         console.log('[CRON] Reached max pages per run, stopping')
         break
@@ -201,7 +209,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      version: 'v3-no-eu-filter',
+      version: 'v4-shuffled-sources',
       duration,
       results: finalResults,
     })
