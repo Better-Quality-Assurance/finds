@@ -52,8 +52,10 @@ async function getRecentSales(searchParams: SearchParams) {
 
 async function getSalesStatistics() {
   try {
+    // Use NEXTAUTH_URL for production, or construct from headers
+    const baseUrl = process.env.NEXTAUTH_URL || process.env.NEXT_PUBLIC_APP_URL || 'https://finds.ro'
     const response = await fetch(
-      `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/api/global-sales/stats`,
+      `${baseUrl}/api/global-sales/stats`,
       {
         cache: 'no-store',
       }
