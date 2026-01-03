@@ -111,15 +111,36 @@ async function scrapeCatawiki(): Promise<ScrapedAuctionLink[]> {
     // Filter to only auction lot URLs and exclude non-car items
     // Catawiki URLs contain item description - filter for car-related terms
     const carKeywords = [
+      // European makes
       'porsche', 'ferrari', 'bmw', 'mercedes', 'audi', 'jaguar', 'alfa',
       'fiat', 'lancia', 'maserati', 'lamborghini', 'aston', 'bentley',
-      'rolls', 'lotus', 'triumph', 'mg', 'austin', 'ford', 'chevrolet',
-      'cadillac', 'buick', 'oldsmobile', 'pontiac', 'dodge', 'plymouth',
+      'rolls', 'royce', 'lotus', 'triumph', 'mg', 'austin', 'healey',
       'volkswagen', 'vw', 'opel', 'peugeot', 'citroen', 'renault', 'volvo',
-      'saab', 'datsun', 'nissan', 'toyota', 'honda', 'mazda', 'subaru',
-      'corvette', 'mustang', 'camaro', 'challenger', 'charger',
-      'coupe', 'sedan', 'cabriolet', 'convertible', 'roadster', 'spider',
-      'touring', 'estate', 'wagon', 'pickup', 'truck',
+      'saab', 'mini', 'morgan', 'tvr', 'detomaso', 'de-tomaso', 'iso',
+      'bizzarrini', 'intermeccanica', 'monteverdi', 'facel', 'delahaye',
+      'bugatti', 'talbot', 'panhard', 'simca', 'autobianchi', 'innocenti',
+      'daimler', 'jensen', 'sunbeam', 'reliant', 'bristol', 'ac', 'alvis',
+      // American makes
+      'ford', 'chevrolet', 'chevy', 'cadillac', 'buick', 'oldsmobile',
+      'pontiac', 'dodge', 'plymouth', 'chrysler', 'lincoln', 'mercury',
+      'amc', 'rambler', 'studebaker', 'packard', 'hudson', 'nash',
+      'jeep', 'land-rover', 'landrover', 'hummer',
+      // Japanese
+      'datsun', 'nissan', 'toyota', 'honda', 'mazda', 'subaru',
+      'mitsubishi', 'suzuki', 'isuzu', 'lexus', 'infiniti', 'acura',
+      // Korean
+      'hyundai', 'kia', 'genesis',
+      // Model names / icons
+      'corvette', 'mustang', 'camaro', 'challenger', 'charger', 'firebird',
+      'thunderbird', 'shelby', 'cobra', 'viper', 'supra', 'skyline', 'gtr',
+      '911', '356', '944', '928', 'testarossa', 'countach', 'miura', 'esprit',
+      // Performance / trim
+      'amg', 'gti', 'gtb', 'gts', 'gt3', 'gt2', 'turbo', 'supercharged',
+      'm3', 'm5', 'm6', 'rs', 'alpina',
+      // Body types
+      'coupe', 'sedan', 'saloon', 'cabriolet', 'convertible', 'roadster',
+      'spider', 'spyder', 'targa', 'touring', 'estate', 'wagon', 'kombi',
+      'pickup', 'truck', 'suv', 'hatchback', 'limousine', 'landaulet',
     ]
 
     const auctionUrls = urls.filter(url => {
