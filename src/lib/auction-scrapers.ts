@@ -665,24 +665,12 @@ async function scrapeRMSothebysWithPuppeteer(): Promise<string[]> {
 
 /**
  * Scrape Artcurial motorcars results
- * URL: https://www.artcurial.com/en/search?specialties=artcurial-motorcars
+ * DISABLED: Current implementation returns art/jewelry lots, not cars
+ * TODO: Artcurial requires Puppeteer + proper navigation to Motorcars specialty
  */
 async function scrapeArtcurial(): Promise<ScrapedAuctionLink[]> {
-  console.log('[Scraper] Fetching Artcurial...')
-  const html = await fetchWithTimeout('https://www.artcurial.com/en/search?specialties=artcurial-motorcars')
-  if (!html) {return []}
-
-  // Artcurial lot URLs look like: /en/sales/XXXXX/lots/XXX-a
-  const urlPattern = /href="(\/en\/sales\/[^"]+\/lots\/[^"]+)"/g
-  const paths = extractUrls(html, urlPattern)
-
-  const uniquePaths = Array.from(new Set(paths)).slice(0, 20)
-
-  return uniquePaths.map(path => ({
-    url: `https://www.artcurial.com${path}`,
-    title: path.split('/lots/')[1]?.replace(/-/g, ' ') || 'Artcurial Lot',
-    source: 'Artcurial',
-  }))
+  console.log('[Scraper] Artcurial: Disabled (returns non-car lots, needs fix)')
+  return []
 }
 /**
  * Scrape Classic Driver sold cars (requires Puppeteer with stealth)
@@ -819,21 +807,33 @@ export async function scrapeAllAuctionSites(): Promise<ScrapedAuctionLink[]> {
     // Optionally run Puppeteer-based scrapers (sequentially to avoid browser conflicts)
     // Randomly pick 2 scrapers per run to get variety while staying under timeout
     if (usePuppeteer) {
-      const puppeteerScrapers = [
-        { name: 'Catawiki', fn: scrapeCatawiki },
+      // Priority scrapers - always run these first (known to work)
+      const priorityScrapers = [
         { name: 'Collecting Cars', fn: scrapeCollectingCars },
         { name: 'Cars and Bids', fn: scrapeCarsAndBids },
-        { name: 'Bonhams', fn: scrapeBonhams },
-        { name: 'Silverstone', fn: scrapeSilverstoneAuctions },
-        { name: 'RM Sothebys', fn: scrapeRMSothebys },
-        { name: 'Classic Driver', fn: scrapeClassicDriver },
       ]
 
-      // Shuffle and pick first N scrapers
-      for (let i = puppeteerScrapers.length - 1; i > 0; i--) {
+      // Secondary scrapers - randomly pick from these
+      const secondaryScrapers = [
+        { name: 'Catawiki', fn: scrapeCatawiki },
+        { name: 'RM Sothebys', fn: scrapeRMSothebys },
+        // Disabled - returning 0 URLs, sites may have changed:
+        // { name: 'Bonhams', fn: scrapeBonhams },
+        // { name: 'Silverstone', fn: scrapeSilverstoneAuctions },
+        // { name: 'Classic Driver', fn: scrapeClassicDriver },
+      ]
+
+      // Shuffle secondary scrapers
+      for (let i = secondaryScrapers.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1))
-        ;[puppeteerScrapers[i], puppeteerScrapers[j]] = [puppeteerScrapers[j], puppeteerScrapers[i]]
+        ;[secondaryScrapers[i], secondaryScrapers[j]] = [secondaryScrapers[j], secondaryScrapers[i]]
       }
+
+      // Combine: 2 priority + 0-1 secondary (based on maxPuppeteerScrapers limit)
+      const puppeteerScrapers = [
+        ...priorityScrapers.slice(0, maxPuppeteerScrapers),
+        ...secondaryScrapers.slice(0, Math.max(0, maxPuppeteerScrapers - priorityScrapers.length)),
+      ]
 
       const selectedScrapers = puppeteerScrapers.slice(0, maxPuppeteerScrapers)
       console.log(`[Scraper] Running ${selectedScrapers.length} Puppeteer scrapers: ${selectedScrapers.map(s => s.name).join(', ')}`)
