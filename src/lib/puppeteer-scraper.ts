@@ -3,6 +3,8 @@
  *
  * Used for sites like Catawiki and Collecting Cars that require
  * JavaScript execution to render their content.
+ *
+ * Uses @sparticuz/chromium for serverless environments (Railway, Vercel, etc.)
  */
 
 import puppeteer, { Browser, Page } from 'puppeteer'
@@ -16,21 +18,43 @@ async function getBrowser(): Promise<Browser> {
   if (!browserInstance || !browserInstance.isConnected()) {
     console.log('[Puppeteer] Launching browser...')
 
-    // Use system Chromium if available (set via PUPPETEER_EXECUTABLE_PATH)
-    const executablePath = process.env.PUPPETEER_EXECUTABLE_PATH
+    // For serverless environments, use @sparticuz/chromium
+    // In development, use the bundled Puppeteer Chromium
+    const isServerless = process.env.NODE_ENV === 'production' || process.env.RAILWAY_ENVIRONMENT
+
+    let executablePath: string | undefined
+    let chromiumArgs: string[] = [
+      '--no-sandbox',
+      '--disable-setuid-sandbox',
+      '--disable-dev-shm-usage',
+      '--disable-accelerated-2d-canvas',
+      '--disable-gpu',
+      '--window-size=1920x1080',
+      '--single-process',
+    ]
+
+    if (isServerless) {
+      try {
+        // Dynamic import to avoid bundling issues
+        const chromium = await import('@sparticuz/chromium')
+        executablePath = await chromium.default.executablePath()
+        chromiumArgs = chromium.default.args
+        console.log('[Puppeteer] Using @sparticuz/chromium for serverless')
+      } catch (error) {
+        console.error('[Puppeteer] Failed to load @sparticuz/chromium:', error)
+        // Fall back to system/bundled Chromium
+        executablePath = process.env.PUPPETEER_EXECUTABLE_PATH
+      }
+    } else {
+      // Use system Chromium or Puppeteer's bundled one
+      executablePath = process.env.PUPPETEER_EXECUTABLE_PATH
+      console.log('[Puppeteer] Using local/bundled Chromium')
+    }
 
     browserInstance = await puppeteer.launch({
       headless: true,
       executablePath: executablePath || undefined,
-      args: [
-        '--no-sandbox',
-        '--disable-setuid-sandbox',
-        '--disable-dev-shm-usage',
-        '--disable-accelerated-2d-canvas',
-        '--disable-gpu',
-        '--window-size=1920x1080',
-        '--single-process', // Helps with resource constraints
-      ],
+      args: chromiumArgs,
     })
     console.log('[Puppeteer] Browser launched successfully')
   }
