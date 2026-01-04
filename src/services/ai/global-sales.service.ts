@@ -11,6 +11,66 @@ import type { IAIProvider } from '@/services/contracts/ai-provider.interface'
 import { paymentLogger as logger, logError } from '@/lib/logger'
 
 // Supported auction sources - Global (showing all regions)
+/**
+ * Extract structured data attributes from HTML (e.g., data-auction-*, JSON-LD)
+ * This allows AI to access structured data even if it's far into the document
+ */
+function extractStructuredData(html: string): string {
+  const structured: string[] = []
+
+  // Extract data-auction-* attributes (Collecting Cars, etc.)
+  const dataAttrRegex = /data-auction-([a-z-]+)="([^"]+)"/gi
+  const attrs: Record<string, string> = {}
+  let match
+  while ((match = dataAttrRegex.exec(html)) !== null) {
+    const key = match[1]
+    const value = match[2]
+    // Only keep first occurrence of each attribute
+    if (!attrs[key]) {
+      attrs[key] = value
+    }
+  }
+  if (Object.keys(attrs).length > 0) {
+    structured.push('STRUCTURED DATA (data-auction-* attributes):')
+    for (const [key, value] of Object.entries(attrs)) {
+      structured.push(`  ${key}: ${value}`)
+    }
+  }
+
+  // Extract JSON-LD data
+  const jsonLdMatch = html.match(/<script type="application\/ld\+json">([^<]+)<\/script>/i)
+  if (jsonLdMatch) {
+    try {
+      const jsonLd = JSON.parse(jsonLdMatch[1])
+      structured.push('JSON-LD DATA:')
+      structured.push(JSON.stringify(jsonLd, null, 2).slice(0, 2000))
+    } catch {
+      // Invalid JSON-LD, ignore
+    }
+  }
+
+  // Extract Open Graph meta tags
+  const ogTags: Record<string, string> = {}
+  const ogRegex = /<meta\s+(?:property|name)="og:([^"]+)"\s+content="([^"]+)"/gi
+  while ((match = ogRegex.exec(html)) !== null) {
+    ogTags[match[1]] = match[2]
+  }
+  // Also try reverse attribute order
+  const ogRegex2 = /<meta\s+content="([^"]+)"\s+(?:property|name)="og:([^"]+)"/gi
+  while ((match = ogRegex2.exec(html)) !== null) {
+    ogTags[match[2]] = match[1]
+  }
+  if (Object.keys(ogTags).length > 0) {
+    structured.push('OPEN GRAPH METADATA:')
+    for (const [key, value] of Object.entries(ogTags)) {
+      structured.push(`  og:${key}: ${value}`)
+    }
+  }
+
+  return structured.join('\n')
+}
+
+// Supported auction sources - Global (showing all regions)
 export const AUCTION_SOURCES = [
   // EU-focused sources
   { name: 'Catawiki', domain: 'catawiki.com', region: 'EU', requiresLocationCheck: false },
@@ -67,6 +127,13 @@ const PARSE_AUCTION_PROMPT = `You are extracting structured data from an auction
 
 Extract the following information from the provided content. Be precise and only include data you can confidently extract.
 
+IMPORTANT: The input may include STRUCTURED DATA (data-auction-* attributes, JSON-LD, OG tags) which should be used as PRIMARY source. These are the most reliable:
+- pricesold / current-bid = soldPrice
+- currency-code = currency
+- auction-end = saleDate
+- title = title (extract make, model, year from it)
+- main-img-url = imageUrl
+
 Return ONLY valid JSON in this exact format (no markdown, no code blocks):
 {
   "title": "Full auction title, e.g., '1989 Peugeot 205 GTI 1.9'",
@@ -83,8 +150,8 @@ Return ONLY valid JSON in this exact format (no markdown, no code blocks):
 }
 
 Rules:
-- soldPrice: number only, no currency symbols or commas. Must be the SOLD/HAMMER price, not estimate
-- saleDate: YYYY-MM-DD format. Use auction end date if available
+- soldPrice: number only, no currency symbols or commas. Must be the SOLD/HAMMER price, not estimate. Use pricesold or current-bid from structured data.
+- saleDate: YYYY-MM-DD format. Use auction-end from structured data if available.
 - mileage: number in kilometers. Convert miles to km (multiply by 1.6)
 - location: CRITICAL - extract the country/location. Look for:
   * "Located in [country]"
@@ -92,7 +159,7 @@ Rules:
   * Auction house location (e.g., "RM Sotheby's Paris" = France)
   * Registration/plates country
   * If US state mentioned (California, Texas, etc.) = "United States"
-- imageUrl: main hero image URL, not thumbnails
+- imageUrl: main hero image URL, not thumbnails. Use main-img-url from structured data.
 - If a field cannot be found with confidence, use null
 - For year, extract from title if not explicitly stated (e.g., "1989 Porsche" = 1989)`
 
@@ -119,6 +186,19 @@ export class GlobalSalesService {
     source: string
   ): Promise<ParsedAuctionResult | null> {
     try {
+      // Extract structured data (data-auction-*, JSON-LD, OG tags) which may be anywhere in the HTML
+      const structuredData = extractStructuredData(pageContent)
+
+      // Build content for AI: structured data first (most reliable), then page excerpt
+      const aiContent = [
+        `Source: ${source}`,
+        `URL: ${sourceUrl}`,
+        '',
+        structuredData ? `${structuredData}\n` : '',
+        'PAGE CONTENT (excerpt):',
+        pageContent.slice(0, 15000), // Reduce since we have structured data
+      ].filter(Boolean).join('\n')
+
       const response = await this.aiProvider.complete(
         [
           {
@@ -127,7 +207,7 @@ export class GlobalSalesService {
           },
           {
             role: 'user',
-            content: `Source: ${source}\nURL: ${sourceUrl}\n\nPage content:\n${pageContent.slice(0, 8000)}`,
+            content: aiContent,
           },
         ],
         {
