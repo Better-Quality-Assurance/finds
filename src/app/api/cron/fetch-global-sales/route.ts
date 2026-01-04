@@ -122,14 +122,16 @@ export async function GET(request: NextRequest) {
       // Rate limiting
       await sleep(FETCH_DELAY_MS)
 
-      console.log(`[CRON] Fetching: ${link.url}`)
+      console.log(`[CRON] Fetching [${source.name}]: ${link.url}`)
 
       // Fetch page content
       const pageContent = await fetchAuctionPage(link.url)
       if (!pageContent) {
+        console.log(`[CRON] No content from [${source.name}]: ${link.url}`)
         results.errors++
         continue
       }
+      console.log(`[CRON] Got ${pageContent.length} chars from [${source.name}]`)
       results.fetched++
 
       // Parse with AI
@@ -140,8 +142,14 @@ export async function GET(request: NextRequest) {
           source.name
         )
 
-        if (!parsed || !parsed.soldPrice || !parsed.year) {
-          console.log(`[CRON] Could not parse auction data from ${link.url}`)
+        if (!parsed) {
+          console.log(`[CRON] AI returned null for [${source.name}]: ${link.url}`)
+          results.skipped++
+          continue
+        }
+
+        if (!parsed.soldPrice || !parsed.year) {
+          console.log(`[CRON] Missing data [${source.name}]: soldPrice=${parsed.soldPrice}, year=${parsed.year}, title=${parsed.title}`)
           results.skipped++
           continue
         }
