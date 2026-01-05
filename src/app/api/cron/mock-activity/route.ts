@@ -75,12 +75,40 @@ export async function GET(request: NextRequest) {
     }
 
     // Check if there are any active auctions
-    const activeAuctionCount = await prisma.auction.count({
+    let activeAuctionCount = await prisma.auction.count({
       where: {
         status: { in: ['ACTIVE', 'EXTENDED'] },
         currentEndTime: { gt: new Date() },
       },
     })
+
+    // Auto-extend expired mock auctions (those with ACTIVE status but past end time)
+    if (activeAuctionCount === 0) {
+      const expiredMockAuctions = await prisma.auction.count({
+        where: {
+          status: 'ACTIVE',
+          currentEndTime: { lte: new Date() },
+        },
+      })
+
+      if (expiredMockAuctions > 0) {
+        // Extend all expired ACTIVE auctions by 7 days
+        const extendBy = 7 * 24 * 60 * 60 * 1000 // 7 days in ms
+        await prisma.auction.updateMany({
+          where: {
+            status: 'ACTIVE',
+            currentEndTime: { lte: new Date() },
+          },
+          data: {
+            currentEndTime: new Date(Date.now() + extendBy),
+            originalEndTime: new Date(Date.now() + extendBy),
+          },
+        })
+
+        console.log(`[MockActivity Cron] Auto-extended ${expiredMockAuctions} expired mock auctions`)
+        activeAuctionCount = expiredMockAuctions
+      }
+    }
 
     if (activeAuctionCount === 0) {
       return NextResponse.json({
