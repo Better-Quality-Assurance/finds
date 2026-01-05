@@ -25,10 +25,10 @@ Finished in Rosso Alfa over black leather interior with contrasting red stitchin
 
 Recent maintenance includes timing belt service, new spark plugs, and fresh brake pads all round. The car comes with full service history and original toolkit. A perfect weekend driver for the enthusiast who appreciates Italian engineering at its finest.`,
     images: [
-      'https://images.unsplash.com/photo-1544636331-e26879cd4d9b?w=1200&q=80',
-      'https://images.unsplash.com/photo-1503376780353-7e6692767b70?w=1200&q=80',
-      'https://images.unsplash.com/photo-1552519507-da3b142c6e3d?w=1200&q=80',
-      'https://images.unsplash.com/photo-1542362567-b07e54358753?w=1200&q=80',
+      'https://images.unsplash.com/photo-1544636331-e26879cd4d9b?w=1200&q=80', // Red sports car
+      'https://images.unsplash.com/photo-1489824904134-891ab64532f1?w=1200&q=80', // Car interior
+      'https://images.unsplash.com/photo-1507136566006-cfc505b114fc?w=1200&q=80', // Engine bay
+      'https://images.unsplash.com/photo-1568605117036-5fe5e7bab0b7?w=1200&q=80', // Front angle
     ],
   },
   {
@@ -40,10 +40,10 @@ The quattro all-wheel-drive system provides exceptional traction in all conditio
 
 Modifications include an uprated exhaust, stage 1 ECU tune, and lowered suspension on quality coilovers. Recent service includes new turbos, timing belt, and water pump. All receipts included. A practical yet rapid family hauler that's become a modern classic.`,
     images: [
-      'https://images.unsplash.com/photo-1606664515524-ed2f786a0bd6?w=1200&q=80',
-      'https://images.unsplash.com/photo-1603584173870-7f23fdae1b7a?w=1200&q=80',
-      'https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?w=1200&q=80',
-      'https://images.unsplash.com/photo-1580273916550-e323be2ae537?w=1200&q=80',
+      'https://images.unsplash.com/photo-1606664515524-ed2f786a0bd6?w=1200&q=80', // Blue Audi
+      'https://images.unsplash.com/photo-1603584173870-7f23fdae1b7a?w=1200&q=80', // Car side
+      'https://images.unsplash.com/photo-1605559424843-9e4c228bf1c2?w=1200&q=80', // Wagon rear
+      'https://images.unsplash.com/photo-1619405399517-d7fce0f13302?w=1200&q=80', // Interior dash
     ],
   },
   {
@@ -55,10 +55,10 @@ Finished in Alpinweiss II over Sport seats in anthracite cloth, this example fea
 
 Recent work includes a full suspension refresh with Bilstein dampers, new cooling system components, and a rebuild of the Getrag 260 five-speed manual gearbox. Original toolkit and documentation included. An increasingly collectible E30 in excellent driver-quality condition.`,
     images: [
-      'https://images.unsplash.com/photo-1555215695-3004980ad54e?w=1200&q=80',
-      'https://images.unsplash.com/photo-1617531653332-bd46c24f2068?w=1200&q=80',
-      'https://images.unsplash.com/photo-1520050206757-06d6bfd18bfc?w=1200&q=80',
-      'https://images.unsplash.com/photo-1494976388531-d1058494cdd8?w=1200&q=80',
+      'https://images.unsplash.com/photo-1555215695-3004980ad54e?w=1200&q=80', // White BMW
+      'https://images.unsplash.com/photo-1520050206757-06d6bfd18bfc?w=1200&q=80', // Classic car
+      'https://images.unsplash.com/photo-1583121274602-3e2820c69888?w=1200&q=80', // BMW wheel
+      'https://images.unsplash.com/photo-1514867644123-6385d58d3cd4?w=1200&q=80', // Dashboard retro
     ],
   },
   {
@@ -70,10 +70,10 @@ Presented in Rosso Monza over Alcantara/leather interior, this Integrale shows t
 
 Recent mechanical work includes a full service, new cambelt, water pump, and clutch. The turbocharger has been rebuilt and the exhaust system renewed. A rare opportunity to acquire one of rally's most iconic road cars in excellent, usable condition. Italian registration documents present.`,
     images: [
-      'https://images.unsplash.com/photo-1544636331-e26879cd4d9b?w=1200&q=80',
-      'https://images.unsplash.com/photo-1542362567-b07e54358753?w=1200&q=80',
-      'https://images.unsplash.com/photo-1503376780353-7e6692767b70?w=1200&q=80',
-      'https://images.unsplash.com/photo-1552519507-da3b142c6e3d?w=1200&q=80',
+      'https://images.unsplash.com/photo-1542362567-b07e54358753?w=1200&q=80', // Red rally car
+      'https://images.unsplash.com/photo-1494976388531-d1058494cdd8?w=1200&q=80', // Yellow classic
+      'https://images.unsplash.com/photo-1511919884226-fd3cad34687c?w=1200&q=80', // Wheel detail
+      'https://images.unsplash.com/photo-1503376780353-7e6692767b70?w=1200&q=80', // Sporty front
     ],
   },
   {
@@ -85,10 +85,10 @@ Finished in elegant Smoke Silver Metallic over Palomino MB-Tex interior, this W1
 
 The car benefits from a recent full service including new glow plugs, injectors overhauled, and a complete brake system refresh. Air conditioning converted to R134a and working well. Self-leveling rear suspension functions correctly. A practical classic that improves with every mile.`,
     images: [
-      'https://images.unsplash.com/photo-1618843479313-40f8afb4b4d8?w=1200&q=80',
-      'https://images.unsplash.com/photo-1563720223185-11003d516935?w=1200&q=80',
-      'https://images.unsplash.com/photo-1622194993920-c329e8952bc6?w=1200&q=80',
-      'https://images.unsplash.com/photo-1549927681-0b673b8243ab?w=1200&q=80',
+      'https://images.unsplash.com/photo-1618843479313-40f8afb4b4d8?w=1200&q=80', // Silver Mercedes
+      'https://images.unsplash.com/photo-1549927681-0b673b8243ab?w=1200&q=80', // Mercedes front
+      'https://images.unsplash.com/photo-1486496146582-9f17ef2a5bb5?w=1200&q=80', // Wagon cargo
+      'https://images.unsplash.com/photo-1503736334956-4c8f8e92946d?w=1200&q=80', // Classic interior
     ],
   },
   {
@@ -100,10 +100,10 @@ Presented in Brilliantsilber over Mushroom leather interior, the car features th
 
 Recent maintenance includes new soft top, full service, and reconditioning of the wood trim. The automatic climate control works perfectly. Original toolkit, first aid kit, and full documentation present. A sophisticated four-seat convertible that represents excellent value.`,
     images: [
-      'https://images.unsplash.com/photo-1617531653332-bd46c24f2068?w=1200&q=80',
-      'https://images.unsplash.com/photo-1618843479313-40f8afb4b4d8?w=1200&q=80',
-      'https://images.unsplash.com/photo-1563720223185-11003d516935?w=1200&q=80',
-      'https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?w=1200&q=80',
+      'https://images.unsplash.com/photo-1617531653332-bd46c24f2068?w=1200&q=80', // Convertible
+      'https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?w=1200&q=80', // Classic coupe
+      'https://images.unsplash.com/photo-1502877338535-766e1452684a?w=1200&q=80', // Open top
+      'https://images.unsplash.com/photo-1525609004556-c46c7d6cf023?w=1200&q=80', // Wood interior
     ],
   },
   {
@@ -115,10 +115,10 @@ Finished in Obsidian Black over grey leather interior with burled walnut trim. T
 
 The V8 engine has been meticulously maintained with full Mercedes-Benz service history. Recent work includes new air suspension components, brake discs and pads, and a full transmission service. A powerful and comfortable cruiser that represents superb value for a V8 Mercedes.`,
     images: [
-      'https://images.unsplash.com/photo-1563720223185-11003d516935?w=1200&q=80',
-      'https://images.unsplash.com/photo-1618843479313-40f8afb4b4d8?w=1200&q=80',
-      'https://images.unsplash.com/photo-1549927681-0b673b8243ab?w=1200&q=80',
-      'https://images.unsplash.com/photo-1622194993920-c329e8952bc6?w=1200&q=80',
+      'https://images.unsplash.com/photo-1563720223185-11003d516935?w=1200&q=80', // Black sedan
+      'https://images.unsplash.com/photo-1622194993920-c329e8952bc6?w=1200&q=80', // Mercedes badge
+      'https://images.unsplash.com/photo-1590510696235-31f4f61c12c7?w=1200&q=80', // V8 engine
+      'https://images.unsplash.com/photo-1553440569-bcc63803a83d?w=1200&q=80', // Luxury interior
     ],
   },
   {
@@ -130,10 +130,10 @@ Finished in Chili Red with a white roof and mirror caps, this JCW features the A
 
 Recent maintenance includes new supercharger belt, fresh brake pads and discs, and a full service. The car benefits from a Milltek exhaust system and uprated intercooler. A pocket rocket that punches well above its weight, with genuine JCW provenance.`,
     images: [
-      'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=1200&q=80',
-      'https://images.unsplash.com/photo-1503376780353-7e6692767b70?w=1200&q=80',
-      'https://images.unsplash.com/photo-1552519507-da3b142c6e3d?w=1200&q=80',
-      'https://images.unsplash.com/photo-1542362567-b07e54358753?w=1200&q=80',
+      'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=1200&q=80', // Red MINI
+      'https://images.unsplash.com/photo-1609521263047-f8f205293f24?w=1200&q=80', // Hot hatch
+      'https://images.unsplash.com/photo-1517524008697-84bbe3c3fd98?w=1200&q=80', // Sporty wheel
+      'https://images.unsplash.com/photo-1544829099-b9a0c07fad1a?w=1200&q=80', // Sport interior
     ],
   },
   {
@@ -145,10 +145,10 @@ Presented in Indigo Blue over grey cloth sport seats, this 106 GTI is a genuine 
 
 Mechanical highlights include a recent timing belt service, new clutch, and refreshed suspension with KYB dampers. The exhaust is standard and the engine bay is tidy. An increasingly rare and collectible hot hatch that rewards enthusiastic driving.`,
     images: [
-      'https://images.unsplash.com/photo-1544636331-e26879cd4d9b?w=1200&q=80',
-      'https://images.unsplash.com/photo-1542362567-b07e54358753?w=1200&q=80',
-      'https://images.unsplash.com/photo-1503376780353-7e6692767b70?w=1200&q=80',
-      'https://images.unsplash.com/photo-1552519507-da3b142c6e3d?w=1200&q=80',
+      'https://images.unsplash.com/photo-1552519507-da3b142c6e3d?w=1200&q=80', // Blue compact
+      'https://images.unsplash.com/photo-1541899481282-d53bffe3c35d?w=1200&q=80', // Small hatch
+      'https://images.unsplash.com/photo-1549317661-bd32c8ce0db2?w=1200&q=80', // Front view
+      'https://images.unsplash.com/photo-1605893477799-b99e3b8b93fe?w=1200&q=80', // Interior dash
     ],
   },
   {
@@ -160,10 +160,10 @@ Finished in Cherry Red over dark grey sport interior, this example comes from Fr
 
 Recent work includes new timing belt, water pump, and a full geometry setup. The brakes have been refreshed with EBC pads and new discs. A charming and engaging driver's car that offers pure motoring pleasure. Import paperwork complete for EU registration.`,
     images: [
-      'https://images.unsplash.com/photo-1552519507-da3b142c6e3d?w=1200&q=80',
-      'https://images.unsplash.com/photo-1544636331-e26879cd4d9b?w=1200&q=80',
-      'https://images.unsplash.com/photo-1542362567-b07e54358753?w=1200&q=80',
-      'https://images.unsplash.com/photo-1503376780353-7e6692767b70?w=1200&q=80',
+      'https://images.unsplash.com/photo-1580273916550-e323be2ae537?w=1200&q=80', // Red hatchback
+      'https://images.unsplash.com/photo-1597007066704-67bf2068d5b2?w=1200&q=80', // Compact car
+      'https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?w=1200&q=80', // Sporty side
+      'https://images.unsplash.com/photo-1558618047-f7c8f0a5bbed?w=1200&q=80', // Car detail
     ],
   },
   {
@@ -175,10 +175,10 @@ Presented in Graphite Grey over velour interior with supportive sports seats. Th
 
 Mechanical condition is excellent following a comprehensive overhaul including new timing belt, head gasket, and clutch. The suspension has been refreshed with new dampers and bushes. A practical and rapid family saloon with genuine motorsport heritage.`,
     images: [
-      'https://images.unsplash.com/photo-1503376780353-7e6692767b70?w=1200&q=80',
-      'https://images.unsplash.com/photo-1552519507-da3b142c6e3d?w=1200&q=80',
-      'https://images.unsplash.com/photo-1544636331-e26879cd4d9b?w=1200&q=80',
-      'https://images.unsplash.com/photo-1542362567-b07e54358753?w=1200&q=80',
+      'https://images.unsplash.com/photo-1550355291-bbee04a92027?w=1200&q=80', // Grey sedan
+      'https://images.unsplash.com/photo-1546614042-7df3c24c9e5d?w=1200&q=80', // Classic 80s
+      'https://images.unsplash.com/photo-1517026575980-3e1e2dedeab4?w=1200&q=80', // Retro interior
+      'https://images.unsplash.com/photo-1552176926-e9f151bb8a75?w=1200&q=80', // Engine detail
     ],
   },
   {
@@ -190,10 +190,10 @@ Finished in Mars Red over grey tartan sport seats - the classic GTI combination.
 
 The car has been sympathetically maintained with a full service history folder. Recent work includes a new exhaust system, rebuilt gear linkage, and fresh timing belt. The interior is remarkably well-preserved with no rips or wear to the iconic plaid seats. A proper driver's GTI ready to enjoy.`,
     images: [
-      'https://images.unsplash.com/photo-1555215695-3004980ad54e?w=1200&q=80',
-      'https://images.unsplash.com/photo-1494976388531-d1058494cdd8?w=1200&q=80',
-      'https://images.unsplash.com/photo-1552519507-da3b142c6e3d?w=1200&q=80',
-      'https://images.unsplash.com/photo-1580273916550-e323be2ae537?w=1200&q=80',
+      'https://images.unsplash.com/photo-1612825173281-9a193378527e?w=1200&q=80', // Red Golf GTI
+      'https://images.unsplash.com/photo-1616422285623-13ff0162193c?w=1200&q=80', // Classic VW
+      'https://images.unsplash.com/photo-1590362891991-f776e747a588?w=1200&q=80', // GTI badge
+      'https://images.unsplash.com/photo-1489824904134-891ab64532f1?w=1200&q=80', // Tartan seats
     ],
   },
 ]

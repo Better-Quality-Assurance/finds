@@ -20,9 +20,12 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server'
-import { prisma } from '@/lib/db'
 import { runMockActivityOnce } from '@/services/mock-activity-orchestrator.service'
 import type { MockActivityConfig } from '@/services/contracts/mock-activity.interface'
+import {
+  autoExtendExpiredMockAuctions,
+  getActiveMockAuctionCount,
+} from '@/services/mock-auction.service'
 
 // =============================================================================
 // CRON CONFIGURATION
@@ -74,39 +77,18 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    // Check if there are any active auctions
-    let activeAuctionCount = await prisma.auction.count({
-      where: {
-        status: { in: ['ACTIVE', 'EXTENDED'] },
-        currentEndTime: { gt: new Date() },
-      },
-    })
+    // Check if there are any active mock auctions
+    let activeAuctionCount = await getActiveMockAuctionCount()
 
-    // Auto-extend expired mock auctions (those with ACTIVE status but past end time)
+    // Auto-extend expired mock auctions (isMock=true, status=ACTIVE, past end time)
     if (activeAuctionCount === 0) {
-      const expiredMockAuctions = await prisma.auction.count({
-        where: {
-          status: 'ACTIVE',
-          currentEndTime: { lte: new Date() },
-        },
-      })
+      const extendResult = await autoExtendExpiredMockAuctions()
 
-      if (expiredMockAuctions > 0) {
-        // Extend all expired ACTIVE auctions by 7 days
-        const extendBy = 7 * 24 * 60 * 60 * 1000 // 7 days in ms
-        await prisma.auction.updateMany({
-          where: {
-            status: 'ACTIVE',
-            currentEndTime: { lte: new Date() },
-          },
-          data: {
-            currentEndTime: new Date(Date.now() + extendBy),
-            originalEndTime: new Date(Date.now() + extendBy),
-          },
-        })
-
-        console.log(`[MockActivity Cron] Auto-extended ${expiredMockAuctions} expired mock auctions`)
-        activeAuctionCount = expiredMockAuctions
+      if (extendResult.extendedCount > 0) {
+        console.log(
+          `[MockActivity Cron] Auto-extended ${extendResult.extendedCount} expired mock auctions`
+        )
+        activeAuctionCount = extendResult.extendedCount
       }
     }
 

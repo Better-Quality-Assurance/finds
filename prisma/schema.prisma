@@ -104,6 +104,11 @@ model User {
   preferredCurrency    String    @default("EUR") @map("preferred_currency")
   termsAcceptedAt      DateTime? @map("terms_accepted_at")
 
+  // Activity tracking
+  lastLoginAt  DateTime? @map("last_login_at")
+  lastSeenAt   DateTime? @map("last_seen_at")
+  loginCount   Int       @default(0) @map("login_count")
+
   // Timestamps
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
@@ -125,6 +130,8 @@ model User {
   following      SellerFollow[]  @relation("Following")
   followers      SellerFollow[]  @relation("Followers")
   wonAuctions    Auction[]       @relation("AuctionWinner")
+  pageViews      PageView[]
+  activities     UserActivity[]
 
   @@map("users")
 
@@ -330,6 +337,7 @@ model Auction {
 
   // Status
   status AuctionStatus @default(SCHEDULED)
+  isMock Boolean       @default(false) @map("is_mock") // Flag for mock/demo auctions
 
   // Winner
   winnerId     String?  @map("winner_id")
@@ -1035,4 +1043,122 @@ model ExternalAuctionSale {
   @@index([source])
   @@index([year])
   @@map("external_auction_sales")
+}
+
+// ============================================================================
+// ANALYTICS & USER ACTIVITY TRACKING
+// ============================================================================
+
+model PageView {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now()) @map("created_at")
+
+  // User (optional - tracks anonymous visitors too)
+  userId String? @map("user_id")
+  user   User?   @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  // Session tracking for anonymous users
+  sessionId String @map("session_id") // Generated client-side or from cookie
+
+  // Page info
+  path       String // e.g., "/auctions/123", "/en/sell"
+  pageType   String @map("page_type") // "auction", "listing", "home", "account", etc.
+  resourceId String? @map("resource_id") // ID of auction/listing if applicable
+
+  // Referrer & source
+  referrer     String? @db.Text
+  utmSource    String? @map("utm_source")
+  utmMedium    String? @map("utm_medium")
+  utmCampaign  String? @map("utm_campaign")
+
+  // Client info
+  ipAddress   String? @map("ip_address")
+  userAgent   String? @map("user_agent") @db.Text
+  country     String? // Derived from IP
+  city        String?
+  device      String? // "desktop", "mobile", "tablet"
+  browser     String?
+  os          String?
+
+  // Engagement
+  duration    Int?     @default(0) // Time on page in seconds
+  scrollDepth Int?     @map("scroll_depth") // Percentage scrolled
+  exitedAt    DateTime? @map("exited_at")
+
+  @@index([createdAt(sort: Desc)])
+  @@index([userId])
+  @@index([sessionId])
+  @@index([path])
+  @@index([pageType])
+  @@index([resourceId])
+  @@index([createdAt, pageType])
+  @@map("page_views")
+}
+
+enum ActivityType {
+  // Auth events
+  LOGIN
+  LOGIN_FAILED
+  LOGOUT
+  REGISTER
+  PASSWORD_RESET
+  EMAIL_VERIFIED
+  PHONE_VERIFIED
+
+  // Bidding events
+  BID_PLACED
+  BID_RETRACTED
+  DEPOSIT_HELD
+  DEPOSIT_RELEASED
+  AUCTION_WON
+
+  // Listing events
+  LISTING_CREATED
+  LISTING_SUBMITTED
+  LISTING_APPROVED
+  LISTING_REJECTED
+
+  // Engagement events
+  WATCHLIST_ADD
+  WATCHLIST_REMOVE
+  COMMENT_POSTED
+  SELLER_FOLLOWED
+
+  // Account events
+  PROFILE_UPDATED
+  SETTINGS_CHANGED
+  PAYMENT_METHOD_ADDED
+
+  // Admin actions
+  USER_BANNED
+  USER_UNBANNED
+  ROLE_CHANGED
+}
+
+model UserActivity {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now()) @map("created_at")
+
+  // Who
+  userId String @map("user_id")
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // What
+  activityType ActivityType @map("activity_type")
+  description  String?      @db.Text // Human-readable description
+
+  // Related resource
+  resourceType String? @map("resource_type") // "auction", "listing", "user", etc.
+  resourceId   String? @map("resource_id")
+
+  // Context
+  ipAddress String? @map("ip_address")
+  userAgent String? @map("user_agent") @db.Text
+  metadata  Json    @default("{}") // Extra context (bid amount, old/new values, etc.)
+
+  @@index([userId, createdAt(sort: Desc)])
+  @@index([activityType, createdAt(sort: Desc)])
+  @@index([resourceType, resourceId])
+  @@index([createdAt(sort: Desc)])
+  @@map("user_activities")
 }
