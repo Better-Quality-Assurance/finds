@@ -5,6 +5,8 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Skeleton } from '@/components/ui/skeleton'
 import { Badge } from '@/components/ui/badge'
 import { Progress } from '@/components/ui/progress'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { ScrollArea } from '@/components/ui/scroll-area'
 import {
   Users,
   Gavel,
@@ -16,6 +18,12 @@ import {
   Clock,
   BarChart3,
   Car,
+  Activity,
+  Eye,
+  UserPlus,
+  Globe,
+  Monitor,
+  LogIn,
 } from 'lucide-react'
 import { formatCurrency } from '@/lib/utils'
 
@@ -56,20 +64,98 @@ interface AdminStats {
   }
 }
 
+interface AnalyticsDashboard {
+  pageViews: {
+    totalViews: number
+    uniqueVisitors: number
+    uniqueUsers: number
+    viewsByPage: Array<{ path: string; pageType: string; count: number }>
+    viewsByDevice: Array<{ device: string; count: number }>
+    viewsByCountry: Array<{ country: string; count: number }>
+    topReferrers: Array<{ referrer: string; count: number }>
+    viewsOverTime: Array<{ date: string; count: number }>
+  }
+  activeUsers: {
+    activeNow: number
+    activeToday: number
+    activeThisWeek: number
+    activeThisMonth: number
+    recentUsers: Array<{
+      id: string
+      email: string
+      name: string | null
+      lastSeenAt: string | null
+      currentPage?: string
+    }>
+  }
+  newUsers: {
+    today: number
+    thisWeek: number
+    thisMonth: number
+    recentRegistrations: Array<{
+      id: string
+      email: string
+      name: string | null
+      createdAt: string
+      emailVerified: string | null
+      country: string | null
+    }>
+    registrationsOverTime: Array<{ date: string; count: number }>
+  }
+  engagement: {
+    averageSessionDuration: number
+    averagePagesPerSession: number
+    bounceRate: number
+    returningVisitorRate: number
+    topAuctions: Array<{ auctionId: string; title: string; views: number }>
+    topListings: Array<{ listingId: string; title: string; views: number }>
+  }
+}
+
+interface UserActivity {
+  id: string
+  activityType: string
+  description: string | null
+  resourceType: string | null
+  resourceId: string | null
+  ipAddress: string | null
+  createdAt: string
+  metadata: Record<string, unknown>
+}
+
 export default function AdminAnalyticsPage() {
   const [stats, setStats] = useState<AdminStats | null>(null)
+  const [analytics, setAnalytics] = useState<AnalyticsDashboard | null>(null)
+  const [activities, setActivities] = useState<UserActivity[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
-    async function fetchStats() {
+    async function fetchData() {
       try {
-        const response = await fetch('/api/admin/stats')
-        if (!response.ok) {
+        const [statsRes, analyticsRes, activitiesRes] = await Promise.all([
+          fetch('/api/admin/stats'),
+          fetch('/api/admin/analytics'),
+          fetch('/api/admin/analytics/activity?limit=20'),
+        ])
+
+        if (!statsRes.ok) {
           throw new Error('Failed to fetch stats')
         }
-        const data = await response.json()
-        setStats(data)
+
+        const statsData = await statsRes.json()
+        setStats(statsData)
+
+        // Analytics might not have data yet, so handle gracefully
+        if (analyticsRes.ok) {
+          const analyticsData = await analyticsRes.json()
+          setAnalytics(analyticsData)
+        }
+
+        if (activitiesRes.ok) {
+          const activitiesData = await activitiesRes.json()
+          setActivities(activitiesData.activities || [])
+        }
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Unknown error')
       } finally {
@@ -77,7 +163,10 @@ export default function AdminAnalyticsPage() {
       }
     }
 
-    fetchStats()
+    fetchData()
+    // Refresh every 30 seconds
+    const interval = setInterval(fetchData, 30000)
+    return () => clearInterval(interval)
   }, [])
 
   if (loading) {
@@ -298,7 +387,7 @@ export default function AdminAnalyticsPage() {
       </div>
 
       {/* Today's Activity & Alerts */}
-      <div className="grid gap-4 lg:grid-cols-2">
+      <div className="mb-8 grid gap-4 lg:grid-cols-2">
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
@@ -357,6 +446,284 @@ export default function AdminAnalyticsPage() {
           </CardContent>
         </Card>
       </div>
+
+      {/* User Analytics Section */}
+      {analytics && (
+        <>
+          <div className="mb-8">
+            <h2 className="mb-4 text-xl font-semibold flex items-center gap-2">
+              <Activity className="h-5 w-5" />
+              User Analytics
+            </h2>
+
+            {/* Active Users Stats */}
+            <div className="mb-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+              <StatCard
+                title="Active Now"
+                value={analytics.activeUsers.activeNow.toString()}
+                subtitle="Last 5 minutes"
+                icon={Eye}
+                trend="up"
+              />
+              <StatCard
+                title="Active Today"
+                value={analytics.activeUsers.activeToday.toString()}
+                subtitle="Since midnight"
+                icon={Users}
+              />
+              <StatCard
+                title="New This Week"
+                value={analytics.newUsers.thisWeek.toString()}
+                subtitle={`+${analytics.newUsers.today} today`}
+                icon={UserPlus}
+                trend="up"
+              />
+              <StatCard
+                title="Page Views"
+                value={analytics.pageViews.totalViews.toLocaleString()}
+                subtitle={`${analytics.pageViews.uniqueVisitors} unique visitors`}
+                icon={Eye}
+              />
+            </div>
+
+            {/* Detailed User Stats */}
+            <Tabs defaultValue="active" className="w-full">
+              <TabsList className="grid w-full grid-cols-4">
+                <TabsTrigger value="active">Active Users</TabsTrigger>
+                <TabsTrigger value="new">New Users</TabsTrigger>
+                <TabsTrigger value="activity">Activity Log</TabsTrigger>
+                <TabsTrigger value="pages">Page Views</TabsTrigger>
+              </TabsList>
+
+              <TabsContent value="active">
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <Eye className="h-5 w-5 text-green-500" />
+                      Currently Active Users
+                    </CardTitle>
+                    <CardDescription>
+                      Users active in the last 5 minutes
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    {analytics.activeUsers.recentUsers.length === 0 ? (
+                      <p className="text-muted-foreground text-center py-8">
+                        No users currently active
+                      </p>
+                    ) : (
+                      <ScrollArea className="h-[300px]">
+                        <div className="space-y-3">
+                          {analytics.activeUsers.recentUsers.map((user) => (
+                            <div
+                              key={user.id}
+                              className="flex items-center justify-between rounded-lg border p-3"
+                            >
+                              <div>
+                                <p className="font-medium">{user.name || user.email}</p>
+                                <p className="text-sm text-muted-foreground">{user.email}</p>
+                              </div>
+                              <div className="text-right">
+                                {user.currentPage && (
+                                  <Badge variant="outline" className="mb-1">
+                                    {user.currentPage}
+                                  </Badge>
+                                )}
+                                <p className="text-xs text-muted-foreground">
+                                  {user.lastSeenAt && formatRelativeTime(user.lastSeenAt)}
+                                </p>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </ScrollArea>
+                    )}
+                  </CardContent>
+                </Card>
+              </TabsContent>
+
+              <TabsContent value="new">
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <UserPlus className="h-5 w-5 text-blue-500" />
+                      Recent Registrations
+                    </CardTitle>
+                    <CardDescription>
+                      New accounts created in the last 30 days
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    {analytics.newUsers.recentRegistrations.length === 0 ? (
+                      <p className="text-muted-foreground text-center py-8">
+                        No recent registrations
+                      </p>
+                    ) : (
+                      <ScrollArea className="h-[300px]">
+                        <div className="space-y-3">
+                          {analytics.newUsers.recentRegistrations.map((user) => (
+                            <div
+                              key={user.id}
+                              className="flex items-center justify-between rounded-lg border p-3"
+                            >
+                              <div>
+                                <p className="font-medium">{user.name || 'No name'}</p>
+                                <p className="text-sm text-muted-foreground">{user.email}</p>
+                              </div>
+                              <div className="text-right">
+                                <Badge
+                                  variant={user.emailVerified ? 'success' : 'warning'}
+                                >
+                                  {user.emailVerified ? 'Verified' : 'Unverified'}
+                                </Badge>
+                                <p className="mt-1 text-xs text-muted-foreground">
+                                  {new Date(user.createdAt).toLocaleDateString()}
+                                </p>
+                                {user.country && (
+                                  <p className="text-xs text-muted-foreground flex items-center justify-end gap-1">
+                                    <Globe className="h-3 w-3" />
+                                    {user.country}
+                                  </p>
+                                )}
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </ScrollArea>
+                    )}
+                  </CardContent>
+                </Card>
+              </TabsContent>
+
+              <TabsContent value="activity">
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <Activity className="h-5 w-5 text-purple-500" />
+                      Recent Activity
+                    </CardTitle>
+                    <CardDescription>
+                      User actions and events
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    {activities.length === 0 ? (
+                      <p className="text-muted-foreground text-center py-8">
+                        No recent activity
+                      </p>
+                    ) : (
+                      <ScrollArea className="h-[300px]">
+                        <div className="space-y-3">
+                          {activities.map((activity) => (
+                            <div
+                              key={activity.id}
+                              className="flex items-center justify-between rounded-lg border p-3"
+                            >
+                              <div className="flex items-center gap-3">
+                                <div className="rounded-full bg-muted p-2">
+                                  {getActivityIcon(activity.activityType)}
+                                </div>
+                                <div>
+                                  <p className="font-medium">
+                                    {formatActivityType(activity.activityType)}
+                                  </p>
+                                  <p className="text-sm text-muted-foreground">
+                                    {activity.description || activity.resourceType}
+                                  </p>
+                                </div>
+                              </div>
+                              <div className="text-right">
+                                <p className="text-xs text-muted-foreground">
+                                  {formatRelativeTime(activity.createdAt)}
+                                </p>
+                                {activity.ipAddress && (
+                                  <p className="text-xs text-muted-foreground">
+                                    {activity.ipAddress}
+                                  </p>
+                                )}
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </ScrollArea>
+                    )}
+                  </CardContent>
+                </Card>
+              </TabsContent>
+
+              <TabsContent value="pages">
+                <div className="grid gap-4 lg:grid-cols-2">
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Monitor className="h-5 w-5" />
+                        Top Pages
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-3">
+                        {analytics.pageViews.viewsByPage.slice(0, 8).map((page, i) => (
+                          <div key={i} className="flex items-center justify-between">
+                            <span className="text-sm truncate max-w-[200px]">{page.path}</span>
+                            <Badge variant="secondary">{page.count}</Badge>
+                          </div>
+                        ))}
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Globe className="h-5 w-5" />
+                        By Country
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-3">
+                        {analytics.pageViews.viewsByCountry.slice(0, 8).map((country, i) => (
+                          <div key={i} className="flex items-center justify-between">
+                            <span className="text-sm">{country.country || 'Unknown'}</span>
+                            <Badge variant="outline">{country.count}</Badge>
+                          </div>
+                        ))}
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
+              </TabsContent>
+            </Tabs>
+          </div>
+
+          {/* Engagement Stats */}
+          <div className="grid gap-4 lg:grid-cols-4">
+            <Card>
+              <CardContent className="p-6 text-center">
+                <p className="text-3xl font-bold">{analytics.engagement.averageSessionDuration}s</p>
+                <p className="text-sm text-muted-foreground">Avg Session Duration</p>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="p-6 text-center">
+                <p className="text-3xl font-bold">{analytics.engagement.averagePagesPerSession}</p>
+                <p className="text-sm text-muted-foreground">Pages per Session</p>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="p-6 text-center">
+                <p className="text-3xl font-bold">{analytics.engagement.bounceRate}%</p>
+                <p className="text-sm text-muted-foreground">Bounce Rate</p>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="p-6 text-center">
+                <p className="text-3xl font-bold">{analytics.engagement.returningVisitorRate}%</p>
+                <p className="text-sm text-muted-foreground">Returning Visitors</p>
+              </CardContent>
+            </Card>
+          </div>
+        </>
+      )}
     </div>
   )
 }
@@ -392,4 +759,81 @@ function StatCard({
       </CardContent>
     </Card>
   )
+}
+
+function formatRelativeTime(dateString: string): string {
+  const date = new Date(dateString)
+  const now = new Date()
+  const diffMs = now.getTime() - date.getTime()
+  const diffMins = Math.floor(diffMs / 60000)
+  const diffHours = Math.floor(diffMs / 3600000)
+  const diffDays = Math.floor(diffMs / 86400000)
+
+  if (diffMins < 1) {
+    return 'just now'
+  }
+  if (diffMins < 60) {
+    return `${diffMins}m ago`
+  }
+  if (diffHours < 24) {
+    return `${diffHours}h ago`
+  }
+  if (diffDays < 7) {
+    return `${diffDays}d ago`
+  }
+  return date.toLocaleDateString()
+}
+
+function getActivityIcon(activityType: string) {
+  switch (activityType) {
+    case 'LOGIN':
+      return <LogIn className="h-4 w-4 text-green-500" />
+    case 'LOGOUT':
+      return <LogIn className="h-4 w-4 text-gray-500 rotate-180" />
+    case 'REGISTER':
+      return <UserPlus className="h-4 w-4 text-blue-500" />
+    case 'BID_PLACED':
+      return <Gavel className="h-4 w-4 text-amber-500" />
+    case 'LISTING_CREATED':
+    case 'LISTING_SUBMITTED':
+      return <FileText className="h-4 w-4 text-purple-500" />
+    case 'WATCHLIST_ADD':
+      return <Eye className="h-4 w-4 text-pink-500" />
+    case 'USER_BANNED':
+      return <AlertTriangle className="h-4 w-4 text-red-500" />
+    default:
+      return <Activity className="h-4 w-4 text-muted-foreground" />
+  }
+}
+
+function formatActivityType(activityType: string): string {
+  const labels: Record<string, string> = {
+    LOGIN: 'User Login',
+    LOGIN_FAILED: 'Failed Login',
+    LOGOUT: 'User Logout',
+    REGISTER: 'New Registration',
+    PASSWORD_RESET: 'Password Reset',
+    EMAIL_VERIFIED: 'Email Verified',
+    PHONE_VERIFIED: 'Phone Verified',
+    BID_PLACED: 'Bid Placed',
+    BID_RETRACTED: 'Bid Retracted',
+    DEPOSIT_HELD: 'Deposit Held',
+    DEPOSIT_RELEASED: 'Deposit Released',
+    AUCTION_WON: 'Auction Won',
+    LISTING_CREATED: 'Listing Created',
+    LISTING_SUBMITTED: 'Listing Submitted',
+    LISTING_APPROVED: 'Listing Approved',
+    LISTING_REJECTED: 'Listing Rejected',
+    WATCHLIST_ADD: 'Added to Watchlist',
+    WATCHLIST_REMOVE: 'Removed from Watchlist',
+    COMMENT_POSTED: 'Comment Posted',
+    SELLER_FOLLOWED: 'Seller Followed',
+    PROFILE_UPDATED: 'Profile Updated',
+    SETTINGS_CHANGED: 'Settings Changed',
+    PAYMENT_METHOD_ADDED: 'Payment Method Added',
+    USER_BANNED: 'User Banned',
+    USER_UNBANNED: 'User Unbanned',
+    ROLE_CHANGED: 'Role Changed',
+  }
+  return labels[activityType] || activityType.replace(/_/g, ' ')
 }

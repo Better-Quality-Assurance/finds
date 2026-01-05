@@ -1,8 +1,10 @@
 'use client'
 
+import { Suspense } from 'react'
 import { SessionProvider } from 'next-auth/react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { useState } from 'react'
+import { PageViewTracker } from '@/components/analytics/page-view-tracker'
 
 export function Providers({ children }: { children: React.ReactNode }) {
   const [queryClient] = useState(
@@ -19,7 +21,12 @@ export function Providers({ children }: { children: React.ReactNode }) {
 
   return (
     <SessionProvider>
-      <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+      <QueryClientProvider client={queryClient}>
+        {children}
+        <Suspense fallback={null}>
+          <PageViewTracker />
+        </Suspense>
+      </QueryClientProvider>
     </SessionProvider>
   )
 }

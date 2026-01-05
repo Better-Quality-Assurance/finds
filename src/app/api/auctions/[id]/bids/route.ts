@@ -8,8 +8,9 @@ import {
   broadcastAuctionExtended,
   notifyOutbid,
 } from '@/services/notification.service'
+import { getAnalyticsService } from '@/services/analytics.service'
 import { prisma } from '@/lib/db'
-import { z } from 'zod'
+import { ActivityType } from '@prisma/client'
 import { withErrorHandler } from '@/lib/with-error-handler'
 import { successResponse } from '@/lib/api-response'
 import { placeBidSchema } from '@/lib/validation-schemas'
@@ -217,6 +218,25 @@ export const POST = withErrorHandler<{ id: string }>(
       .catch(error => {
         console.error('Failed to notify watchers about new bid:', error)
       })
+
+    // Track user activity (non-blocking)
+    getAnalyticsService().trackActivity({
+      userId: session.user.id,
+      activityType: ActivityType.BID_PLACED,
+      description: `Placed bid of ${amount} on auction`,
+      resourceType: 'auction',
+      resourceId: id,
+      ipAddress: ipAddress || undefined,
+      userAgent: userAgent || undefined,
+      metadata: {
+        bidId: bid.id,
+        amount: Number(bid.amount),
+        bidderNumber: bid.bidderNumber,
+        extended,
+      },
+    }).catch(() => {
+      // Silent fail - activity tracking should not affect bid placement
+    })
 
     const response = successResponse({
       bid,

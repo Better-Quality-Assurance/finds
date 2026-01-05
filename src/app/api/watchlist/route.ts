@@ -1,12 +1,14 @@
 import { NextRequest } from 'next/server'
 import { auth } from '@/lib/auth'
 import { prisma } from '@/lib/db'
+import { ActivityType } from '@prisma/client'
 import { addToWatchlistSchema, updateWatchlistSchema } from '@/lib/validation-schemas'
 import { withSimpleErrorHandler } from '@/lib/with-error-handler'
 import { successResponse } from '@/lib/api-response'
 import { UnauthorizedError, NotFoundError, ConflictError, ValidationError } from '@/lib/errors'
 import { ERROR_CODES } from '@/lib/error-codes'
 import { pusher, CHANNELS, EVENTS } from '@/lib/pusher'
+import { getAnalyticsService } from '@/services/analytics.service'
 import type { WatchlistCountUpdatedEvent } from '@/lib/pusher'
 
 // GET - Get user's watchlist
@@ -114,6 +116,15 @@ export const POST = withSimpleErrorHandler(
       watchlistCount,
     } as WatchlistCountUpdatedEvent)
 
+    // Track activity (non-blocking)
+    getAnalyticsService().trackActivity({
+      userId: session.user.id,
+      activityType: ActivityType.WATCHLIST_ADD,
+      description: 'Added auction to watchlist',
+      resourceType: 'auction',
+      resourceId: auctionId,
+    }).catch(() => {})
+
     return successResponse({ watchlistItem }, 201)
   },
   {
@@ -219,6 +230,15 @@ export const DELETE = withSimpleErrorHandler(
       auctionId,
       watchlistCount,
     } as WatchlistCountUpdatedEvent)
+
+    // Track activity (non-blocking)
+    getAnalyticsService().trackActivity({
+      userId: session.user.id,
+      activityType: ActivityType.WATCHLIST_REMOVE,
+      description: 'Removed auction from watchlist',
+      resourceType: 'auction',
+      resourceId: auctionId,
+    }).catch(() => {})
 
     return successResponse({ success: true })
   },

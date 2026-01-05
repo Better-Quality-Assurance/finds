@@ -75,3 +75,12 @@ export const UPLOAD_RATE_LIMIT: RateLimitConfig = {
   windowMs: 5 * 60 * 1000, // 5 minutes
   maxRequests: 10,
 }
+
+/**
+ * Analytics page view tracking - Prevent abuse
+ * 60 page views per minute per session (generous for SPA navigation)
+ */
+export const PAGE_VIEW_RATE_LIMIT: RateLimitConfig = {
+  windowMs: 60 * 1000, // 1 minute
+  maxRequests: 60,
+}

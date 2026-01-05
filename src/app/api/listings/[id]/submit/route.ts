@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server'
 import { auth } from '@/lib/auth'
 import { getContainer } from '@/lib/container'
+import { ActivityType } from '@prisma/client'
+import { getAnalyticsService } from '@/services/analytics.service'
 
 type RouteParams = { params: Promise<{ id: string }> }
 
@@ -23,6 +25,15 @@ export async function POST(request: Request, { params }: RouteParams) {
 
     const container = getContainer()
     const listing = await container.listings.submitForReview(id, session.user.id)
+
+    // Track activity (non-blocking)
+    getAnalyticsService().trackActivity({
+      userId: session.user.id,
+      activityType: ActivityType.LISTING_SUBMITTED,
+      description: `Submitted listing for review: ${listing.title}`,
+      resourceType: 'listing',
+      resourceId: id,
+    }).catch(() => {})
 
     return NextResponse.json(listing)
   } catch (error) {

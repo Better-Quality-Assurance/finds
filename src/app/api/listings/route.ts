@@ -1,11 +1,13 @@
 import { NextRequest } from 'next/server'
 import { auth } from '@/lib/auth'
 import { getContainer } from '@/lib/container'
+import { ActivityType } from '@prisma/client'
 import { createListingSchema } from '@/lib/validation-schemas'
 import { withSimpleErrorHandler } from '@/lib/with-error-handler'
 import { successResponse } from '@/lib/api-response'
 import { UnauthorizedError, ForbiddenError } from '@/lib/errors'
 import { ERROR_CODES } from '@/lib/error-codes'
+import { getAnalyticsService } from '@/services/analytics.service'
 
 export const POST = withSimpleErrorHandler(
   async (request: NextRequest) => {
@@ -33,6 +35,20 @@ export const POST = withSimpleErrorHandler(
       ...data,
       sellerId: session.user.id,
     })
+
+    // Track activity (non-blocking)
+    getAnalyticsService().trackActivity({
+      userId: session.user.id,
+      activityType: ActivityType.LISTING_CREATED,
+      description: `Created listing: ${listing.title}`,
+      resourceType: 'listing',
+      resourceId: listing.id,
+      metadata: {
+        make: listing.make,
+        model: listing.model,
+        year: listing.year,
+      },
+    }).catch(() => {})
 
     return successResponse(listing, 201)
   },

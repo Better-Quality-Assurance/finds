@@ -3,7 +3,7 @@ import { PrismaAdapter } from '@auth/prisma-adapter'
 import Credentials from 'next-auth/providers/credentials'
 import { compare } from 'bcryptjs'
 import { prisma } from '@/lib/db'
-import type { Role } from '@prisma/client'
+import { ActivityType, type Role } from '@prisma/client'
 import type { Adapter } from 'next-auth/adapters'
 
 declare module 'next-auth' {
@@ -117,5 +117,33 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       }
       return session
     },
+  },
+  events: {
+    async signIn({ user }) {
+      if (user?.id) {
+        // Track login activity
+        await Promise.all([
+          prisma.user.update({
+            where: { id: user.id },
+            data: {
+              lastLoginAt: new Date(),
+              lastSeenAt: new Date(),
+              loginCount: { increment: 1 },
+            },
+          }),
+          prisma.userActivity.create({
+            data: {
+              userId: user.id,
+              activityType: ActivityType.LOGIN,
+              description: 'User logged in',
+            },
+          }),
+        ]).catch((error) => {
+          console.error('Failed to track login:', error)
+        })
+      }
+    },
+    // Note: signOut event doesn't have access to token in JWT strategy
+    // Logout tracking can be done client-side if needed
   },
 })

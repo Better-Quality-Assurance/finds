@@ -1,7 +1,7 @@
 import { NextRequest } from 'next/server'
 import { hash } from 'bcryptjs'
-import { z } from 'zod'
 import { randomBytes } from 'crypto'
+import { ActivityType } from '@prisma/client'
 import { getContainer } from '@/lib/container'
 import { withSimpleErrorHandler } from '@/lib/with-error-handler'
 import { successResponse } from '@/lib/api-response'
@@ -56,10 +56,16 @@ export const POST = withSimpleErrorHandler(
     const tokenExpiry = new Date()
     tokenExpiry.setHours(tokenExpiry.getHours() + 24)
 
+    // Get IP and user agent for activity tracking
+    const ipAddress = request.headers.get('x-forwarded-for')?.split(',')[0] ||
+                      request.headers.get('x-real-ip') ||
+                      'unknown'
+    const userAgent = request.headers.get('user-agent') || undefined
+
     // Create user and verification token in a transaction
     await container.prisma.$transaction(async (tx) => {
       // Create user
-      await tx.user.create({
+      const user = await tx.user.create({
         data: {
           name,
           email,
@@ -74,6 +80,17 @@ export const POST = withSimpleErrorHandler(
           identifier: email,
           token: verificationToken,
           expires: tokenExpiry,
+        },
+      })
+
+      // Track registration activity
+      await tx.userActivity.create({
+        data: {
+          userId: user.id,
+          activityType: ActivityType.REGISTER,
+          description: 'User registered',
+          ipAddress,
+          userAgent,
         },
       })
     })
