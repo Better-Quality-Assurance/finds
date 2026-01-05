@@ -108,10 +108,6 @@ export async function RecentSalesSection() {
                     src={getProxiedImageUrl(sale.imageUrl) || ''}
                     alt={sale.title}
                     className="w-full h-full object-cover transition-transform group-hover:scale-105"
-                    onError={(e) => {
-                      // Hide broken images
-                      (e.target as HTMLImageElement).style.display = 'none'
-                    }}
                   />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center text-muted-foreground">
