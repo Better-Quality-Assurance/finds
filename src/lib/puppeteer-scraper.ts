@@ -181,3 +181,141 @@ export async function extractUrlsWithPuppeteer(
     }
   }
 }
+
+/**
+ * Fetch Catawiki page with enhanced data extraction
+ * Catawiki uses Next.js with data in <script id="__NEXT_DATA__"> or window.__PRELOADED_STATE__
+ */
+export async function fetchCatawikiPage(url: string): Promise<string | null> {
+  let page: Page | null = null
+
+  try {
+    const browser = await getBrowser()
+    page = await browser.newPage()
+
+    await page.setViewport({ width: 1920, height: 1080 })
+    await page.setUserAgent(
+      'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+    )
+
+    // Navigate and wait for network to settle
+    await page.goto(url, {
+      waitUntil: 'networkidle2',
+      timeout: 30000,
+    })
+
+    // Wait for price/bid data to load (Catawiki uses React hydration)
+    await new Promise(resolve => setTimeout(resolve, 4000))
+
+    // Extract structured data from the page using JavaScript execution
+    const pageData = await page.evaluate(() => {
+      const data: Record<string, any> = {}
+
+      // 1. Extract Next.js data (most reliable source for Catawiki)
+      try {
+        const nextDataScript = document.getElementById('__NEXT_DATA__')
+        if (nextDataScript && nextDataScript.textContent) {
+          const nextData = JSON.parse(nextDataScript.textContent)
+          data.nextData = nextData
+        }
+      } catch (e) {
+        // Ignore parse errors
+      }
+
+      // 2. Extract window global variables
+      try {
+        const win = window as any
+        if (win.__PRELOADED_STATE__) {
+          data.preloadedState = win.__PRELOADED_STATE__
+        }
+        if (win.__INITIAL_STATE__) {
+          data.initialState = win.__INITIAL_STATE__
+        }
+      } catch (e) {
+        // Ignore
+      }
+
+      // 3. Extract JSON-LD structured data
+      try {
+        const jsonLdScript = document.querySelector('script[type="application/ld+json"]')
+        if (jsonLdScript && jsonLdScript.textContent) {
+          data.jsonLd = JSON.parse(jsonLdScript.textContent)
+        }
+      } catch (e) {
+        // Ignore parse errors
+      }
+
+      // 4. Extract meta tags
+      const metaTags: Record<string, string> = {}
+      document.querySelectorAll('meta[property^="og:"], meta[name^="og:"]').forEach((meta) => {
+        const property = meta.getAttribute('property') || meta.getAttribute('name')
+        const content = meta.getAttribute('content')
+        if (property && content) {
+          metaTags[property] = content
+        }
+      })
+      if (Object.keys(metaTags).length > 0) {
+        data.metaTags = metaTags
+      }
+
+      // 5. Look for data attributes on key elements
+      const dataAttrs: Record<string, string> = {}
+      document.querySelectorAll('[data-bid], [data-price], [data-current-bid], [data-sold-price]').forEach((el) => {
+        Array.from(el.attributes).forEach((attr) => {
+          if (attr.name.startsWith('data-')) {
+            dataAttrs[attr.name] = attr.value
+          }
+        })
+      })
+      if (Object.keys(dataAttrs).length > 0) {
+        data.dataAttributes = dataAttrs
+      }
+
+      // 6. Extract visible price text from common selectors
+      const priceSelectors = [
+        '[class*="price"]',
+        '[class*="bid"]',
+        '[class*="current"]',
+        '[class*="sold"]',
+        '[class*="winning"]',
+      ]
+      const priceTexts: string[] = []
+      priceSelectors.forEach((selector) => {
+        document.querySelectorAll(selector).forEach((el) => {
+          const text = el.textContent?.trim()
+          if (text && text.length < 100 && /[\d€$£,.]/.test(text)) {
+            priceTexts.push(text)
+          }
+        })
+      })
+      if (priceTexts.length > 0) {
+        data.priceTexts = Array.from(new Set(priceTexts)).slice(0, 20)
+      }
+
+      return data
+    })
+
+    // Build enhanced HTML content with extracted structured data at the top
+    const htmlContent = await page.content()
+
+    // Prepend structured data as HTML comments for easy extraction
+    let enhancedContent = '<!-- CATAWIKI STRUCTURED DATA -->\n'
+    enhancedContent += `<!-- NEXT_DATA: ${JSON.stringify(pageData.nextData || {}).slice(0, 5000)} -->\n`
+    enhancedContent += `<!-- PRELOADED_STATE: ${JSON.stringify(pageData.preloadedState || {}).slice(0, 5000)} -->\n`
+    enhancedContent += `<!-- JSON_LD: ${JSON.stringify(pageData.jsonLd || {}).slice(0, 2000)} -->\n`
+    enhancedContent += `<!-- META_TAGS: ${JSON.stringify(pageData.metaTags || {}).slice(0, 1000)} -->\n`
+    enhancedContent += `<!-- DATA_ATTRIBUTES: ${JSON.stringify(pageData.dataAttributes || {}).slice(0, 1000)} -->\n`
+    enhancedContent += `<!-- PRICE_TEXTS: ${JSON.stringify(pageData.priceTexts || []).slice(0, 1000)} -->\n`
+    enhancedContent += '<!-- END CATAWIKI STRUCTURED DATA -->\n\n'
+    enhancedContent += htmlContent
+
+    return enhancedContent
+  } catch (error) {
+    console.error(`[Puppeteer] Error fetching Catawiki page ${url}:`, error)
+    return null
+  } finally {
+    if (page) {
+      await page.close()
+    }
+  }
+}

@@ -7,6 +7,14 @@ import { formatCurrency } from '@/lib/utils'
 import { ArrowRight, TrendingUp, ExternalLink, Calendar } from 'lucide-react'
 import Link from 'next/link'
 
+// Proxy external images to bypass hotlinking protection
+function getProxiedImageUrl(url: string | null): string | null {
+  if (!url) {
+    return null
+  }
+  return `/api/image-proxy?url=${encodeURIComponent(url)}`
+}
+
 // EU-only sources that don't need location filtering
 const EU_ONLY_SOURCES = ['Catawiki', 'Artcurial', 'Collecting Cars']
 
@@ -93,19 +101,27 @@ export async function RecentSalesSection() {
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
           {sales.map((sale) => (
             <Card key={sale.id} className="group overflow-hidden hover:shadow-lg transition-all">
-              {sale.imageUrl && (
-                <div className="relative h-48 bg-muted overflow-hidden">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
+              <div className="relative h-48 bg-muted overflow-hidden">
+                {sale.imageUrl ? (
+                  /* eslint-disable-next-line @next/next/no-img-element */
                   <img
-                    src={sale.imageUrl}
+                    src={getProxiedImageUrl(sale.imageUrl) || ''}
                     alt={sale.title}
                     className="w-full h-full object-cover transition-transform group-hover:scale-105"
+                    onError={(e) => {
+                      // Hide broken images
+                      (e.target as HTMLImageElement).style.display = 'none'
+                    }}
                   />
-                  <Badge className="absolute top-3 left-3" variant="secondary">
-                    {sale.source}
-                  </Badge>
-                </div>
-              )}
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center text-muted-foreground">
+                    <span className="text-4xl">🚗</span>
+                  </div>
+                )}
+                <Badge className="absolute top-3 left-3" variant="secondary">
+                  {sale.source}
+                </Badge>
+              </div>
               <CardContent className="p-4">
                 <h3 className="font-semibold line-clamp-1 group-hover:text-primary transition-colors">
                   {sale.title}

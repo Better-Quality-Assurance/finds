@@ -408,9 +408,9 @@ async function scrapeBonhams(): Promise<ScrapedAuctionLink[]> {
     }
 
     return urls.map(url => {
-      // Extract title from URL path if possible
-      const match = url.match(/\/lot\/\d+\/(.+?)\/?$/)
-      const title = match ? match[1].replace(/-/g, ' ') : 'Bonhams Lot'
+      // Extract title from URL path: /auction/ID/preview-lot/ID/title-slug/
+      const match = url.match(/\/(lot|preview-lot)\/\d+\/(.+?)\/?$/)
+      const title = match ? match[2].replace(/-/g, ' ') : 'Bonhams Lot'
 
       return {
         url,
@@ -426,6 +426,7 @@ async function scrapeBonhams(): Promise<ScrapedAuctionLink[]> {
 
 /**
  * Helper to scrape Bonhams with stealth mode to bypass 403 blocking
+ * Note: Bonhams moved car auctions to cars.bonhams.com
  */
 async function scrapeBonhamsWithStealth(): Promise<string[]> {
   const puppeteerExtra = await import('puppeteer-extra')
@@ -455,9 +456,9 @@ async function scrapeBonhamsWithStealth(): Promise<string[]> {
 
     const randomDelay = () => new Promise(r => setTimeout(r, 500 + Math.random() * 1500))
 
-    console.log('[Scraper] Bonhams: Navigating to auction results...')
-    // Try auction results page which may be more accessible
-    await page.goto('https://www.bonhams.com/auctions/results/?department=MOT-CAR', {
+    console.log('[Scraper] Bonhams: Navigating to cars.bonhams.com...')
+    // Bonhams moved car auctions to cars.bonhams.com - /cars/ shows individual lots
+    await page.goto('https://cars.bonhams.com/cars/', {
       waitUntil: 'networkidle2',
       timeout: 45000,
     })
@@ -467,25 +468,28 @@ async function scrapeBonhamsWithStealth(): Promise<string[]> {
     // Wait for content to load
     await new Promise(resolve => setTimeout(resolve, 3000))
 
-    // Scroll to trigger lazy loading
-    for (let i = 0; i < 3; i++) {
-      await page.evaluate(() => window.scrollBy(0, 500))
-      await randomDelay()
+    // Scroll more to trigger lazy loading (site loads content on scroll)
+    for (let i = 0; i < 5; i++) {
+      await page.evaluate(() => window.scrollBy(0, 800))
+      await new Promise(resolve => setTimeout(resolve, 1500))
     }
 
     await new Promise(resolve => setTimeout(resolve, 2000))
 
-    // Extract auction lot URLs - Bonhams uses /auction/{id}/lot/{id}/ pattern
+    // Extract auction lot URLs - cars.bonhams.com uses anchor tags with /preview-lot/ pattern
     const urls = await page.evaluate(() => {
+      const results: string[] = []
       const links = document.querySelectorAll('a[href]')
-      return Array.from(links)
-        .map(link => (link as HTMLAnchorElement).href)
-        .filter(href => {
-          if (!href || !href.includes('bonhams.com')) {return false}
-          // Match URLs like /auction/29123/lot/123/1965-jaguar-e-type/
-          const hasAuctionLot = /\/auction\/\d+\/lot\/\d+/.test(href)
-          return hasAuctionLot
-        })
+      Array.from(links).forEach(link => {
+        const href = (link as HTMLAnchorElement).href
+        if (href && href.includes('cars.bonhams.com')) {
+          // Match /auction/ID/lot/ID or /auction/ID/preview-lot/ID patterns
+          if (/\/auction\/\d+\/(lot|preview-lot)\/\d+/.test(href)) {
+            results.push(href)
+          }
+        }
+      })
+      return results
     })
 
     const uniqueUrls = Array.from(new Set(urls)).slice(0, 20)
@@ -502,50 +506,161 @@ async function scrapeBonhamsWithStealth(): Promise<string[]> {
 }
 
 /**
- * Scrape Silverstone Auctions (now Iconic Auctioneers) sold lots
- * URL: https://www.silverstoneauctions.com/auction/archive-auctions-cars
+ * Helper to scrape Iconic Auctioneers with Puppeteer
+ * Two-step process: get auction events, then get lots from first event
+ */
+async function scrapeIconicAuctioneersWithPuppeteer(): Promise<string[]> {
+  const puppeteerExtra = await import('puppeteer-extra')
+  const StealthPlugin = await import('puppeteer-extra-plugin-stealth')
+
+  puppeteerExtra.default.use(StealthPlugin.default())
+
+  let browser = null
+
+  try {
+    const executablePath = process.env.PUPPETEER_EXECUTABLE_PATH
+
+    browser = await puppeteerExtra.default.launch({
+      headless: true,
+      executablePath: executablePath || undefined,
+      args: [
+        '--no-sandbox',
+        '--disable-setuid-sandbox',
+        '--disable-dev-shm-usage',
+        '--disable-blink-features=AutomationControlled',
+        '--window-size=1920,1080',
+      ],
+    })
+
+    const page = await browser.newPage()
+    await page.setViewport({ width: 1920, height: 1080 })
+
+    const randomDelay = () => new Promise(r => setTimeout(r, 500 + Math.random() * 1500))
+
+    // Step 1: Get auction event URLs from archive
+    console.log('[Scraper] Iconic Auctioneers: Getting auction events...')
+    await page.goto('https://www.iconicauctioneers.com/auction/archive-auctions-cars', {
+      waitUntil: 'networkidle2',
+      timeout: 45000,
+    })
+
+    await randomDelay()
+    await new Promise(resolve => setTimeout(resolve, 3000))
+
+    // Get auction event URLs (format: /the-xxx-sale-xxx/YYYY-MM-DD/ipp-100)
+    const auctionEventUrls = await page.evaluate(() => {
+      const links = document.querySelectorAll('a[href]')
+      return Array.from(links)
+        .map(link => (link as HTMLAnchorElement).href)
+        .filter(href => {
+          if (!href.includes('iconicauctioneers.com')) {return false}
+          // Match auction result pages: /the-xxx/YYYY-MM-DD/ipp-100
+          return /\/the-[a-z0-9-]+\/\d{4}-\d{2}-\d{2}\/ipp-\d+/.test(href)
+        })
+    })
+
+    if (auctionEventUrls.length === 0) {
+      console.log('[Scraper] Iconic Auctioneers: No auction events found')
+      return []
+    }
+
+    console.log(`[Scraper] Iconic Auctioneers: Found ${auctionEventUrls.length} auction events`)
+
+    // Step 2: Visit first auction event to get individual lot URLs
+    const firstAuction = auctionEventUrls[0]
+    console.log('[Scraper] Iconic Auctioneers: Visiting auction event...')
+    try {
+      await page.goto(firstAuction, {
+        waitUntil: 'domcontentloaded',
+        timeout: 45000,
+      })
+    } catch (navError) {
+      // Page may redirect or have frame issues - try waiting for content anyway
+      console.log('[Scraper] Iconic Auctioneers: Navigation warning, continuing...')
+      await new Promise(resolve => setTimeout(resolve, 5000))
+    }
+
+    await randomDelay()
+    await new Promise(resolve => setTimeout(resolve, 3000))
+
+    // Scroll to load more lots
+    for (let i = 0; i < 3; i++) {
+      await page.evaluate(() => window.scrollBy(0, 800))
+      await randomDelay()
+    }
+
+    await new Promise(resolve => setTimeout(resolve, 2000))
+
+    // Get individual lot URLs (format: /YYYY-make-model-lotcode-location-date)
+    const lotUrls = await page.evaluate(() => {
+      const links = document.querySelectorAll('a[href]')
+      return Array.from(links)
+        .map(link => (link as HTMLAnchorElement).href)
+        .filter(href => {
+          if (!href.includes('iconicauctioneers.com')) {return false}
+          const path = new URL(href).pathname
+          // Match lot URLs: /YYYY-make-model-xxx (starts with year)
+          return /^\/(?:19|20)\d{2}-[a-z0-9]+-/.test(path)
+        })
+    })
+
+    const uniqueUrls = Array.from(new Set(lotUrls)).slice(0, 20)
+    console.log(`[Scraper] Iconic Auctioneers: Found ${uniqueUrls.length} lot URLs`)
+    return uniqueUrls
+  } catch (error) {
+    console.error('[Scraper] Iconic Auctioneers Puppeteer error:', error)
+    return []
+  } finally {
+    if (browser) {
+      await browser.close()
+    }
+  }
+}
+
+/**
+ * Scrape Iconic Auctioneers (formerly Silverstone Auctions) sold lots
+ * Strategy:
+ * 1. Get auction event URLs from archive page
+ * 2. Visit first auction event to get individual lot URLs
  * Note: Site is JS-rendered with Vue.js, requires Puppeteer
  */
 async function scrapeSilverstoneAuctions(): Promise<ScrapedAuctionLink[]> {
-  console.log('[Scraper] Fetching Silverstone Auctions (Iconic Auctioneers)...')
+  console.log('[Scraper] Fetching Iconic Auctioneers (formerly Silverstone Auctions)...')
 
   const usePuppeteer = process.env.USE_PUPPETEER === 'true'
 
   if (!usePuppeteer) {
-    console.log('[Scraper] Silverstone: Skipping (requires Puppeteer - set USE_PUPPETEER=true)')
+    console.log('[Scraper] Iconic Auctioneers: Skipping (requires Puppeteer - set USE_PUPPETEER=true)')
     return []
   }
 
   try {
-    // The site is now iconicauctioneers.com and uses Vue.js for rendering
-    // silverstoneauctions.com redirects to iconicauctioneers.com
-    const urls = await extractUrlsWithPuppeteer(
-      'https://www.silverstoneauctions.com/auction/archive-auctions-cars',
-      'a[href*="/lot/"]',
-      {
-        limit: 20,
-        timeout: 30000,
-      }
-    )
+    const lotUrls = await scrapeIconicAuctioneersWithPuppeteer()
 
-    if (urls.length === 0) {
-      console.log('[Scraper] Silverstone: No URLs found')
+    if (lotUrls.length === 0) {
+      console.log('[Scraper] Iconic Auctioneers: No lot URLs found')
       return []
     }
 
-    // Filter to only lot URLs (exclude navigation, footer, etc.)
-    const lotUrls = urls.filter(url => {
-      // Lot URLs should contain /lot/ followed by a number or slug
-      return /\/lot\/\d+/.test(url) || /\/lot\/[a-z0-9-]+/.test(url)
-    })
+    console.log(`[Scraper] Iconic Auctioneers: Found ${lotUrls.length} vehicle lots`)
 
-    return lotUrls.slice(0, 20).map(url => ({
-      url,
-      title: url.split('/lot/')[1]?.replace(/-/g, ' ')?.replace(/\/$/, '') || 'Silverstone Lot',
-      source: 'Silverstone Auctions',
-    }))
+    return lotUrls.slice(0, 20).map(url => {
+      // Extract year-make-model from URL for title
+      const path = new URL(url).pathname.replace(/^\//, '')
+      const parts = path.split('-')
+      const year = parts[0]
+      const make = parts[1]
+      const model = parts[2]
+      const title = `${year} ${make} ${model}`.replace(/-/g, ' ')
+
+      return {
+        url,
+        title,
+        source: 'Iconic Auctioneers',
+      }
+    })
   } catch (error) {
-    console.error('[Scraper] Silverstone Auctions error:', error)
+    console.error('[Scraper] Iconic Auctioneers error:', error)
     return []
   }
 }
@@ -664,14 +779,174 @@ async function scrapeRMSothebysWithPuppeteer(): Promise<string[]> {
 }
 
 /**
- * Scrape Artcurial motorcars results
- * DISABLED: Current implementation returns art/jewelry lots, not cars
- * TODO: Artcurial requires Puppeteer + proper navigation to Motorcars specialty
+ * Scrape Artcurial motorcars results with Puppeteer
+ * - French auction house with major classic car sales
+ * - Filters to "Artcurial Motorcars" department only
+ * - Site is Nuxt/Vue.js - requires Puppeteer for JS rendering
  */
 async function scrapeArtcurial(): Promise<ScrapedAuctionLink[]> {
-  console.log('[Scraper] Artcurial: Disabled (returns non-car lots, needs fix)')
-  return []
+  console.log('[Scraper] Fetching Artcurial Motorcars with Puppeteer...')
+
+  const usePuppeteer = process.env.USE_PUPPETEER === 'true'
+  if (!usePuppeteer) {
+    console.log('[Scraper] Artcurial: Skipping (requires Puppeteer - set USE_PUPPETEER=true)')
+    return []
+  }
+
+  try {
+    const urls = await scrapeArtcurialWithPuppeteer()
+
+    if (urls.length === 0) {
+      console.log('[Scraper] Artcurial: No car sale URLs found')
+      return []
+    }
+
+    return urls.map(url => {
+      // Extract sale info from URL: /en/sales/6446 or /en/sales/vente-fr-6446-automobile-legends
+      const saleId = url.match(/\/sales\/(?:vente-fr-)?(\d+)/)?.[1] || 'unknown'
+      const title = url.split('/').pop()?.replace(/-/g, ' ')?.replace(/vente fr \d+ /, '') || `Artcurial Sale ${saleId}`
+
+      return {
+        url,
+        title,
+        source: 'Artcurial Motorcars',
+      }
+    })
+  } catch (error) {
+    console.error('[Scraper] Artcurial error:', error)
+    return []
+  }
 }
+
+/**
+ * Helper to scrape Artcurial motorcars with Puppeteer
+ * Strategy:
+ * 1. Navigate to Artcurial Motorcars specialty page
+ * 2. Look for past/upcoming car sales only
+ * 3. Extract sale URLs (not individual lots - too many)
+ * 4. Filter out non-car departments (art, jewelry, wine, etc.)
+ */
+async function scrapeArtcurialWithPuppeteer(): Promise<string[]> {
+  const puppeteerExtra = await import('puppeteer-extra')
+  const StealthPlugin = await import('puppeteer-extra-plugin-stealth')
+
+  puppeteerExtra.default.use(StealthPlugin.default())
+
+  let browser = null
+
+  try {
+    const executablePath = process.env.PUPPETEER_EXECUTABLE_PATH
+
+    browser = await puppeteerExtra.default.launch({
+      headless: true,
+      executablePath: executablePath || undefined,
+      args: [
+        '--no-sandbox',
+        '--disable-setuid-sandbox',
+        '--disable-dev-shm-usage',
+        '--disable-blink-features=AutomationControlled',
+        '--window-size=1920,1080',
+      ],
+    })
+
+    const page = await browser.newPage()
+    await page.setViewport({ width: 1920, height: 1080 })
+
+    const randomDelay = () => new Promise(r => setTimeout(r, 500 + Math.random() * 1500))
+
+    console.log('[Scraper] Artcurial: Navigating to motorcars results...')
+
+    // Try motorcars specialty page first
+    await page.goto('https://www.artcurial.com/en/specialties/artcurial-motorcars', {
+      waitUntil: 'networkidle2',
+      timeout: 45000,
+    })
+
+    await randomDelay()
+
+    // Wait for Vue.js app to render
+    await new Promise(resolve => setTimeout(resolve, 3000))
+
+    // Scroll to load lazy content
+    for (let i = 0; i < 3; i++) {
+      await page.evaluate(() => window.scrollBy(0, 500))
+      await randomDelay()
+    }
+
+    await new Promise(resolve => setTimeout(resolve, 2000))
+
+    // Extract sale URLs - look for /sales/ pattern
+    let urls = await page.evaluate(() => {
+      const links = document.querySelectorAll('a[href]')
+      return Array.from(links)
+        .map(link => (link as HTMLAnchorElement).href)
+        .filter(href => {
+          if (!href || !href.includes('artcurial.com')) {return false}
+          // Match sales URLs like /en/sales/6446 or /en/sales/vente-fr-6446-automobile-legends
+          return /\/sales\/(?:vente-fr-)?\d+/.test(href)
+        })
+    })
+
+    // If no results from specialty page, try results page with motorcars context
+    if (urls.length === 0) {
+      console.log('[Scraper] Artcurial: No sales on specialty page, trying schedule...')
+
+      await page.goto('https://www.artcurial.com/en/schedule-auctions-sales', {
+        waitUntil: 'networkidle2',
+        timeout: 45000,
+      })
+
+      await randomDelay()
+      await new Promise(resolve => setTimeout(resolve, 3000))
+
+      for (let i = 0; i < 3; i++) {
+        await page.evaluate(() => window.scrollBy(0, 500))
+        await randomDelay()
+      }
+
+      await new Promise(resolve => setTimeout(resolve, 2000))
+
+      // Extract sales and filter for car-related keywords
+      urls = await page.evaluate(() => {
+        const links = document.querySelectorAll('a[href]')
+        const carKeywords = [
+          'automobile', 'motorcars', 'car', 'voiture', 'auto',
+          'porsche', 'ferrari', 'mercedes', 'jaguar', 'alfa',
+          'maserati', 'bugatti', 'aston', 'bentley', 'rolls',
+          'legend', 'racing', 'formula', 'grand prix', 'sport',
+        ]
+
+        return Array.from(links)
+          .filter(link => {
+            const href = (link as HTMLAnchorElement).href
+            if (!href || !href.includes('artcurial.com')) {return false}
+            if (!/\/sales\/(?:vente-fr-)?\d+/.test(href)) {return false}
+
+            // Check link text and href for car keywords
+            const text = (link as HTMLAnchorElement).textContent?.toLowerCase() || ''
+            const url = href.toLowerCase()
+
+            return carKeywords.some(keyword =>
+              text.includes(keyword) || url.includes(keyword)
+            )
+          })
+          .map(link => (link as HTMLAnchorElement).href)
+      })
+    }
+
+    const uniqueUrls = Array.from(new Set(urls)).slice(0, 10)
+    console.log(`[Scraper] Artcurial: Found ${uniqueUrls.length} motorcar sale URLs`)
+    return uniqueUrls
+  } catch (error) {
+    console.error('[Scraper] Artcurial Puppeteer error:', error)
+    return []
+  } finally {
+    if (browser) {
+      await browser.close()
+    }
+  }
+}
+
 /**
  * Scrape Classic Driver sold cars (requires Puppeteer with stealth)
  * URL: https://www.classicdriver.com/en/cars?sale_status=sold
@@ -738,39 +1013,76 @@ async function scrapeClassicDriverWithStealth(): Promise<string[]> {
 
     const randomDelay = () => new Promise(r => setTimeout(r, 500 + Math.random() * 1500))
 
-    console.log('[Scraper] Classic Driver: Navigating to sold cars page...')
-    await page.goto('https://www.classicdriver.com/en/cars?sale_status=sold', {
+    // Classic Driver doesn't have a public sold archive, but has active marketplace and auctions
+    // Strategy: scrape both active marketplace listings and auction lots
+    const allUrls: string[] = []
+
+    // 1. Scrape active marketplace listings (recent additions)
+    console.log('[Scraper] Classic Driver: Navigating to marketplace...')
+    await page.goto('https://www.classicdriver.com/en/cars?sort=newest', {
       waitUntil: 'networkidle2',
       timeout: 45000,
     })
 
     await randomDelay()
-
-    // Wait for content to load
     await new Promise(resolve => setTimeout(resolve, 3000))
 
     // Scroll to trigger lazy loading
     for (let i = 0; i < 3; i++) {
-      await page.evaluate(() => window.scrollBy(0, 500))
+      await page.evaluate(() => window.scrollBy(0, 800))
       await randomDelay()
     }
 
-    await new Promise(resolve => setTimeout(resolve, 2000))
-
     // Extract car URLs - Classic Driver uses /en/car/MAKE/MODEL/YEAR/ID pattern
-    const urls = await page.evaluate(() => {
+    const marketplaceUrls = await page.evaluate(() => {
       const links = document.querySelectorAll('a[href]')
       return Array.from(links)
         .map(link => (link as HTMLAnchorElement).href)
         .filter(href => {
           if (!href || !href.includes('classicdriver.com')) {return false}
-          // Match URLs like /en/car/porsche/911/1989/123456
+          // Match URLs like /en/car/porsche/911-964-carrera/1994/627065
           return href.includes('/en/car/') && href.split('/en/car/')[1]?.split('/').length >= 4
         })
     })
 
-    const uniqueUrls = Array.from(new Set(urls)).slice(0, 20)
-    console.log(`[Scraper] Classic Driver: Found ${uniqueUrls.length} URLs`)
+    allUrls.push(...marketplaceUrls)
+    console.log(`[Scraper] Classic Driver: Found ${marketplaceUrls.length} marketplace URLs`)
+
+    // 2. Scrape auction lots
+    await randomDelay()
+    console.log('[Scraper] Classic Driver: Navigating to auction lots...')
+    await page.goto('https://www.classicdriver.com/en/auctions-search?sort=newest', {
+      waitUntil: 'networkidle2',
+      timeout: 45000,
+    })
+
+    await randomDelay()
+    await new Promise(resolve => setTimeout(resolve, 3000))
+
+    // Scroll to trigger lazy loading
+    for (let i = 0; i < 3; i++) {
+      await page.evaluate(() => window.scrollBy(0, 800))
+      await randomDelay()
+    }
+
+    // Extract auction lot URLs - may use /en/lot/ or /en/car/ pattern
+    const auctionUrls = await page.evaluate(() => {
+      const links = document.querySelectorAll('a[href]')
+      return Array.from(links)
+        .map(link => (link as HTMLAnchorElement).href)
+        .filter(href => {
+          if (!href || !href.includes('classicdriver.com')) {return false}
+          // Match auction lots and car URLs
+          return (href.includes('/en/lot/') || href.includes('/en/car/')) &&
+                 href.match(/\d{6,}/) // Contains 6+ digit ID
+        })
+    })
+
+    allUrls.push(...auctionUrls)
+    console.log(`[Scraper] Classic Driver: Found ${auctionUrls.length} auction URLs`)
+
+    const uniqueUrls = Array.from(new Set(allUrls)).slice(0, 20)
+    console.log(`[Scraper] Classic Driver: Total ${uniqueUrls.length} unique URLs`)
     return uniqueUrls
   } catch (error) {
     console.error('[Scraper] Classic Driver stealth error:', error)
@@ -796,7 +1108,7 @@ export async function scrapeAllAuctionSites(): Promise<ScrapedAuctionLink[]> {
   const results: ScrapedAuctionLink[] = []
   const usePuppeteer = process.env.USE_PUPPETEER === 'true'
   // Limit Puppeteer scrapers per run to avoid timeout (each takes 15-30s)
-  const maxPuppeteerScrapers = 2
+  const maxPuppeteerScrapers = 6
 
   try {
     // Always run BaT (works without Puppeteer)
@@ -817,10 +1129,10 @@ export async function scrapeAllAuctionSites(): Promise<ScrapedAuctionLink[]> {
       const secondaryScrapers = [
         { name: 'Catawiki', fn: scrapeCatawiki },
         { name: 'RM Sothebys', fn: scrapeRMSothebys },
-        // Disabled - returning 0 URLs, sites may have changed:
-        // { name: 'Bonhams', fn: scrapeBonhams },
-        // { name: 'Silverstone', fn: scrapeSilverstoneAuctions },
-        // { name: 'Classic Driver', fn: scrapeClassicDriver },
+        { name: 'Artcurial Motorcars', fn: scrapeArtcurial },
+        { name: 'Bonhams', fn: scrapeBonhams },
+        { name: 'Iconic Auctioneers', fn: scrapeSilverstoneAuctions },
+        { name: 'Classic Driver', fn: scrapeClassicDriver },
       ]
 
       // Shuffle secondary scrapers
@@ -829,10 +1141,10 @@ export async function scrapeAllAuctionSites(): Promise<ScrapedAuctionLink[]> {
         ;[secondaryScrapers[i], secondaryScrapers[j]] = [secondaryScrapers[j], secondaryScrapers[i]]
       }
 
-      // Combine: 2 priority + 0-1 secondary (based on maxPuppeteerScrapers limit)
+      // Combine: all priority + remaining secondary up to limit
       const puppeteerScrapers = [
-        ...priorityScrapers.slice(0, maxPuppeteerScrapers),
-        ...secondaryScrapers.slice(0, Math.max(0, maxPuppeteerScrapers - priorityScrapers.length)),
+        ...priorityScrapers,
+        ...secondaryScrapers.slice(0, maxPuppeteerScrapers - priorityScrapers.length),
       ]
 
       const selectedScrapers = puppeteerScrapers.slice(0, maxPuppeteerScrapers)
@@ -852,16 +1164,6 @@ export async function scrapeAllAuctionSites(): Promise<ScrapedAuctionLink[]> {
       }
     } else {
       console.log('[Scraper] Puppeteer disabled (set USE_PUPPETEER=true to enable)')
-    }
-
-    // Run Artcurial (simple HTTP, no Puppeteer needed)
-    console.log('[Scraper] Scraping Artcurial...')
-    try {
-      const artcurialResult = await scrapeArtcurial()
-      console.log(`[Scraper] Artcurial: ${artcurialResult.length} links`)
-      results.push(...artcurialResult)
-    } catch (error) {
-      console.error('[Scraper] Artcurial failed:', error)
     }
 
     console.log(`[Scraper] Total links found: ${results.length}`)

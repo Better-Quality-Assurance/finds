@@ -8,6 +8,14 @@ import { formatCurrency } from '@/lib/utils'
 import Link from 'next/link'
 import { SalesStatistics } from '@/components/sales/sales-statistics'
 
+// Proxy external images to bypass hotlinking protection
+function getProxiedImageUrl(url: string | null): string | null {
+  if (!url) {
+    return null
+  }
+  return `/api/image-proxy?url=${encodeURIComponent(url)}`
+}
+
 export async function generateMetadata() {
   return {
     title: 'Recent Sales - Classic Car Auction Results | Finds',
@@ -75,19 +83,26 @@ async function getSalesStatistics() {
 function SaleCard({ sale }: { sale: Awaited<ReturnType<typeof getRecentSales>>[0] }) {
   return (
     <Card className="overflow-hidden hover:shadow-lg transition-shadow">
-      {sale.imageUrl && (
-        <div className="relative h-48 bg-muted">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
+      <div className="relative h-48 bg-muted">
+        {sale.imageUrl ? (
+          /* eslint-disable-next-line @next/next/no-img-element */
           <img
-            src={sale.imageUrl}
+            src={getProxiedImageUrl(sale.imageUrl) || ''}
             alt={sale.title}
             className="w-full h-full object-cover"
+            onError={(e) => {
+              (e.target as HTMLImageElement).style.display = 'none'
+            }}
           />
-          <Badge className="absolute top-2 right-2" variant="secondary">
-            {sale.source}
-          </Badge>
-        </div>
-      )}
+        ) : (
+          <div className="w-full h-full flex items-center justify-center text-muted-foreground">
+            <span className="text-4xl">🚗</span>
+          </div>
+        )}
+        <Badge className="absolute top-2 right-2" variant="secondary">
+          {sale.source}
+        </Badge>
+      </div>
       <CardHeader className="pb-2">
         <CardTitle className="text-lg line-clamp-2">{sale.title}</CardTitle>
       </CardHeader>
