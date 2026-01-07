@@ -18,6 +18,19 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
+import {
+  Alert,
+  AlertDescription,
+  AlertTitle,
+} from '@/components/ui/alert'
 import { toast } from 'sonner'
 import {
   ArrowLeft,
@@ -32,6 +45,8 @@ import {
   Star,
   Plus,
   GripVertical,
+  AlertTriangle,
+  ShieldAlert,
 } from 'lucide-react'
 import {
   CATEGORIES,
@@ -46,9 +61,12 @@ type ListingWithRelations = Prisma.ListingGetPayload<{
   include: {
     seller: { select: { id: true; name: true; email: true } }
     media: true
-    auction: { select: { id: true; status: true } }
+    auction: { select: { id: true; status: true; bidCount: true } }
   }
 }>
+
+// Statuses that require admin override
+const RESTRICTED_STATUSES: ListingStatus[] = ['APPROVED', 'ACTIVE', 'SOLD', 'WITHDRAWN', 'EXPIRED']
 
 type AdminListingEditClientProps = {
   listing: ListingWithRelations
@@ -72,6 +90,12 @@ export function AdminListingEditClient({ listing }: AdminListingEditClientProps)
   const [media, setMedia] = useState(listing.media)
   const [newImageUrl, setNewImageUrl] = useState('')
   const [isAddingImage, setIsAddingImage] = useState(false)
+  const [showOverrideDialog, setShowOverrideDialog] = useState(false)
+
+  // Determine if this listing requires override
+  const isRestrictedStatus = RESTRICTED_STATUSES.includes(listing.status)
+  const hasActiveBids = listing.auction?.status === 'ACTIVE' && (listing.auction?.bidCount ?? 0) > 0
+  const requiresOverride = isRestrictedStatus || hasActiveBids
 
   // Form state
   const [formData, setFormData] = useState({
@@ -101,11 +125,20 @@ export function AdminListingEditClient({ listing }: AdminListingEditClientProps)
     setFormData((prev) => ({ ...prev, [field]: value }))
   }
 
-  const handleSave = async () => {
+  const handleSaveClick = () => {
+    if (requiresOverride) {
+      setShowOverrideDialog(true)
+    } else {
+      handleSave(false)
+    }
+  }
+
+  const handleSave = async (withOverride: boolean) => {
     setIsSaving(true)
+    setShowOverrideDialog(false)
     try {
       // Prepare data for API
-      const updateData = {
+      const updateData: Record<string, unknown> = {
         title: formData.title,
         make: formData.make,
         model: formData.model,
@@ -126,6 +159,11 @@ export function AdminListingEditClient({ listing }: AdminListingEditClientProps)
         currency: formData.currency,
       }
 
+      // Add override flag if needed
+      if (withOverride) {
+        updateData._adminOverride = true
+      }
+
       const response = await fetch(`/api/admin/listings/${listing.id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
@@ -134,6 +172,11 @@ export function AdminListingEditClient({ listing }: AdminListingEditClientProps)
 
       if (!response.ok) {
         const error = await response.json()
+        // Check if it's a "requires override" error
+        if (error.error?.details?.requiresOverride) {
+          setShowOverrideDialog(true)
+          return
+        }
         throw new Error(error.error?.message || 'Failed to save')
       }
 
@@ -239,12 +282,33 @@ export function AdminListingEditClient({ listing }: AdminListingEditClientProps)
         </div>
         <div className="flex items-center gap-3">
           <Badge variant={statusBadge.variant}>{statusBadge.label}</Badge>
-          <Button onClick={handleSave} disabled={isSaving} className="gap-2">
+          <Button onClick={handleSaveClick} disabled={isSaving} className="gap-2">
             {isSaving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
             Save Changes
           </Button>
         </div>
       </div>
+
+      {/* Warning for restricted listings */}
+      {requiresOverride && (
+        <Alert variant="destructive">
+          <AlertTriangle className="h-4 w-4" />
+          <AlertTitle>Restricted Listing</AlertTitle>
+          <AlertDescription>
+            {hasActiveBids ? (
+              <>
+                This listing has an <strong>active auction with {listing.auction?.bidCount} bid(s)</strong>.
+                Editing requires admin override and will be logged with high severity.
+              </>
+            ) : (
+              <>
+                This listing is in <strong>{listing.status}</strong> status.
+                Editing requires admin override confirmation.
+              </>
+            )}
+          </AlertDescription>
+        </Alert>
+      )}
 
       <div className="grid gap-6 lg:grid-cols-3">
         {/* Main Content */}
@@ -631,6 +695,48 @@ export function AdminListingEditClient({ listing }: AdminListingEditClientProps)
           </Card>
         </div>
       </div>
+
+      {/* Admin Override Confirmation Dialog */}
+      <Dialog open={showOverrideDialog} onOpenChange={setShowOverrideDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <ShieldAlert className="h-5 w-5 text-destructive" />
+              Admin Override Required
+            </DialogTitle>
+            <DialogDescription className="space-y-2 pt-2">
+              {hasActiveBids ? (
+                <p>
+                  This listing has an <strong>active auction with {listing.auction?.bidCount} bid(s)</strong>.
+                  Editing it may affect bidders and could be considered fraudulent behavior.
+                </p>
+              ) : (
+                <p>
+                  This listing is in <strong>{listing.status}</strong> status and is normally locked from editing.
+                </p>
+              )}
+              <p className="text-sm text-muted-foreground">
+                This action will be logged with high severity in the audit trail.
+                Are you sure you want to proceed?
+              </p>
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowOverrideDialog(false)}>
+              Cancel
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={() => handleSave(true)}
+              disabled={isSaving}
+              className="gap-2"
+            >
+              {isSaving && <Loader2 className="h-4 w-4 animate-spin" />}
+              Confirm Override & Save
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

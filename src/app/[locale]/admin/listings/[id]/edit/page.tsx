@@ -56,6 +56,7 @@ export default async function AdminListingEditPage({ params }: AdminListingEditP
         select: {
           id: true,
           status: true,
+          bidCount: true,
         },
       },
     },
