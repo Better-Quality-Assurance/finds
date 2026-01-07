@@ -36,6 +36,9 @@ function getCSP() {
       'https://fastly.picsum.photos',
       'https://source.unsplash.com',
       'https://images.unsplash.com',
+      // Wikimedia Commons for mock auction images
+      'https://commons.wikimedia.org',
+      'https://upload.wikimedia.org',
     ],
     'font-src': ["'self'", 'data:'],
     'connect-src': [
@@ -116,6 +119,15 @@ const nextConfig = {
       {
         protocol: 'https',
         hostname: 'images.unsplash.com',
+      },
+      // Wikimedia Commons for mock auction images
+      {
+        protocol: 'https',
+        hostname: 'commons.wikimedia.org',
+      },
+      {
+        protocol: 'https',
+        hostname: 'upload.wikimedia.org',
       },
     ],
     formats: ['image/avif', 'image/webp'],
