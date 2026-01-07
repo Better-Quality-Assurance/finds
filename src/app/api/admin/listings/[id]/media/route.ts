@@ -9,6 +9,80 @@ import { ValidationError, NotFoundError } from '@/lib/errors'
 import { ERROR_CODES } from '@/lib/error-codes'
 import { z } from 'zod'
 
+// Allowed external image domains for security (SSRF prevention)
+const ALLOWED_IMAGE_DOMAINS = [
+  'commons.wikimedia.org',
+  'upload.wikimedia.org',
+  'picsum.photos',
+  'fastly.picsum.photos',
+  'images.unsplash.com',
+  'source.unsplash.com',
+  'placehold.co',
+  // R2 storage domains
+  'pub-', // R2 public bucket prefix
+]
+
+// Blocked patterns (internal networks, localhost, etc.)
+const BLOCKED_URL_PATTERNS = [
+  /^https?:\/\/localhost/i,
+  /^https?:\/\/127\./,
+  /^https?:\/\/0\./,
+  /^https?:\/\/10\./,
+  /^https?:\/\/172\.(1[6-9]|2[0-9]|3[0-1])\./,
+  /^https?:\/\/192\.168\./,
+  /^https?:\/\/169\.254\./,
+  /^https?:\/\/\[::1\]/,
+  /^https?:\/\/\[fc/i,
+  /^https?:\/\/\[fd/i,
+  /^file:/i,
+  /^ftp:/i,
+]
+
+/**
+ * Validate external URL for security
+ * - Must be HTTPS (except localhost in dev)
+ * - Must be from allowed domains
+ * - Must not be internal network
+ */
+function validateExternalUrl(url: string): { valid: boolean; reason?: string } {
+  try {
+    const parsed = new URL(url)
+
+    // Must be HTTPS
+    if (parsed.protocol !== 'https:') {
+      return { valid: false, reason: 'URL must use HTTPS protocol' }
+    }
+
+    // Check against blocked patterns (SSRF prevention)
+    for (const pattern of BLOCKED_URL_PATTERNS) {
+      if (pattern.test(url)) {
+        return { valid: false, reason: 'URL points to blocked network range' }
+      }
+    }
+
+    // Check against allowed domains
+    const hostname = parsed.hostname.toLowerCase()
+    const isAllowed = ALLOWED_IMAGE_DOMAINS.some((domain) => {
+      if (domain.endsWith('-')) {
+        // Prefix match (e.g., 'pub-' for R2 buckets)
+        return hostname.startsWith(domain)
+      }
+      return hostname === domain || hostname.endsWith('.' + domain)
+    })
+
+    if (!isAllowed) {
+      return {
+        valid: false,
+        reason: `Domain '${hostname}' is not in the allowed list. Allowed: ${ALLOWED_IMAGE_DOMAINS.join(', ')}`,
+      }
+    }
+
+    return { valid: true }
+  } catch {
+    return { valid: false, reason: 'Invalid URL format' }
+  }
+}
+
 const addMediaByUrlSchema = z.object({
   url: z.string().url('Invalid URL'),
   category: z.string().optional(),
@@ -26,6 +100,31 @@ const deleteMediaSchema = z.object({
   mediaId: z.string(),
 })
 
+// Helper: Ensure only one primary image
+async function ensureSinglePrimaryImage(listingId: string, primaryId?: string) {
+  await prisma.listingMedia.updateMany({
+    where: {
+      listingId,
+      isPrimary: true,
+      ...(primaryId ? { id: { not: primaryId } } : {}),
+    },
+    data: { isPrimary: false },
+  })
+}
+
+// Helper: Reorder media positions after deletion
+async function reorderMediaPositions(listingId: string, deletedPosition: number) {
+  await prisma.listingMedia.updateMany({
+    where: {
+      listingId,
+      position: { gt: deletedPosition },
+    },
+    data: {
+      position: { decrement: 1 },
+    },
+  })
+}
+
 // POST - Add media by URL (for mock data / external images)
 export const POST = withErrorHandler<{ id: string }>(
   async (request: NextRequest, { params }: { params: Promise<{ id: string }> }) => {
@@ -41,6 +140,16 @@ export const POST = withErrorHandler<{ id: string }>(
         'Invalid media data',
         ERROR_CODES.VALIDATION_INVALID_INPUT,
         { errors: parseResult.error.flatten().fieldErrors }
+      )
+    }
+
+    // Security: Validate external URL
+    const urlValidation = validateExternalUrl(parseResult.data.url)
+    if (!urlValidation.valid) {
+      throw new ValidationError(
+        urlValidation.reason || 'Invalid URL',
+        ERROR_CODES.VALIDATION_INVALID_INPUT,
+        { url: parseResult.data.url }
       )
     }
 
@@ -64,10 +173,7 @@ export const POST = withErrorHandler<{ id: string }>(
 
     // If setting as primary, unset other primary images
     if (parseResult.data.isPrimary) {
-      await prisma.listingMedia.updateMany({
-        where: { listingId, isPrimary: true },
-        data: { isPrimary: false },
-      })
+      await ensureSinglePrimaryImage(listingId)
     }
 
     // Create media record with external URL
@@ -96,6 +202,7 @@ export const POST = withErrorHandler<{ id: string }>(
         listingTitle: listing.title,
         mediaId: media.id,
         url: parseResult.data.url,
+        externalUrl: true,
         adminAction: true,
       },
     })
@@ -141,10 +248,7 @@ export const PATCH = withErrorHandler<{ id: string }>(
 
     // If setting as primary, unset other primary images
     if (updateData.isPrimary) {
-      await prisma.listingMedia.updateMany({
-        where: { listingId, isPrimary: true, id: { not: mediaId } },
-        data: { isPrimary: false },
-      })
+      await ensureSinglePrimaryImage(listingId, mediaId)
     }
 
     const media = await prisma.listingMedia.update({
@@ -205,13 +309,19 @@ export const DELETE = withErrorHandler<{ id: string }>(
       throw new NotFoundError('Media not found', ERROR_CODES.RESOURCE_NOT_FOUND)
     }
 
+    const deletedPosition = existingMedia.position
+    const wasPrimary = existingMedia.isPrimary
+
     // Delete media record
     await prisma.listingMedia.delete({
       where: { id: parseResult.data.mediaId },
     })
 
+    // Reorder remaining media positions to close the gap
+    await reorderMediaPositions(listingId, deletedPosition)
+
     // If deleted media was primary, set next image as primary
-    if (existingMedia.isPrimary) {
+    if (wasPrimary) {
       const nextMedia = await prisma.listingMedia.findFirst({
         where: { listingId },
         orderBy: { position: 'asc' },
@@ -236,6 +346,7 @@ export const DELETE = withErrorHandler<{ id: string }>(
         listingTitle: existingMedia.listing.title,
         mediaId: parseResult.data.mediaId,
         mediaUrl: existingMedia.publicUrl,
+        deletedPosition,
         adminAction: true,
       },
     })
