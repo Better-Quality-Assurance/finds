@@ -30,6 +30,7 @@
     "home": "Acasa",
     "auctions": "Licitatii",
     "recentSales": "Vanzari Recente",
+    "blog": "Jurnal",
     "sell": "Vinde-ti Masina",
     "account": "Contul Meu",
     "login": "Autentificare",
@@ -687,6 +688,42 @@
       "auctionsSold": "Licitatii Vandute",
       "totalEarned": "Total Castigat",
       "averageRating": "Evaluare Medie"
+    }
+  },
+  "blog": {
+    "title": "Jurnalul Finds",
+    "subtitle": "Perspective, ghiduri si povesti din lumea licitatiilor de masini clasice",
+    "readMore": "Citeste Mai Mult",
+    "readingTime": "{minutes} min de citit",
+    "publishedOn": "Publicat {date}",
+    "byAuthor": "De {author}",
+    "backToBlog": "Inapoi la Jurnal",
+    "categories": {
+      "all": "Toate Articolele",
+      "buying-guide": "Ghiduri de Cumparare",
+      "selling-guide": "Ghiduri de Vanzare",
+      "market-insights": "Perspective de Piata",
+      "restoration": "Restaurare",
+      "fraud-prevention": "Prevenire Fraude",
+      "auction-tips": "Sfaturi pentru Licitatii"
+    },
+    "noArticles": "Inca nu sunt articole",
+    "noArticlesDescription": "Lucram la crearea de continut util pentru pasionatii de masini clasice. Revino curand!",
+    "relatedArticles": "Articole Similare",
+    "shareArticle": "Distribuie acest articol",
+    "betterQA": {
+      "badge": "Un Proiect BetterQA",
+      "footer": "Construit cu grija de echipa BetterQA",
+      "about": "Finds face parte din familia de produse BetterQA axate pe calitate"
+    },
+    "newsletter": {
+      "title": "Ramai la curent",
+      "description": "Primeste cele mai recente informatii despre piata masinilor clasice si sfaturi pentru licitatii direct in inbox.",
+      "placeholder": "Adresa ta de email",
+      "subscribe": "Aboneaza-te",
+      "subscribing": "Se aboneaza...",
+      "success": "Multumim pentru abonare!",
+      "error": "Ceva nu a functionat. Te rugam sa incerci din nou."
     }
   },
   "condition": {

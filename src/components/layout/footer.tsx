@@ -49,6 +49,14 @@ export function Footer() {
               </li>
               <li>
                 <Link
+                  href="/blog"
+                  className="text-muted-foreground transition-colors hover:text-primary"
+                >
+                  {t('nav.blog')}
+                </Link>
+              </li>
+              <li>
+                <Link
                   href="/sell"
                   className="text-muted-foreground transition-colors hover:text-primary"
                 >
@@ -124,9 +132,22 @@ export function Footer() {
 
         <div className="mt-16 border-t border-border/50 pt-8">
           <div className="flex flex-col items-center justify-between gap-4 md:flex-row">
-            <p className="text-sm text-muted-foreground">
-              &copy; {new Date().getFullYear()} Finds. All rights reserved.
-            </p>
+            <div className="flex flex-col items-center gap-2 md:items-start">
+              <p className="text-sm text-muted-foreground">
+                &copy; {new Date().getFullYear()} Finds. All rights reserved.
+              </p>
+              <p className="text-xs text-muted-foreground/70">
+                {t('blog.betterQA.badge')} ·{' '}
+                <a
+                  href="https://betterqa.co"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="hover:text-primary transition-colors"
+                >
+                  betterqa.co
+                </a>
+              </p>
+            </div>
             <p className="text-sm font-medium text-muted-foreground">
               Built for collectors, by collectors.
             </p>

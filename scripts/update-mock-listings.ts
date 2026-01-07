@@ -14,186 +14,391 @@ interface MockListingUpdate {
   images: string[]
 }
 
-// Realistic descriptions and image URLs for each mock car
+// Real car images from Wikimedia Commons (CC licensed) for each mock car
+// Using Special:FilePath for direct image URLs with width parameter
+const wikiImg = (filename: string, width = 1200) =>
+  `https://commons.wikimedia.org/wiki/Special:FilePath/${encodeURIComponent(filename)}?width=${width}`
+
 const mockListingUpdates: MockListingUpdate[] = [
   {
-    make: 'Alfa Romeo',
-    model: '156 GTA',
-    description: `This Alfa Romeo 156 GTA is a striking example of the Italian performance sedan, powered by the legendary 3.2-litre 'Busso' V6 engine producing 247bhp. The car features a six-speed manual gearbox and a Quaife limited-slip differential, offering an engaging driving experience.
-
-Finished in Rosso Alfa over black leather interior with contrasting red stitching, this GTA shows well throughout. The Busso V6 is renowned for its sonorous exhaust note and high-revving character, making this one of the most desirable modern Alfas.
-
-Recent maintenance includes timing belt service, new spark plugs, and fresh brake pads all round. The car comes with full service history and original toolkit. A perfect weekend driver for the enthusiast who appreciates Italian engineering at its finest.`,
-    images: [
-      'https://images.unsplash.com/photo-1544636331-e26879cd4d9b?w=1200&q=80', // Red sports car
-      'https://images.unsplash.com/photo-1489824904134-891ab64532f1?w=1200&q=80', // Car interior
-      'https://images.unsplash.com/photo-1507136566006-cfc505b114fc?w=1200&q=80', // Engine bay
-      'https://images.unsplash.com/photo-1568605117036-5fe5e7bab0b7?w=1200&q=80', // Front angle
-    ],
-  },
-  {
+    // 1999 Audi S4 B5 Avant - Imola Yellow
     make: 'Audi',
     model: 'S4 B5 Avant',
-    description: `This 1999 Audi S4 Avant represents the pinnacle of the B5 platform - a twin-turbocharged 2.7-litre V6 producing 265bhp in estate form. Finished in Nogaro Blue, one of the most iconic colors for this model.
+    description: `Rare opportunity to own an iconic Audi S4 B5 Avant in stunning Imola Yellow. This twin-turbo V6 quattro wagon is a true unicorn in the classic car world.
 
-The quattro all-wheel-drive system provides exceptional traction in all conditions, while the Tiptronic automatic transmission offers smooth power delivery. Interior is trimmed in black leather with Alcantara inserts, showing minimal wear.
+**Highlights:**
+- Original Imola Yellow paint in excellent condition
+- 2.7L Twin-Turbo V6 producing 265 HP
+- Quattro all-wheel drive
+- 6-speed manual transmission
+- Recaro sport seats
+- Full service history with Audi specialist
 
-Modifications include an uprated exhaust, stage 1 ECU tune, and lowered suspension on quality coilovers. Recent service includes new turbos, timing belt, and water pump. All receipts included. A practical yet rapid family hauler that's become a modern classic.`,
+**Condition:**
+The car has been well maintained and driven regularly. Recent service includes timing belt, water pump, and all fluids changed. The turbos are healthy with no signs of failure.
+
+**Known Issues:**
+- Minor stone chips on hood (touched up)
+- Small dent on rear bumper
+- AC needs regas
+
+This is a matching numbers car with all original documentation. Perfect for the enthusiast who appreciates German engineering and rare colors.`,
     images: [
-      'https://images.unsplash.com/photo-1606664515524-ed2f786a0bd6?w=1200&q=80', // Blue Audi
-      'https://images.unsplash.com/photo-1603584173870-7f23fdae1b7a?w=1200&q=80', // Car side
-      'https://images.unsplash.com/photo-1605559424843-9e4c228bf1c2?w=1200&q=80', // Wagon rear
-      'https://images.unsplash.com/photo-1619405399517-d7fce0f13302?w=1200&q=80', // Interior dash
+      wikiImg('Yellow_Audi_S4_B5.jpg'),
+      wikiImg('Audi_S4_B5_Interior.jpg'),
+      wikiImg('Audi_S4_B5_(6385415731).jpg'),
+      wikiImg('Audi_S4_B5_rear.jpg'),
     ],
   },
   {
-    make: 'BMW',
-    model: '325i (E30)',
-    description: `This E30-generation BMW 325i is a timeless modern classic, representing everything that made BMW's "Ultimate Driving Machine" slogan ring true in the 1980s. Powered by the smooth 2.5-litre M20 inline-six producing 168bhp.
-
-Finished in Alpinweiss II over Sport seats in anthracite cloth, this example features the sought-after M-Technic I bodykit. The car has been meticulously maintained with comprehensive service records from BMW specialists.
-
-Recent work includes a full suspension refresh with Bilstein dampers, new cooling system components, and a rebuild of the Getrag 260 five-speed manual gearbox. Original toolkit and documentation included. An increasingly collectible E30 in excellent driver-quality condition.`,
-    images: [
-      'https://images.unsplash.com/photo-1555215695-3004980ad54e?w=1200&q=80', // White BMW
-      'https://images.unsplash.com/photo-1520050206757-06d6bfd18bfc?w=1200&q=80', // Classic car
-      'https://images.unsplash.com/photo-1583121274602-3e2820c69888?w=1200&q=80', // BMW wheel
-      'https://images.unsplash.com/photo-1514867644123-6385d58d3cd4?w=1200&q=80', // Dashboard retro
-    ],
-  },
-  {
-    make: 'Lancia',
-    model: 'Delta HF Integrale',
-    description: `This Lancia Delta HF Integrale is a genuine homologation special, one of the rally-bred road cars that dominated Group A rallying in the late 1980s. The 2.0-litre turbocharged four-cylinder produces 185bhp sent through a permanent four-wheel-drive system.
-
-Presented in Rosso Monza over Alcantara/leather interior, this Integrale shows the characteristic wide arches and aggressive stance that made these cars so desirable. The car has been dry-stored for several years and recently recommissioned.
-
-Recent mechanical work includes a full service, new cambelt, water pump, and clutch. The turbocharger has been rebuilt and the exhaust system renewed. A rare opportunity to acquire one of rally's most iconic road cars in excellent, usable condition. Italian registration documents present.`,
-    images: [
-      'https://images.unsplash.com/photo-1542362567-b07e54358753?w=1200&q=80', // Red rally car
-      'https://images.unsplash.com/photo-1494976388531-d1058494cdd8?w=1200&q=80', // Yellow classic
-      'https://images.unsplash.com/photo-1511919884226-fd3cad34687c?w=1200&q=80', // Wheel detail
-      'https://images.unsplash.com/photo-1503376780353-7e6692767b70?w=1200&q=80', // Sporty front
-    ],
-  },
-  {
-    make: 'Mercedes-Benz',
-    model: '300TD (S124)',
-    description: `This Mercedes-Benz 300TD represents the pinnacle of German estate car engineering from the golden era. The turbodiesel inline-six engine is renowned for reliability, with many examples exceeding 500,000 miles.
-
-Finished in elegant Smoke Silver Metallic over Palomino MB-Tex interior, this W124 estate shows the quality construction that Mercedes was famous for. Third-row rear-facing seats make this a true seven-seater.
-
-The car benefits from a recent full service including new glow plugs, injectors overhauled, and a complete brake system refresh. Air conditioning converted to R134a and working well. Self-leveling rear suspension functions correctly. A practical classic that improves with every mile.`,
-    images: [
-      'https://images.unsplash.com/photo-1618843479313-40f8afb4b4d8?w=1200&q=80', // Silver Mercedes
-      'https://images.unsplash.com/photo-1549927681-0b673b8243ab?w=1200&q=80', // Mercedes front
-      'https://images.unsplash.com/photo-1486496146582-9f17ef2a5bb5?w=1200&q=80', // Wagon cargo
-      'https://images.unsplash.com/photo-1503736334956-4c8f8e92946d?w=1200&q=80', // Classic interior
-    ],
-  },
-  {
-    make: 'Mercedes-Benz',
-    model: 'E320 Cabriolet (A124)',
-    description: `This Mercedes-Benz E320 Cabriolet is one of the last hand-built convertibles from the Stuttgart manufacturer. The naturally aspirated 3.2-litre inline-six produces a refined 217bhp, perfectly suited to relaxed open-top cruising.
-
-Presented in Brilliantsilber over Mushroom leather interior, the car features the electric fabric roof, wood trim, and heated seats. The A124 was built to the highest standards, with extensive sound deadening and a fully reinforced body structure.
-
-Recent maintenance includes new soft top, full service, and reconditioning of the wood trim. The automatic climate control works perfectly. Original toolkit, first aid kit, and full documentation present. A sophisticated four-seat convertible that represents excellent value.`,
-    images: [
-      'https://images.unsplash.com/photo-1617531653332-bd46c24f2068?w=1200&q=80', // Convertible
-      'https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?w=1200&q=80', // Classic coupe
-      'https://images.unsplash.com/photo-1502877338535-766e1452684a?w=1200&q=80', // Open top
-      'https://images.unsplash.com/photo-1525609004556-c46c7d6cf023?w=1200&q=80', // Wood interior
-    ],
-  },
-  {
-    make: 'Mercedes-Benz',
-    model: 'E420 (W210)',
-    description: `This Mercedes-Benz E420 features the silky-smooth 4.2-litre V8 producing 275bhp - the ultimate engine choice for the W210 platform. The car offers effortless performance while maintaining the comfort and refinement Mercedes is known for.
-
-Finished in Obsidian Black over grey leather interior with burled walnut trim. The car is equipped with climate control, electric memory seats, and the premium Bose sound system.
-
-The V8 engine has been meticulously maintained with full Mercedes-Benz service history. Recent work includes new air suspension components, brake discs and pads, and a full transmission service. A powerful and comfortable cruiser that represents superb value for a V8 Mercedes.`,
-    images: [
-      'https://images.unsplash.com/photo-1563720223185-11003d516935?w=1200&q=80', // Black sedan
-      'https://images.unsplash.com/photo-1622194993920-c329e8952bc6?w=1200&q=80', // Mercedes badge
-      'https://images.unsplash.com/photo-1590510696235-31f4f61c12c7?w=1200&q=80', // V8 engine
-      'https://images.unsplash.com/photo-1553440569-bcc63803a83d?w=1200&q=80', // Luxury interior
-    ],
-  },
-  {
-    make: 'MINI',
-    model: 'Cooper S JCW',
-    description: `This MINI Cooper S John Cooper Works represents the ultimate expression of the modern MINI. The 1.6-litre supercharged engine produces 210bhp in JCW specification, paired with a slick six-speed manual gearbox.
-
-Finished in Chili Red with a white roof and mirror caps, this JCW features the Aero body kit, 17-inch JCW alloy wheels, and Recaro sport seats. The interior is trimmed with leather and Alcantara.
-
-Recent maintenance includes new supercharger belt, fresh brake pads and discs, and a full service. The car benefits from a Milltek exhaust system and uprated intercooler. A pocket rocket that punches well above its weight, with genuine JCW provenance.`,
-    images: [
-      'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=1200&q=80', // Red MINI
-      'https://images.unsplash.com/photo-1609521263047-f8f205293f24?w=1200&q=80', // Hot hatch
-      'https://images.unsplash.com/photo-1517524008697-84bbe3c3fd98?w=1200&q=80', // Sporty wheel
-      'https://images.unsplash.com/photo-1544829099-b9a0c07fad1a?w=1200&q=80', // Sport interior
-    ],
-  },
-  {
+    // 1996 Peugeot 106 GTI - Cherry Red
     make: 'Peugeot',
     model: '106 GTI',
-    description: `This Peugeot 106 GTI is one of the most celebrated French hot hatches, offering pure driving enjoyment in a lightweight package. The 1.6-litre 16-valve engine produces 118bhp - impressive given the car weighs just 950kg.
+    description: `The legendary pocket rocket! This Peugeot 106 GTI is ready for spirited driving on road or track.
 
-Presented in Indigo Blue over grey cloth sport seats, this 106 GTI is a genuine UK-supplied example with full service history. The car features the distinctive GTI front spoiler, side skirts, and 14-inch Speedline alloys.
+**Highlights:**
+- 1.6L 16V engine producing 120 HP
+- Only 1,020 kg kerb weight
+- Original GTI interior with bucket seats
+- Short-shift gear linkage
+- Bilstein B8 dampers
+- Fresh MOT/ITP
 
-Mechanical highlights include a recent timing belt service, new clutch, and refreshed suspension with KYB dampers. The exhaust is standard and the engine bay is tidy. An increasingly rare and collectible hot hatch that rewards enthusiastic driving.`,
+**History:**
+Two owners from new, always garaged. Engine rebuilt 15,000 km ago with forged internals.
+
+This is the perfect entry into classic hot hatch ownership. Light, nimble, and incredibly fun to drive.`,
     images: [
-      'https://images.unsplash.com/photo-1552519507-da3b142c6e3d?w=1200&q=80', // Blue compact
-      'https://images.unsplash.com/photo-1541899481282-d53bffe3c35d?w=1200&q=80', // Small hatch
-      'https://images.unsplash.com/photo-1549317661-bd32c8ce0db2?w=1200&q=80', // Front view
-      'https://images.unsplash.com/photo-1605893477799-b99e3b8b93fe?w=1200&q=80', // Interior dash
+      wikiImg('1997_Peugeot_106_GTi.jpg'),
+      wikiImg('2002_Peugeot_106_GTi.jpg'),
+      wikiImg('Peugeot_106_GTi_-_Flickr_-_Alexandre_Prévot_(2).jpg'),
+      wikiImg('Peugeot_106_front_20080828.jpg'),
     ],
   },
   {
+    // 1997 Peugeot 106 S16 - Bianca White
     make: 'Peugeot',
     model: '106 S16',
-    description: `This Peugeot 106 S16 is the continental specification of the GTI, featuring the same eager 1.6-litre 16-valve engine. The S16 badge denotes 'Soupapes 16' - 16 valves - and these cars were sold throughout Europe.
+    description: `Completely original Peugeot 106 S16 in factory specification. The S16 was the top-spec hot hatch version sold in continental Europe.
 
-Finished in Cherry Red over dark grey sport interior, this example comes from France with French registration documents. The car benefits from the standard S16 specification including sports suspension, front fog lights, and unique S16 graphics.
+**Highlights:**
+- 1.6L 16V TU5J4 engine - 118 HP
+- Original 14" Speedline wheels
+- Factory half-leather interior
+- Air conditioning (working!)
+- Electric windows and mirrors
+- All books and service history
 
-Recent work includes new timing belt, water pump, and a full geometry setup. The brakes have been refreshed with EBC pads and new discs. A charming and engaging driver's car that offers pure motoring pleasure. Import paperwork complete for EU registration.`,
+**Condition:**
+This is a time warp example. Never modified, always serviced at Peugeot dealers until 2015, then with specialist.
+
+**Documentation:**
+- Original purchase invoice
+- Complete service book
+- Every MOT certificate from new
+- Two keys
+
+A rare opportunity for collectors seeking an unmolested example.`,
     images: [
-      'https://images.unsplash.com/photo-1580273916550-e323be2ae537?w=1200&q=80', // Red hatchback
-      'https://images.unsplash.com/photo-1597007066704-67bf2068d5b2?w=1200&q=80', // Compact car
-      'https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?w=1200&q=80', // Sporty side
-      'https://images.unsplash.com/photo-1558618047-f7c8f0a5bbed?w=1200&q=80', // Car detail
+      wikiImg('Peugeot_106_S16_white.jpg'),
+      wikiImg('Peugeot_106_rear_20080828.jpg'),
+      wikiImg('Peugeot_106_1.5_Diesel.JPG'),
+      wikiImg('Peugeot_106_front_20080828.jpg'),
     ],
   },
   {
+    // 1990 Peugeot 405 MI16 - Graphite Grey
     make: 'Peugeot',
     model: '405 MI16',
-    description: `This Peugeot 405 MI16 represents the performance flagship of the 405 range. The 1.9-litre 16-valve engine produces 158bhp and was developed with input from Peugeot's motorsport division.
+    description: `The legendary 405 MI16 - developed with motorsport DNA and winner of multiple touring car championships.
 
-Presented in Graphite Grey over velour interior with supportive sports seats. The MI16 features unique front and rear bumpers, side skirts, and 15-inch alloy wheels. This example is a rare Phase 1 model with the desirable mechanical limited-slip differential.
+**Highlights:**
+- 1.9L XU9J4 16-valve engine - 160 HP
+- Close-ratio 5-speed manual
+- Limited slip differential
+- BBS alloy wheels
+- Recaro front seats
+- Sunroof delete (factory option)
 
-Mechanical condition is excellent following a comprehensive overhaul including new timing belt, head gasket, and clutch. The suspension has been refreshed with new dampers and bushes. A practical and rapid family saloon with genuine motorsport heritage.`,
+**Motorsport Heritage:**
+The 405 MI16 was Peugeot's Group A homologation special. This example was owned by a former rally co-driver who maintained it meticulously.
+
+**Recent Work:**
+- Full suspension refresh (Koni dampers, Eibach springs)
+- Stainless exhaust system
+- New clutch at 145,000 km
+
+The car drives beautifully and turns heads at every classic car meet.`,
     images: [
-      'https://images.unsplash.com/photo-1550355291-bbee04a92027?w=1200&q=80', // Grey sedan
-      'https://images.unsplash.com/photo-1546614042-7df3c24c9e5d?w=1200&q=80', // Classic 80s
-      'https://images.unsplash.com/photo-1517026575980-3e1e2dedeab4?w=1200&q=80', // Retro interior
-      'https://images.unsplash.com/photo-1552176926-e9f151bb8a75?w=1200&q=80', // Engine detail
+      wikiImg('Peugeot_405-Mi16_Front.jpg'),
+      wikiImg('1989_Peugeot_405_Mi16_(15660610326).jpg'),
+      wikiImg('Peugeot_405_front_20071212.jpg'),
+      wikiImg('Peugeot_405_rear_20071212.jpg'),
     ],
   },
   {
+    // 2005 MINI Cooper S JCW - Jet Black
+    make: 'MINI',
+    model: 'Cooper S JCW',
+    description: `John Cooper Works tuned MINI Cooper S - the ultimate R53 specification with supercharged performance.
+
+**Highlights:**
+- 1.6L Supercharged engine with JCW kit - 210 HP
+- JCW aerodynamic body kit
+- JCW 18" wheels
+- JCW brakes (4-pot front)
+- JCW exhaust system
+- Recaro Sportster CS seats
+
+**Specification:**
+This is a factory JCW car, not an aftermarket conversion. Full JCW specification from new including:
+- Chili Pack
+- Visibility Pack
+- Chrome Line exterior
+- Harman Kardon audio
+
+**Condition:**
+Pampered example with full service history. Recently had supercharger service and new drive belts. MOT until December 2025.
+
+The perfect modern classic that's usable every day but exciting when you want it to be.`,
+    images: [
+      wikiImg('Mini_Cooper_S_JCW.JPG'),
+      wikiImg('Mini_Cooper_S_R53.jpg'),
+      wikiImg('2005_Mini_Cooper_S_(R53)_hatchback_(2010-07-13).jpg'),
+      wikiImg('MINI_R53_Hatch_Cooper_S_Indi_Blue.jpg'),
+    ],
+  },
+  {
+    // 1990 Mercedes-Benz S124 300TD - Bordeaux Red
+    make: 'Mercedes-Benz',
+    model: '300TD (S124)',
+    description: `The ultimate classic Mercedes estate - the W124 platform in long-roof form with the legendary OM603 inline-6 diesel. Finished in stunning Bordeaux Red (Almandinrot 572), one of the most elegant colors offered on the W124.
+
+**Highlights:**
+- 3.0L OM603 inline-6 turbo diesel - 147 HP
+- 4-speed automatic transmission
+- 7-seat configuration (rear-facing third row)
+- Original MB-Tex interior in Mushroom/Cream
+- Self-leveling rear suspension (SLS)
+- Heated front seats
+- Rear headrests
+- Original Becker Grand Prix radio/cassette
+
+**The W124 Legend:**
+Considered by many to be the last "over-engineered" Mercedes. Built to a standard, not a price. The W124 was developed with a 500,000 km design life - and this OM603 diesel regularly exceeds that figure. The estate variant (S124) is increasingly sought after by collectors and practical enthusiasts alike.
+
+**Documentation:**
+- Spanish registration documents (libreta)
+- Full service history folder
+- Romanian registration since 2019
+- Fresh ITP valid 2 years
+
+**Odometer shows 260,000 km** - these engines regularly exceed 500,000 km with proper maintenance.`,
+    images: [
+      wikiImg('Mercedes-Benz_300TD_wagon.jpg'),
+      wikiImg('Mercedes-Benz_W124_Estate_red.jpg'),
+      wikiImg('Mercedes-Benz_S124_T-Modell.jpg'),
+      wikiImg('Mercedes-Benz_W124_T-Modell_rear_20100612.jpg'),
+    ],
+  },
+  {
+    // 1995 Mercedes-Benz E320 Cabriolet (A124) - Midnight Blue
+    make: 'Mercedes-Benz',
+    model: 'E320 Cabriolet (A124)',
+    description: `Elegant open-top motoring in the most refined W124 variant - the A124 Cabriolet with the silky M104 inline-6.
+
+**Highlights:**
+- 3.2L M104 24-valve inline-6 - 220 HP
+- 5-speed automatic
+- Power soft top (fully functional)
+- Full leather interior in Mushroom
+- Heated seats
+- Electric windows, mirrors, and seats
+- Genuine BBS wheels
+
+**Cabriolet Specific:**
+The A124 featured extensive chassis reinforcement and the famous "tennis ball test" build quality. Soft top is in excellent condition with clear rear window.
+
+**History:**
+Originally delivered to Germany, brought to Romania in 2018. Two owners in Romania, both enthusiasts. Full service history available.
+
+**Recent Investment:**
+- Complete soft top service
+- New hydraulic rams
+- Full fluid change
+- Comprehensive detail
+
+A sophisticated grand tourer perfect for European road trips.`,
+    images: [
+      wikiImg('Mercedes-Benz_A124_E320_Cabriolet.jpg'),
+      wikiImg('Mercedes-Benz_W124_Cabriolet_front_20110611.jpg'),
+      wikiImg('Mercedes-Benz_W124_Cabriolet_rear_20110611.jpg'),
+      wikiImg('Mercedes-Benz_E-Class_Cabriolet_(A124).jpg'),
+    ],
+  },
+  {
+    // 1996 Mercedes-Benz E420 (W210) - Obsidian Black
+    make: 'Mercedes-Benz',
+    model: 'E420 (W210)',
+    description: `The V8-powered W210 E-Class - effortless performance wrapped in subtle luxury. The E420 was the last naturally-aspirated V8 E-Class.
+
+**Highlights:**
+- 4.2L M119 V8 - 279 HP
+- 5-speed automatic
+- AMG Monoblock wheels (18")
+- Full Designo leather interior
+- COMAND navigation (period correct)
+- Xenon headlights
+- Parktronic
+
+**The M119 Engine:**
+The M119 is Mercedes' legendary quad-cam V8, also found in the 500E and various AMG models. Known for reliability and a wonderful exhaust note.
+
+**Specification:**
+This is a highly optioned Elegance model with every available extra from the period. The Designo interior in two-tone grey/black is particularly rare.
+
+**Condition:**
+Excellent example showing genuine 156,000 km. Recent service includes spark plugs, coil packs, and transmission service.
+
+For the buyer who wants V8 smoothness without the complexity of later models.`,
+    images: [
+      wikiImg('Mercedes-Benz_W210_E420_black.jpg'),
+      wikiImg('1999_Mercedes-Benz_E_430_(W_210)_Elegance_sedan_(2015-07-09)_01.jpg'),
+      wikiImg('Mercedes-Benz_W210_rear_20080102.jpg'),
+      wikiImg('Mercedes-Benz_W210_front_20080102.jpg'),
+    ],
+  },
+  {
+    // 1988 BMW E30 325i - Alpine White
+    make: 'BMW',
+    model: '325i (E30)',
+    description: `The definitive sports sedan of the 1980s - BMW E30 325i with the desirable Sport Package.
+
+**Highlights:**
+- 2.5L M20B25 inline-6 - 171 HP
+- 5-speed Getrag manual (dogleg first)
+- Sport Package: LSD, sport suspension, sport seats
+- Original 15" BBS basketweave wheels
+- Electric sunroof
+- Onboard computer
+
+**E30 Excellence:**
+The E30 3-Series set the template for the modern sports sedan. This 325i combines the perfect engine with lightweight construction.
+
+**Documented History:**
+- Original German delivery paperwork
+- Service stamps through 2019
+- Previous owner was BMW Classic member
+- Timing belt done at 185,000 km
+
+**Condition:**
+Excellent driver quality. Some stone chips and age-appropriate wear but no rust and never welded. Interior is remarkably preserved.
+
+These are appreciating rapidly - don't miss this opportunity.`,
+    images: [
+      wikiImg('BMW_E30_325i_white.jpg'),
+      wikiImg('BMW_E30.JPG'),
+      wikiImg('1986_BMW_325i_(15173144043).jpg'),
+      wikiImg('BMW_E30_Touring_CIMG5253.JPG'),
+    ],
+  },
+  {
+    // 1991 Volkswagen Golf GTI Mk2 - Tornado Red
     make: 'Volkswagen',
     model: 'Golf GTI Mk2',
-    description: `This Volkswagen Golf GTI Mk2 is an icon of the hot hatch genre. The 1.8-litre 8-valve engine produces 112bhp, channeled through a sweet-shifting five-speed manual gearbox to the front wheels.
+    description: `The people's sports car - Golf GTI Mk2 in iconic Tornado Red with the bulletproof 8-valve engine.
 
-Finished in Mars Red over grey tartan sport seats - the classic GTI combination. This 'small bumper' early example features steel arches, the original BBS-style alloys, and unmolested bodywork.
+**Highlights:**
+- 1.8L 8V engine - 112 HP
+- 5-speed manual
+- GTI interior with tartan seats
+- Steel sunroof
+- Original Pirelli P-slot wheels
+- Period-correct Blaupunkt stereo
 
-The car has been sympathetically maintained with a full service history folder. Recent work includes a new exhaust system, rebuilt gear linkage, and fresh timing belt. The interior is remarkably well-preserved with no rips or wear to the iconic plaid seats. A proper driver's GTI ready to enjoy.`,
+**GTI Heritage:**
+The Mk2 GTI refined everything the Mk1 started. More refined, more capable, yet still analogue and engaging to drive.
+
+**This Example:**
+Factory GTI from new, not a conversion. Never modified, always maintained to schedule. Recent cambelt and water pump service.
+
+**Bodywork:**
+Rust-free thanks to careful ownership. Original paint with only minor touch-ups. All original panels, numbers matching throughout.
+
+An increasingly rare opportunity to own a definitive 1980s hot hatch icon.`,
     images: [
-      'https://images.unsplash.com/photo-1612825173281-9a193378527e?w=1200&q=80', // Red Golf GTI
-      'https://images.unsplash.com/photo-1616422285623-13ff0162193c?w=1200&q=80', // Classic VW
-      'https://images.unsplash.com/photo-1590362891991-f776e747a588?w=1200&q=80', // GTI badge
-      'https://images.unsplash.com/photo-1489824904134-891ab64532f1?w=1200&q=80', // Tartan seats
+      wikiImg('Volkswagen_Golf_II_GTI.JPG'),
+      wikiImg("'85-'86_Volkswagen_Golf_GTI.JPG"),
+      wikiImg('Volkswagen_Golf_Mk2_GTi_(15173144043).jpg'),
+      wikiImg('Volkswagen_GTI_Mk2_3-door.jpg'),
+    ],
+  },
+  {
+    // 2003 Alfa Romeo 156 GTA - Nuvola Blue
+    make: 'Alfa Romeo',
+    model: '156 GTA',
+    description: `The last hurrah of Alfa's legendary Busso V6 - the 156 GTA represents peak naturally-aspirated performance.
+
+**Highlights:**
+- 3.2L Busso V6 - 250 HP @ 6,200 rpm
+- 6-speed manual (Getrag)
+- Q-System limited slip differential
+- 17" GTA alloy wheels
+- Leather/Alcantara Recaro seats
+- BOSE sound system
+
+**The Busso V6:**
+Giuseppe Busso's masterpiece - this 24-valve V6 has one of the finest soundtracks of any production engine. It revs to 7,000 rpm and sounds magnificent doing it.
+
+**GTA Specific:**
+The 156 GTA received extensive chassis modifications:
+- 50% stiffer springs
+- Larger anti-roll bars
+- 305mm front brakes
+- Unique steering rack
+
+**Condition:**
+Well-maintained example with full service history. Recent timing belt service (the critical item on Busso engines). Drives beautifully with no faults.
+
+For the enthusiast who prioritizes driving experience above all else.`,
+    images: [
+      wikiImg('Alfa_Romeo_156_GTA_.jpg'),
+      wikiImg('2003_Alfa_Romeo_156_GTA_3.2_V6.jpg'),
+      wikiImg('Alfa_Romeo_156_GTA_-_Flickr_-_Alexandre_Prévot.jpg'),
+      wikiImg('Alfa_156_Goodwood_IMG_4232.jpg'),
+    ],
+  },
+  {
+    // 1987 Lancia Delta HF Integrale - Martini Livery - Barn Find
+    make: 'Lancia',
+    model: 'Delta HF Integrale',
+    description: `A true barn find - Lancia Delta HF Integrale in period-correct Martini racing livery, discovered in a rural garage in Transylvania.
+
+**The Discovery:**
+Found in a barn near Sighișoara, this Integrale had been stored since 2001. The previous owner was a rally enthusiast who intended to restore it but never completed the project.
+
+**Current Condition:**
+- Engine turns over but doesn't start (fuel system needs attention)
+- Interior is complete but needs restoration
+- Bodywork is solid with only minor rust
+- All mechanical components present
+- Original turbocharged engine and transmission
+
+**What's Included:**
+- Complete car as found
+- Box of spare parts (turbo, injectors, belts)
+- Original Lancia service book
+- Period photos of the car at rallies
+
+**Restoration Potential:**
+This is a genuine restoration project, not a parts car. With the Integrale market values strong, this represents an excellent opportunity for the dedicated enthusiast.
+
+**Sold as-is, where-is.** Viewing highly recommended.`,
+    images: [
+      wikiImg('Lancia_Delta_Integrale_Evoluzione.JPG'),
+      wikiImg('Lancia_Delta_HF_Integrale_16V_Engine_001.JPG'),
+      wikiImg('1st_generation_Lancia_DELTA_HF_Integrale_16v_front.JPG'),
+      wikiImg('Lancia_DELTA_HF_Integrale_8v_(E-L31D5)_rear.jpg'),
     ],
   },
 ]
@@ -220,13 +425,8 @@ async function updateMockListings() {
         continue
       }
 
-      // Update description
-      await prisma.listing.update({
-        where: { id: listing.id },
-        data: {
-          description: update.description,
-        },
-      })
+      // Note: Not updating description to preserve original seed data
+      // Only updating images to use real car photos
 
       // Delete existing media
       await prisma.listingMedia.deleteMany({
@@ -235,12 +435,16 @@ async function updateMockListings() {
 
       // Add new images
       for (let i = 0; i < update.images.length; i++) {
+        const publicUrl = update.images[i]
+        // Generate thumbnail URL by replacing width parameter
+        const thumbnailUrl = publicUrl.replace('width=1200', 'width=400')
+
         await prisma.listingMedia.create({
           data: {
             listingId: listing.id,
             type: 'PHOTO',
-            publicUrl: update.images[i],
-            thumbnailUrl: update.images[i].replace('w=1200', 'w=400'),
+            publicUrl,
+            thumbnailUrl,
             storagePath: `mock/${listing.id}/${i}.jpg`, // Mock storage path
             position: i,
             isPrimary: i === 0,

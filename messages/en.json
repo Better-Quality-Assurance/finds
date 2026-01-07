@@ -30,6 +30,7 @@
     "home": "Home",
     "auctions": "Auctions",
     "recentSales": "Recent Sales",
+    "blog": "Journal",
     "sell": "Sell Your Car",
     "account": "My Account",
     "login": "Log In",
@@ -687,6 +688,42 @@
       "auctionsSold": "Auctions Sold",
       "totalEarned": "Total Earned",
       "averageRating": "Average Rating"
+    }
+  },
+  "blog": {
+    "title": "Finds Journal",
+    "subtitle": "Insights, guides, and stories from the world of classic car auctions",
+    "readMore": "Read More",
+    "readingTime": "{minutes} min read",
+    "publishedOn": "Published {date}",
+    "byAuthor": "By {author}",
+    "backToBlog": "Back to Journal",
+    "categories": {
+      "all": "All Articles",
+      "buying-guide": "Buying Guides",
+      "selling-guide": "Selling Guides",
+      "market-insights": "Market Insights",
+      "restoration": "Restoration",
+      "fraud-prevention": "Fraud Prevention",
+      "auction-tips": "Auction Tips"
+    },
+    "noArticles": "No articles yet",
+    "noArticlesDescription": "We're working on creating helpful content for classic car enthusiasts. Check back soon!",
+    "relatedArticles": "Related Articles",
+    "shareArticle": "Share this article",
+    "betterQA": {
+      "badge": "A BetterQA Venture",
+      "footer": "Built with care by the BetterQA team",
+      "about": "Finds is part of the BetterQA family of quality-focused products"
+    },
+    "newsletter": {
+      "title": "Stay in the loop",
+      "description": "Get the latest classic car market insights and auction tips delivered to your inbox.",
+      "placeholder": "Your email address",
+      "subscribe": "Subscribe",
+      "subscribing": "Subscribing...",
+      "success": "Thanks for subscribing!",
+      "error": "Something went wrong. Please try again."
     }
   },
   "condition": {

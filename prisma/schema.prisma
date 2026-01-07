@@ -1046,6 +1046,78 @@ model ExternalAuctionSale {
 }
 
 // ============================================================================
+// BLOG MODELS
+// ============================================================================
+
+model BlogPost {
+  id        String   @id @default(cuid())
+  slug      String   @unique
+  status    BlogPostStatus @default(DRAFT)
+
+  // Content (stored in both languages)
+  titleEn       String @map("title_en")
+  titleRo       String @map("title_ro")
+  excerptEn     String @map("excerpt_en") @db.Text
+  excerptRo     String @map("excerpt_ro") @db.Text
+  contentEn     String @map("content_en") @db.Text
+  contentRo     String @map("content_ro") @db.Text
+
+  // SEO
+  metaTitleEn       String? @map("meta_title_en")
+  metaTitleRo       String? @map("meta_title_ro")
+  metaDescriptionEn String? @map("meta_description_en") @db.Text
+  metaDescriptionRo String? @map("meta_description_ro") @db.Text
+
+  // Media
+  featuredImage    String? @map("featured_image")
+  featuredImageAlt String? @map("featured_image_alt")
+
+  // Author
+  authorId String     @map("author_id")
+  author   BlogAuthor @relation(fields: [authorId], references: [id])
+
+  // Categorization
+  category String // buying-guide, selling-guide, market-insights, restoration, fraud-prevention, auction-tips
+  tags     String[] @default([])
+
+  // Reading time (auto-calculated, in minutes)
+  readingTime Int @default(5) @map("reading_time")
+
+  // Timestamps
+  publishedAt DateTime? @map("published_at")
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
+
+  @@index([status, publishedAt(sort: Desc)])
+  @@index([category])
+  @@index([slug])
+  @@map("blog_posts")
+}
+
+model BlogAuthor {
+  id        String @id @default(cuid())
+  name      String
+  slug      String @unique
+  role      String // "Finds Editorial Team", "Guest Contributor", etc.
+  bio       String? @db.Text
+  avatar    String?
+  linkedIn  String? @map("linkedin")
+  twitter   String?
+
+  posts BlogPost[]
+
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@map("blog_authors")
+}
+
+enum BlogPostStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
+// ============================================================================
 // ANALYTICS & USER ACTIVITY TRACKING
 // ============================================================================
 

@@ -18,6 +18,7 @@
     "db:migrate": "prisma migrate dev",
     "db:studio": "prisma studio",
     "db:seed": "tsx prisma/seed.ts",
+    "db:seed-blog": "tsx prisma/seed-blog.ts",
     "mock:activity": "tsx scripts/run-mock-activity.ts",
     "mock:demo": "tsx scripts/run-mock-activity.ts --mode=demo --duration=30",
     "prepare": "husky"
