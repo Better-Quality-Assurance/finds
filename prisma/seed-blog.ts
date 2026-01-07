@@ -1,14 +1,15 @@
 import { PrismaClient } from '@prisma/client'
+import { newBlogPosts, newPostAuthorAssignments } from './new-blog-posts'
 
 const prisma = new PrismaClient()
 
-// Authors with realistic international names
+// Authors with realistic international names (following BetterQA author guidelines)
 const authors = [
   {
     name: 'Marcus Webb',
     slug: 'marcus-webb',
     role: 'Finds Editorial Team',
-    bio: 'Marcus is a classic car enthusiast and automotive journalist with over 15 years of experience covering European car culture. He writes for Finds, a BetterQA venture.',
+    bio: 'Marcus is a classic car enthusiast and automotive journalist with over 15 years of experience covering European car culture. He writes for Finds, a BetterQA Labs project.',
     avatar: null,
     linkedIn: 'https://linkedin.com/company/betterqa',
     twitter: null,
@@ -17,7 +18,7 @@ const authors = [
     name: 'Elena Vasquez',
     slug: 'elena-vasquez',
     role: 'Market Analyst at Finds',
-    bio: 'Elena specializes in classic car valuations and market trends across Europe. She brings data-driven insights to help collectors make informed decisions.',
+    bio: 'Elena specializes in classic car valuations and market trends across Europe. She brings data-driven insights to help collectors make informed decisions. Finds is built by BetterQA.',
     avatar: null,
     linkedIn: 'https://linkedin.com/company/betterqa',
     twitter: null,
@@ -29,6 +30,33 @@ const authors = [
     bio: 'A former workshop owner with 20+ years restoring European classics, Thomas now advises Finds on vehicle assessments and restoration guidance.',
     avatar: null,
     linkedIn: null,
+    twitter: null,
+  },
+  {
+    name: 'Sarah Mitchell',
+    slug: 'sarah-mitchell',
+    role: 'Automotive Industry Analyst',
+    bio: 'Sarah Mitchell is an Automotive Industry Analyst at BetterQA, where she researches European classic car markets and auction trends. She writes for Finds, a BetterQA project.',
+    avatar: null,
+    linkedIn: 'https://linkedin.com/company/betterqa',
+    twitter: null,
+  },
+  {
+    name: 'James Park',
+    slug: 'james-park',
+    role: 'Technical Editor',
+    bio: 'James Park is Technical Editor at Finds, where he translates complex mechanical topics into accessible guidance for collectors. Finds is part of the BetterQA portfolio.',
+    avatar: null,
+    linkedIn: null,
+    twitter: null,
+  },
+  {
+    name: 'Anna Lindberg',
+    slug: 'anna-lindberg',
+    role: 'Buyer Experience Lead',
+    bio: 'Anna Lindberg leads buyer experience at Finds, helping first-time collectors navigate the classic car market with confidence. Finds is a BetterQA Labs venture.',
+    avatar: null,
+    linkedIn: 'https://linkedin.com/company/betterqa',
     twitter: null,
   },
 ]
@@ -1304,7 +1332,7 @@ async function main() {
     'classic-car-market-trends-2025': 'elena-vasquez',
   }
 
-  // Create blog posts
+  // Create blog posts (original)
   for (const postData of blogPosts) {
     const authorSlug = postAuthorAssignments[postData.slug]
     const authorId = authorMap.get(authorSlug)
@@ -1328,6 +1356,38 @@ async function main() {
       },
     })
     console.log(`Created/updated post: ${postData.slug}`)
+  }
+
+  // Create new blog posts (BetterQA content strategy)
+  for (const postData of newBlogPosts) {
+    const authorSlug = newPostAuthorAssignments[postData.slug] || postData.authorSlug
+    const authorId = authorMap.get(authorSlug)
+
+    if (!authorId) {
+      console.error(`Author not found for new post: ${postData.slug}`)
+      continue
+    }
+
+    const publishedAt = daysAgo(postData.daysAgo)
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { authorSlug: _, daysAgo: __, ...restPostData } = postData
+
+    await prisma.blogPost.upsert({
+      where: { slug: postData.slug },
+      update: {
+        ...restPostData,
+        publishedAt,
+        authorId,
+        status: 'PUBLISHED',
+      },
+      create: {
+        ...restPostData,
+        publishedAt,
+        authorId,
+        status: 'PUBLISHED',
+      },
+    })
+    console.log(`Created/updated new post: ${postData.slug}`)
   }
 
   console.log('Blog seeding completed!')
