@@ -14,6 +14,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     '',
     '/auctions',
     '/sell',
+    '/blog',
     '/legal/privacy',
     '/legal/terms',
     '/legal/cookies',
@@ -36,6 +37,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         changeFrequency = 'daily'
       } else if (page === '/sell') {
         priority = 0.8
+      } else if (page === '/blog') {
+        priority = 0.8
+        changeFrequency = 'daily'
       } else if (page.startsWith('/legal/')) {
         priority = 0.3
         changeFrequency = 'monthly'
@@ -54,6 +58,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   // Try to get auctions from database
   let auctionRoutes: MetadataRoute.Sitemap = []
+  let blogRoutes: MetadataRoute.Sitemap = []
+
   try {
     const auctions = await prisma.auction.findMany({
       where: {
@@ -75,10 +81,31 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         priority: 0.8,
       }))
     )
+
+    // Get published blog posts
+    const blogPosts = await prisma.blogPost.findMany({
+      where: {
+        status: 'PUBLISHED',
+      },
+      select: {
+        slug: true,
+        updatedAt: true,
+      },
+      orderBy: { publishedAt: 'desc' },
+    })
+
+    blogRoutes = locales.flatMap((locale) =>
+      blogPosts.map((post) => ({
+        url: `${SITE_URL}/${locale}/blog/${post.slug}`,
+        lastModified: post.updatedAt,
+        changeFrequency: 'monthly' as const,
+        priority: 0.7,
+      }))
+    )
   } catch {
     // Database not available during build, return static routes only
     console.log('Sitemap: Database not available, returning static routes only')
   }
 
-  return [...staticRoutes, ...auctionRoutes]
+  return [...staticRoutes, ...auctionRoutes, ...blogRoutes]
 }
