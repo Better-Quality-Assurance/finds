@@ -34,6 +34,7 @@ import {
   DollarSign,
   ShieldAlert,
   Shield,
+  Pencil,
 } from 'lucide-react'
 import { Markdown } from '@/components/ui/markdown'
 import type { Prisma, ListingStatus } from '@prisma/client'
@@ -189,7 +190,15 @@ export function AdminListingDetailClient({ listing, userRole }: AdminListingDeta
             <p className="text-muted-foreground">{listing.year} {listing.make} {listing.model}</p>
           </div>
         </div>
-        <Badge variant={statusBadge.variant}>{statusBadge.label}</Badge>
+        <div className="flex items-center gap-3">
+          <Badge variant={statusBadge.variant}>{statusBadge.label}</Badge>
+          <Link href={`/admin/listings/${listing.id}/edit`}>
+            <Button variant="outline" className="gap-2">
+              <Pencil className="h-4 w-4" />
+              Edit Listing
+            </Button>
+          </Link>
+        </div>
       </div>
 
       {canReview && isPending && (
