@@ -1,10 +1,8 @@
 name: CI
 
 on:
-  push:
-    branches: [main, develop]
   pull_request:
-    branches: [main, develop]
+    branches: [main]
 
 # Cancel in-progress runs for the same PR
 concurrency:
@@ -12,8 +10,8 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  lint:
-    name: Lint
+  ci:
+    name: Lint, Type Check & Build
     runs-on: ubuntu-latest
 
     steps:
@@ -28,61 +26,24 @@ jobs:
 
       - name: Install dependencies
         run: npm ci
+
+      - name: Generate Prisma Client
+        run: npm run db:generate
+        env:
+          DATABASE_URL: postgresql://user:pass@localhost:5432/test
+
+      - name: Validate Prisma schema
+        run: npx prisma validate && npx prisma format --check
 
       - name: Run ESLint
         run: npm run lint
 
-  typecheck:
-    name: Type Check
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-          cache: 'npm'
-
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Generate Prisma Client
-        run: npm run db:generate
-        env:
-          DATABASE_URL: postgresql://user:pass@localhost:5432/test
-
       - name: Run TypeScript type checking
         run: npm run typecheck
-
-  build:
-    name: Build
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-          cache: 'npm'
-
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Generate Prisma Client
-        run: npm run db:generate
-        env:
-          DATABASE_URL: postgresql://user:pass@localhost:5432/test
 
       - name: Build Next.js application
         run: npm run build
         env:
-          # Required environment variables for build
           DATABASE_URL: postgresql://user:pass@localhost:5432/test
           NEXTAUTH_SECRET: test-secret-for-ci-build
           NEXTAUTH_URL: http://localhost:3000
@@ -100,92 +61,3 @@ jobs:
           NEXT_PUBLIC_PUSHER_KEY: test
           NEXT_PUBLIC_PUSHER_CLUSTER: mt1
           RESEND_API_KEY: test
-
-      - name: Upload build artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: next-build
-          path: .next
-          retention-days: 7
-
-  test:
-    name: Test
-    runs-on: ubuntu-latest
-
-    # Uncomment when tests are added
-    # services:
-    #   postgres:
-    #     image: postgres:16
-    #     env:
-    #       POSTGRES_USER: test
-    #       POSTGRES_PASSWORD: test
-    #       POSTGRES_DB: test
-    #     options: >-
-    #       --health-cmd pg_isready
-    #       --health-interval 10s
-    #       --health-timeout 5s
-    #       --health-retries 5
-    #     ports:
-    #       - 5432:5432
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-          cache: 'npm'
-
-      - name: Install dependencies
-        run: npm ci
-
-      # Uncomment when test script is added
-      # - name: Generate Prisma Client
-      #   run: npm run db:generate
-      #   env:
-      #     DATABASE_URL: postgresql://test:test@localhost:5432/test
-
-      # - name: Run database migrations
-      #   run: npm run db:push
-      #   env:
-      #     DATABASE_URL: postgresql://test:test@localhost:5432/test
-
-      # - name: Run tests
-      #   run: npm test
-      #   env:
-      #     DATABASE_URL: postgresql://test:test@localhost:5432/test
-
-      - name: Check test script exists
-        run: |
-          if grep -q '"test"' package.json; then
-            echo "Test script found, running tests..."
-            npm test || echo "Tests failed or not configured yet"
-          else
-            echo "No test script found in package.json. Skipping tests."
-            echo "Add tests with Jest or Vitest for production readiness."
-          fi
-
-  prisma-validate:
-    name: Validate Prisma Schema
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-          cache: 'npm'
-
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Validate Prisma schema
-        run: npx prisma validate
-
-      - name: Check for schema drift
-        run: npx prisma format --check
