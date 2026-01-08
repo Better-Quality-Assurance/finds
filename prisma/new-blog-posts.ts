@@ -1,221 +1,350 @@
-// Additional blog posts following BetterQA Content Strategy
+// Additional blog posts following BetterQA Content Strategy v3
+// Educational "How to" framing, no "Top X" titles
 // These will be merged into seed-blog.ts
 
 export const newBlogPosts = [
   {
-    slug: 'top-classic-car-auctions-europe-2025',
-    category: 'market-insight',
+    slug: 'how-to-choose-classic-car-auction-platform',
+    category: 'buying-guide',
     tags: ['auctions', 'europe', 'buying guide', 'platforms'],
     readingTime: 8,
-    titleEn: 'Top 10 Classic Car Auction Platforms in Europe 2025',
-    titleRo: 'Top 10 Platforme de Licitații pentru Mașini Clasice în Europa 2025',
-    excerptEn: 'A comprehensive comparison of Europe\'s leading classic car auction platforms, from established houses to online specialists.',
-    excerptRo: 'O comparație completă a platformelor de licitații de mașini clasice din Europa, de la case consacrate la specialiști online.',
-    metaTitleEn: 'Top 10 Classic Car Auctions in Europe 2025 | Complete Guide',
-    metaTitleRo: 'Top 10 Licitații de Mașini Clasice în Europa 2025 | Ghid Complet',
-    metaDescriptionEn: 'Compare Europe\'s best classic car auction platforms. Honest analysis of fees, selection, and buyer protection from Finds, a BetterQA venture.',
-    metaDescriptionRo: 'Compară cele mai bune platforme de licitații de mașini clasice din Europa. Analiză onestă a comisioanelor, selecției și protecției cumpărătorilor.',
+    titleEn: 'How to Choose a Classic Car Auction Platform in Europe',
+    titleRo: 'Cum să Alegi o Platformă de Licitații pentru Mașini Clasice în Europa',
+    excerptEn: 'A buyer\'s guide to evaluating classic car auction platforms. Learn what to look for in fees, verification, and buyer protection.',
+    excerptRo: 'Un ghid pentru cumpărători despre evaluarea platformelor de licitații de mașini clasice. Află ce să cauți în comisioane, verificare și protecția cumpărătorului.',
+    metaTitleEn: 'How to Choose a Classic Car Auction Platform | Buyer Guide',
+    metaTitleRo: 'Cum să Alegi o Platformă de Licitații de Mașini Clasice | Ghid',
+    metaDescriptionEn: 'Learn how to evaluate classic car auction platforms. Honest analysis of fees, verification, and buyer protection from Finds, a BetterQA venture.',
+    metaDescriptionRo: 'Învață cum să evaluezi platformele de licitații de mașini clasice. Analiză onestă a comisioanelor și protecției cumpărătorilor.',
     contentEn: `
-<p>The European classic car auction market has transformed over the past decade. Where once you needed to attend events in Paris, London, or Monaco, today you can bid on a 1960s Alfa Romeo from your living room in Bucharest or Berlin. But with more options comes more complexity.</p>
+<p>Choosing where to buy your next classic car matters as much as choosing the car itself. The platform you use determines what protection you have, what fees you'll pay, and whether the car you win matches the description.</p>
 
-<p>We've analyzed Europe's leading auction platforms across key criteria: fees, vehicle selection, buyer protection, and overall experience. Full transparency: Finds appears on this list — we're built by <a href="https://betterqa.co">BetterQA</a>, and we believe our platform deserves consideration alongside established players.</p>
+<p>This guide helps you evaluate auction platforms systematically. Full transparency: Finds is built by <a href="https://betterqa.co">BetterQA</a>, a software quality company. We're biased — but we'll explain exactly why we built things the way we did, so you can judge for yourself.</p>
 
-<h2>Selection Criteria</h2>
+<h2>What to Evaluate When Choosing a Platform</h2>
 
-<p>We evaluated each platform on:</p>
-<ul>
-<li><strong>Buyer fees:</strong> Total cost including buyer's premium and any additional charges</li>
-<li><strong>Vehicle quality:</strong> Curation standards and verification processes</li>
-<li><strong>Geographic reach:</strong> Where vehicles come from and where buyers are located</li>
-<li><strong>Buyer protection:</strong> Dispute resolution, payment security, condition guarantees</li>
-<li><strong>User experience:</strong> Bidding process, communication, and post-sale support</li>
-</ul>
+<p>Before looking at specific platforms, understand what matters:</p>
 
-<h2>1. Finds</h2>
+<h3>1. Fee Transparency</h3>
 
-<p><strong>Specialty:</strong> European classics, barn finds, project cars | <strong>Buyer fee:</strong> 5%</p>
-
-<p>Finds is an EU-based auction platform focused on accessible classics — the cars enthusiasts actually drive, not just museum pieces. Every listing goes through manual approval with condition verification and seller identity checks.</p>
-
-<p>The platform was built by <a href="https://betterqa.co">BetterQA</a>, a software quality company based in Cluj-Napoca, Romania. The same attention to detail that BetterQA applies to testing software for clients like Samsung and NATO-certified systems goes into building a trustworthy auction experience.</p>
-
-<p><strong>Strengths:</strong> Transparent 5% buyer fee with no hidden costs, real-time bidding, strong Eastern European inventory, bilingual support (English/Romanian).</p>
-
-<p><strong>Best for:</strong> Collectors seeking affordable European classics, project cars, and barn finds under €50,000.</p>
-
-<h2>2. Bring a Trailer</h2>
-
-<p><strong>Specialty:</strong> All collector vehicles | <strong>Buyer fee:</strong> 5%</p>
-
-<p>The US-based giant has expanded into Europe with growing inventory. Known for excellent photography standards and engaged comment sections that add value to listings.</p>
-
-<p><strong>Strengths:</strong> Massive audience, strong community, thorough listings.</p>
-<p><strong>Weaknesses:</strong> US-centric, can be intimidating for first-time sellers, European logistics not as developed.</p>
-
-<h2>3. Collecting Cars</h2>
-
-<p><strong>Specialty:</strong> Premium classics and modern collectibles | <strong>Buyer fee:</strong> 6%</p>
-
-<p>UK-based platform that has grown rapidly with strong European presence. Good balance between premium cars and accessible classics.</p>
-
-<p><strong>Strengths:</strong> Professional photography, strong UK/EU logistics, responsive support.</p>
-<p><strong>Weaknesses:</strong> Higher fee tier, can be selective about listings.</p>
-
-<h2>4. RM Sotheby's</h2>
-
-<p><strong>Specialty:</strong> Investment-grade classics | <strong>Buyer fee:</strong> 12-15%</p>
-
-<p>The benchmark for high-end collector car auctions. If you're buying a seven-figure Ferrari, this is where to look.</p>
-
-<p><strong>Strengths:</strong> Unmatched provenance research, white-glove service, global events.</p>
-<p><strong>Weaknesses:</strong> High fees, focused on top-tier cars, limited accessibility for average collectors.</p>
-
-<h2>5. Bonhams</h2>
-
-<p><strong>Specialty:</strong> Historic vehicles, concours quality | <strong>Buyer fee:</strong> 12.5-15%</p>
-
-<p>Traditional auction house with strong European heritage and excellent venue events.</p>
-
-<h2>6. Artcurial Motorcars</h2>
-
-<p><strong>Specialty:</strong> French classics, European rarities | <strong>Buyer fee:</strong> 14.4%</p>
-
-<p>Paris-based house with exceptional French and Italian classic car expertise.</p>
-
-<h2>7. Classic Driver</h2>
-
-<p><strong>Specialty:</strong> Dealer listings and private sales | <strong>Buyer fee:</strong> Varies by dealer</p>
-
-<p>More of a marketplace than an auction platform, but essential for the European classic car market.</p>
-
-<h2>8. Catawiki</h2>
-
-<p><strong>Specialty:</strong> Accessible classics, broad range | <strong>Buyer fee:</strong> 9%</p>
-
-<p>Dutch platform with a wide range of classics at accessible price points.</p>
-
-<h2>9. The Market by Bonhams</h2>
-
-<p><strong>Specialty:</strong> Online-focused auctions | <strong>Buyer fee:</strong> 12.5%</p>
-
-<h2>10. Car & Classic</h2>
-
-<p><strong>Specialty:</strong> UK classics and auctions | <strong>Buyer fee:</strong> 6%</p>
-
-<p>UK-focused platform combining classifieds with auction format.</p>
-
-<h2>Choosing the Right Platform</h2>
+<p>The question isn't just "what's the buyer fee?" It's "what's the total cost?"</p>
 
 <ul>
-<li><strong>Investment-grade classics (€100,000+):</strong> RM Sotheby's, Bonhams</li>
-<li><strong>Premium drivers (€30,000-100,000):</strong> Collecting Cars, Bring a Trailer</li>
-<li><strong>Affordable classics (under €30,000):</strong> Finds, Catawiki</li>
-<li><strong>Eastern European sourcing:</strong> Finds</li>
+<li><strong>Buyer's premium:</strong> Ranges from 5% to 15% depending on platform</li>
+<li><strong>Payment processing fees:</strong> Some platforms add 2-3% for card payments</li>
+<li><strong>Documentation fees:</strong> Some charge for paperwork handling</li>
+<li><strong>Storage fees:</strong> If you don't collect quickly, fees can add up</li>
 </ul>
 
-<p>Ready to explore? <a href="/auctions">Browse current auctions on Finds</a>.</p>
+<p>At Finds, we charge 5% buyer fee with no hidden costs. We chose this because <a href="https://betterqa.co">BetterQA</a>'s approach to software is the same — clear specifications, no surprises.</p>
+
+<h3>2. Verification Processes</h3>
+
+<p>This is where platforms differ most. Questions to ask:</p>
+
+<ul>
+<li>Are sellers verified before listing?</li>
+<li>Does someone review listings for accuracy?</li>
+<li>How are condition descriptions validated?</li>
+<li>What happens if the car doesn't match the listing?</li>
+</ul>
+
+<p>At <a href="https://betterqa.co">BetterQA</a>, we test software for banks and defense contractors. We applied the same verification mindset to Finds — every seller goes through identity verification, every listing is manually reviewed.</p>
+
+<h3>3. Buyer Protection</h3>
+
+<p>What recourse do you have if something goes wrong?</p>
+
+<ul>
+<li><strong>Payment protection:</strong> Is money held until you confirm receipt?</li>
+<li><strong>Dispute resolution:</strong> Who mediates if there's a problem?</li>
+<li><strong>Condition guarantees:</strong> What if the car has undisclosed issues?</li>
+</ul>
+
+<h3>4. Geographic Focus</h3>
+
+<p>Consider where the inventory comes from:</p>
+
+<ul>
+<li><strong>US-focused platforms:</strong> Bring a Trailer — great inventory but shipping to Europe adds complexity</li>
+<li><strong>UK-focused:</strong> Car & Classic, Collecting Cars — post-Brexit import considerations</li>
+<li><strong>EU-focused:</strong> Finds (Romania/EU), Catawiki (Netherlands) — simpler intra-EU transactions</li>
+<li><strong>Traditional houses:</strong> RM Sotheby's, Bonhams — global but expensive</li>
+</ul>
+
+<h2>Platform Comparison</h2>
+
+<table>
+<tr><th>Platform</th><th>Buyer Fee</th><th>Focus</th><th>Best For</th></tr>
+<tr><td>Finds</td><td>5%</td><td>EU classics, barn finds</td><td>Affordable classics under €50k</td></tr>
+<tr><td>Bring a Trailer</td><td>5%</td><td>All collector vehicles</td><td>US market, engaged community</td></tr>
+<tr><td>Collecting Cars</td><td>6%</td><td>Premium classics</td><td>€30k-100k range</td></tr>
+<tr><td>Catawiki</td><td>9%</td><td>Broad range</td><td>Entry-level classics</td></tr>
+<tr><td>RM Sotheby's</td><td>12-15%</td><td>Investment grade</td><td>Six-figure+ purchases</td></tr>
+</table>
+
+<h2>Why We Built Finds Differently</h2>
+
+<p><a href="https://betterqa.co">BetterQA</a> tests software for clients including Samsung, major European banks, and NATO-certified systems. Our business is finding problems before they become expensive.</p>
+
+<p>When our engineers tried buying classic cars in Romania, they saw the same problems repeatedly:</p>
+
+<ul>
+<li>Listings that hid defects behind careful photography</li>
+<li>Sellers who disappeared when asked hard questions</li>
+<li>Platforms that took fees but offered no protection</li>
+<li>No verification that cars were as described</li>
+</ul>
+
+<p>We built Finds to fix these problems. Same verification rigor we apply to software, applied to classic car auctions.</p>
+
+<h2>Making Your Choice</h2>
+
+<p>Match the platform to your purchase:</p>
+
+<ul>
+<li><strong>First classic, learning the market:</strong> Start with lower-fee platforms where mistakes are less expensive</li>
+<li><strong>Specific rare car:</strong> Go where the inventory is, regardless of fees</li>
+<li><strong>Eastern European classics:</strong> <a href="/auctions">Finds</a> — we're based in Romania and understand this market</li>
+<li><strong>Investment purchases:</strong> Traditional houses with provenance research</li>
+</ul>
+
+<p>Whatever platform you choose, ask questions, verify claims, and understand your protection before you bid.</p>
 
 <hr />
-<p><em>© 2025 Finds. A <a href="https://betterqa.co">BetterQA</a> project.</em></p>
+<p><em>Finds is a <a href="https://betterqa.co">BetterQA</a> project. We believe classic car auctions should be transparent, curated, and fair.</em></p>
 `,
     contentRo: `
-<p>Piața europeană de licitații pentru mașini clasice s-a transformat în ultimul deceniu. Am analizat principalele platforme pe criterii cheie. Transparență totală: Finds apare pe această listă — suntem construiți de <a href="https://betterqa.co">BetterQA</a>.</p>
+<p>Alegerea locului de unde cumperi următoarea mașină clasică contează la fel de mult ca alegerea mașinii în sine. Platforma pe care o folosești determină ce protecție ai, ce comisioane vei plăti și dacă mașina pe care o câștigi corespunde descrierii.</p>
 
-<h2>1. Finds</h2>
-<p><strong>Comision:</strong> 5% | Platformă construită de <a href="https://betterqa.co">BetterQA</a> în Cluj-Napoca.</p>
+<p>Acest ghid te ajută să evaluezi platformele de licitații sistematic. Transparență totală: Finds este construit de <a href="https://betterqa.co">BetterQA</a>, o companie de calitate software. Suntem părtinitori — dar îți vom explica exact de ce am construit lucrurile așa cum le-am construit.</p>
 
-<h2>2-10. Alte Platforme</h2>
-<p>Bring a Trailer, Collecting Cars, RM Sotheby's, Bonhams, Artcurial, Classic Driver, Catawiki, The Market, Car & Classic.</p>
+<h2>Ce să Evaluezi Când Alegi o Platformă</h2>
+
+<h3>1. Transparența Comisioanelor</h3>
+
+<p>Întrebarea nu este doar "care e comisionul cumpărătorului?" Ci "care e costul total?"</p>
+
+<ul>
+<li><strong>Prima cumpărătorului:</strong> Variază de la 5% la 15%</li>
+<li><strong>Taxe procesare plată:</strong> Unele platforme adaugă 2-3% pentru plăți cu cardul</li>
+<li><strong>Taxe documentație:</strong> Unele taxează pentru gestionarea actelor</li>
+</ul>
+
+<p>La Finds, percepem 5% comision cumpărător fără costuri ascunse. Am ales acest lucru pentru că abordarea <a href="https://betterqa.co">BetterQA</a> față de software este aceeași — specificații clare, fără surprize.</p>
+
+<h3>2. Procese de Verificare</h3>
+
+<p>Aici diferă cel mai mult platformele. Întrebări de pus:</p>
+
+<ul>
+<li>Sunt vânzătorii verificați înainte de listare?</li>
+<li>Revizuiește cineva anunțurile pentru acuratețe?</li>
+<li>Cum sunt validate descrierile stării?</li>
+</ul>
+
+<p>La <a href="https://betterqa.co">BetterQA</a>, testăm software pentru bănci și contractori de apărare. Am aplicat aceeași mentalitate de verificare la Finds.</p>
+
+<h2>Comparație Platforme</h2>
+
+<table>
+<tr><th>Platformă</th><th>Comision</th><th>Focus</th><th>Cel mai bun pentru</th></tr>
+<tr><td>Finds</td><td>5%</td><td>Clasice UE, barn finds</td><td>Clasice accesibile sub €50k</td></tr>
+<tr><td>Bring a Trailer</td><td>5%</td><td>Toate vehiculele de colecție</td><td>Piața SUA</td></tr>
+<tr><td>Collecting Cars</td><td>6%</td><td>Clasice premium</td><td>Gama €30k-100k</td></tr>
+<tr><td>Catawiki</td><td>9%</td><td>Gamă largă</td><td>Clasice entry-level</td></tr>
+</table>
+
+<h2>De Ce Am Construit Finds Diferit</h2>
+
+<p><a href="https://betterqa.co">BetterQA</a> testează software pentru clienți precum Samsung, bănci europene majore și sisteme certificate NATO. Afacerea noastră este găsirea problemelor înainte să devină costisitoare.</p>
+
+<p>Am construit Finds pentru a repara aceste probleme. Aceeași rigoare de verificare pe care o aplicăm software-ului, aplicată la licitațiile de mașini clasice.</p>
 
 <p><a href="/auctions">Explorează licitațiile pe Finds</a>.</p>
 
 <hr />
-<p><em>© 2025 Finds. Un proiect <a href="https://betterqa.co">BetterQA</a>.</em></p>
+<p><em>Finds este un proiect <a href="https://betterqa.co">BetterQA</a>. Credem că licitațiile de mașini clasice trebuie să fie transparente, curate și corecte.</em></p>
 `,
     authorSlug: 'sarah-mitchell',
     daysAgo: 2,
   },
   {
-    slug: 'best-affordable-classic-cars-under-15000',
+    slug: 'how-to-find-first-classic-car-under-15000',
     category: 'buying-guide',
-    tags: ['affordable', 'budget', 'first car', 'recommendations'],
+    tags: ['affordable', 'budget', 'first car', 'beginners'],
     readingTime: 7,
-    titleEn: 'Best Affordable Classic Cars Under €15,000 in 2025',
-    titleRo: 'Cele Mai Bune Mașini Clasice Accesibile Sub 15.000 € în 2025',
-    excerptEn: 'You don\'t need a fortune to own a classic. These ten models offer genuine character without breaking the bank.',
-    excerptRo: 'Nu ai nevoie de o avere pentru a deține o clasică. Aceste zece modele oferă caracter autentic fără să-ți golești contul.',
-    metaTitleEn: 'Best Affordable Classic Cars Under €15,000 | 2025 Guide',
-    metaTitleRo: 'Cele Mai Bune Mașini Clasice Sub 15.000 € | Ghid 2025',
-    metaDescriptionEn: 'Looking for your first classic car? These 10 models under €15,000 offer genuine character, good parts availability, and active communities.',
-    metaDescriptionRo: 'Cauți prima ta mașină clasică? Aceste 10 modele sub 15.000 € oferă caracter autentic și comunități active.',
+    titleEn: 'How to Find Your First Affordable Classic Car Under €15,000',
+    titleRo: 'Cum să Găsești Prima Ta Mașină Clasică Accesibilă Sub 15.000 €',
+    excerptEn: 'A practical guide to finding and buying your first classic car on a budget. What to look for, where to search, and how to avoid expensive mistakes.',
+    excerptRo: 'Un ghid practic pentru găsirea și cumpărarea primei tale mașini clasice cu buget limitat. Ce să cauți, unde să cauți și cum să eviți greșelile costisitoare.',
+    metaTitleEn: 'How to Find Your First Classic Car Under €15,000 | Buyer Guide',
+    metaTitleRo: 'Cum să Găsești Prima Mașină Clasică Sub 15.000 € | Ghid',
+    metaDescriptionEn: 'Learn how to find your first affordable classic car. Practical advice on what to look for, inspection tips, and models to consider under €15,000.',
+    metaDescriptionRo: 'Învață cum să găsești prima ta mașină clasică accesibilă. Sfaturi practice despre ce să cauți și modele de considerat sub 15.000 €.',
     contentEn: `
-<p>The myth that classic car ownership requires deep pockets persists, but it isn't true. For under €15,000 you can buy a genuine classic with character that no modern car can match.</p>
+<p>You don't need deep pockets to own a classic car. For under €15,000, you can find genuine character that no modern car can match. The key is knowing how to search, what to look for, and what mistakes to avoid.</p>
 
-<h2>1. Mazda MX-5 (NA/NB) — €5,000-12,000</h2>
-<p>Bulletproof reliability, massive parts supply, lightweight balanced handling that embarrasses cars costing ten times as much.</p>
+<p>This guide walks you through finding your first affordable classic — from Finds, a <a href="https://betterqa.co">BetterQA</a> project built by engineers who learned these lessons the hard way.</p>
 
-<h2>2. BMW E30 (non-M) — €8,000-15,000</h2>
-<p>The E30 3-Series defined the sports sedan category. Perfect weight distribution, excellent parts availability.</p>
+<h2>Step 1: Define What You Actually Want</h2>
 
-<h2>3. Volkswagen Golf GTI (Mk1/Mk2) — €8,000-15,000</h2>
-<p>The car that invented the hot hatch category. Simple, light, and delivers driving thrills.</p>
+<p>Before you start searching, answer honestly:</p>
 
-<h2>4. Alfa Romeo Spider (Series 4) — €10,000-15,000</h2>
-<p>Beautiful Italian design, characterful twin-spark engine, true open-air driving.</p>
+<ul>
+<li><strong>Driver or project?</strong> A €5,000 driver needs different evaluation than a €5,000 project</li>
+<li><strong>Primary use?</strong> Weekend fun, daily driver, shows?</li>
+<li><strong>Your mechanical ability?</strong> Can you handle routine maintenance?</li>
+<li><strong>Storage situation?</strong> Garage or street parking affects what you can own</li>
+</ul>
 
-<h2>5. Peugeot 205 GTI — €10,000-15,000</h2>
-<p>Many consider the 205 GTI the best hot hatch ever made. Legendary handling.</p>
+<h2>Step 2: Set a Realistic Budget</h2>
 
-<h2>6. Mercedes W124 — €6,000-14,000</h2>
-<p>The last Mercedes built to "over-engineered" standards. Tank-like build quality.</p>
+<p>The purchase price is just the start:</p>
 
-<h2>7. Fiat 124 Spider — €8,000-15,000</h2>
-<p>Italian style at accessible prices. Pininfarina design, revvy twin-cam engine.</p>
+<table>
+<tr><th>Cost</th><th>Budget</th></tr>
+<tr><td>Purchase price</td><td>Your target (e.g., €10,000)</td></tr>
+<tr><td>Immediate repairs</td><td>+20% of purchase</td></tr>
+<tr><td>First year insurance</td><td>€300-800</td></tr>
+<tr><td>Pre-purchase inspection</td><td>€200-300</td></tr>
+<tr><td>Registration/taxes</td><td>Varies by country</td></tr>
+</table>
 
-<h2>8. Volvo 240 — €4,000-10,000</h2>
-<p>The Swedish brick is indestructible, practical, and increasingly cool.</p>
+<p>A €10,000 car often costs €13,000-14,000 to get running and registered properly.</p>
 
-<h2>9. Porsche 924 — €8,000-15,000</h2>
-<p>The entry-level Porsche is finally being appreciated. True Porsche handling at a fraction of 911 prices.</p>
+<h2>Step 3: Choose Models Strategically</h2>
 
-<h2>10. Ford Capri — €8,000-15,000</h2>
-<p>The European muscle car that Ford got right. V6 character and practical GT usability.</p>
+<p>Look for models with:</p>
 
-<h2>Buying Tips</h2>
+<ul>
+<li><strong>Active communities:</strong> Clubs mean knowledge, parts sources, and help</li>
+<li><strong>Good parts availability:</strong> Can you still buy what breaks?</li>
+<li><strong>High production numbers:</strong> More cars built means more parts surviving</li>
+<li><strong>Simple mechanicals:</strong> Complex systems = expensive repairs</li>
+</ul>
+
+<h3>Models That Fit These Criteria (€5,000-15,000)</h3>
+
+<p><strong>Mazda MX-5 (NA/NB):</strong> €5,000-12,000. Bulletproof reliability, massive parts supply, brilliant handling. The go-to first classic recommendation for good reason.</p>
+
+<p><strong>BMW E30 (non-M):</strong> €8,000-15,000. The 3-Series that defined sports sedans. Perfect weight distribution, excellent availability, appreciating steadily.</p>
+
+<p><strong>Volkswagen Golf GTI (Mk1/Mk2):</strong> €8,000-15,000. Invented the hot hatch. Simple, light, engaged driving.</p>
+
+<p><strong>Mercedes W124:</strong> €6,000-14,000. "Over-engineered" is literal. Tank-like build quality, comfortable, practical.</p>
+
+<p><strong>Volvo 240:</strong> €4,000-10,000. Indestructible, practical, increasingly fashionable. Great entry point.</p>
+
+<h2>Step 4: Search Strategically</h2>
+
+<h3>Where to Look</h3>
+
+<ul>
+<li><strong>Curated platforms:</strong> <a href="/auctions">Finds</a> — verified sellers, condition transparency, buyer protection</li>
+<li><strong>Marque forums:</strong> Often the best cars never hit public classifieds</li>
+<li><strong>Local clubs:</strong> Members know of cars before they're listed</li>
+<li><strong>General classifieds:</strong> OLX, Autovit — higher volume but buyer beware</li>
+</ul>
+
+<h3>Red Flags to Avoid</h3>
+
+<ul>
+<li>Price significantly below market — there's always a reason</li>
+<li>Seller reluctant to allow inspection</li>
+<li>Fresh underseal hiding rust</li>
+<li>"Needs nothing" claims without documentation</li>
+</ul>
+
+<h2>Step 5: Inspect Properly</h2>
+
+<p>At <a href="https://betterqa.co">BetterQA</a>, we test software by assuming it's broken until proven otherwise. Apply the same thinking to classic cars:</p>
+
+<ul>
+<li><strong>Rust is the killer.</strong> Check sills, floor pans, wheel arches, door bottoms</li>
+<li><strong>Verify documentation.</strong> Does the VIN match everywhere?</li>
+<li><strong>Get a professional inspection.</strong> €200-300 is cheap compared to surprise repairs</li>
+<li><strong>Cold start test.</strong> Arrive unannounced or early — warm engines hide problems</li>
+</ul>
+
+<h2>Step 6: Buy Smart</h2>
+
 <ol>
-<li><strong>Condition beats rarity.</strong> A good example of a common model will bring more pleasure than a rough rare car.</li>
-<li><strong>Join the club first.</strong> Marque-specific clubs are invaluable.</li>
-<li><strong>Budget 20% for immediate repairs.</strong></li>
-<li><strong>Buy the best you can afford.</strong></li>
-<li><strong>Get a pre-purchase inspection.</strong> €200-300 is cheap insurance.</li>
+<li><strong>Condition beats rarity.</strong> A good common car brings more joy than a rough rare one</li>
+<li><strong>Buy the best you can afford.</strong> Cheap cars often cost more long-term</li>
+<li><strong>Join the club first.</strong> Learn before you buy</li>
+<li><strong>Written agreements.</strong> Document everything, especially known issues</li>
+<li><strong>Payment protection.</strong> Use platforms that hold funds until you verify the car</li>
 </ol>
 
-<p>Classic car auction platforms like <a href="/">Finds</a> often surface project cars and barn finds at accessible prices.</p>
+<p><a href="/auctions">Browse affordable classics on Finds</a> — every listing is verified, every seller is checked.</p>
 
 <hr />
-<p><em>Finds is a classic car auction platform built by <a href="https://betterqa.co">BetterQA</a>.</em></p>
+<p><em>Finds is a <a href="https://betterqa.co">BetterQA</a> project. We believe classic car auctions should be transparent, curated, and fair.</em></p>
 `,
     contentRo: `
-<p>Nu ai nevoie de o avere pentru a deține o mașină clasică. Pentru sub 15.000 € poți cumpăra o clasică autentică cu caracter.</p>
+<p>Nu ai nevoie de buzunare adânci pentru a deține o mașină clasică. Pentru sub 15.000 €, poți găsi caracter autentic pe care nicio mașină modernă nu îl poate egala. Cheia este să știi cum să cauți, ce să cauți și ce greșeli să eviți.</p>
 
-<h2>Top 10 Modele</h2>
-<ol>
-<li>Mazda MX-5 (NA/NB) — 5.000-12.000 €</li>
-<li>BMW E30 (non-M) — 8.000-15.000 €</li>
-<li>Volkswagen Golf GTI (Mk1/Mk2) — 8.000-15.000 €</li>
-<li>Alfa Romeo Spider — 10.000-15.000 €</li>
-<li>Peugeot 205 GTI — 10.000-15.000 €</li>
-<li>Mercedes W124 — 6.000-14.000 €</li>
-<li>Fiat 124 Spider — 8.000-15.000 €</li>
-<li>Volvo 240 — 4.000-10.000 €</li>
-<li>Porsche 924 — 8.000-15.000 €</li>
-<li>Ford Capri — 8.000-15.000 €</li>
-</ol>
+<p>Acest ghid te ghidează prin găsirea primei tale clasice accesibile — de la Finds, un proiect <a href="https://betterqa.co">BetterQA</a> construit de ingineri care au învățat aceste lecții pe propria piele.</p>
 
-<p><a href="/auctions">Explorează licitațiile pe Finds</a>.</p>
+<h2>Pasul 1: Definește Ce Vrei de Fapt</h2>
+
+<p>Înainte să începi căutarea, răspunde onest:</p>
+
+<ul>
+<li><strong>Driver sau proiect?</strong> Un driver de 5.000 € necesită evaluare diferită față de un proiect de 5.000 €</li>
+<li><strong>Utilizare principală?</strong> Distracție de weekend, mașină zilnică, show-uri?</li>
+<li><strong>Abilitatea ta mecanică?</strong> Poți gestiona întreținerea de rutină?</li>
+</ul>
+
+<h2>Pasul 2: Stabilește un Buget Realist</h2>
+
+<p>Prețul de achiziție este doar începutul:</p>
+
+<table>
+<tr><th>Cost</th><th>Buget</th></tr>
+<tr><td>Preț achiziție</td><td>Ținta ta (ex. €10.000)</td></tr>
+<tr><td>Reparații imediate</td><td>+20% din achiziție</td></tr>
+<tr><td>Asigurare primul an</td><td>€300-800</td></tr>
+<tr><td>Inspecție pre-cumpărare</td><td>€200-300</td></tr>
+</table>
+
+<h2>Pasul 3: Alege Modele Strategic</h2>
+
+<h3>Modele Care Îndeplinesc Aceste Criterii (€5.000-15.000)</h3>
+
+<p><strong>Mazda MX-5 (NA/NB):</strong> €5.000-12.000. Fiabilitate de neegalat, piese abundente, manevrabilitate excelentă.</p>
+
+<p><strong>BMW E30 (non-M):</strong> €8.000-15.000. Seria 3 care a definit sedanurile sport.</p>
+
+<p><strong>Volkswagen Golf GTI (Mk1/Mk2):</strong> €8.000-15.000. A inventat hot hatch-ul.</p>
+
+<p><strong>Mercedes W124:</strong> €6.000-14.000. "Supra-inginerit" este literal. Calitate de tanc.</p>
+
+<h2>Pasul 4: Caută Strategic</h2>
+
+<h3>Unde să Cauți</h3>
+
+<ul>
+<li><strong>Platforme curate:</strong> <a href="/auctions">Finds</a> — vânzători verificați, transparența stării, protecția cumpărătorului</li>
+<li><strong>Forumuri de marcă:</strong> Adesea cele mai bune mașini nu ajung niciodată pe anunțuri publice</li>
+<li><strong>Cluburi locale:</strong> Membrii știu de mașini înainte să fie listate</li>
+</ul>
+
+<h2>Pasul 5: Inspectează Corect</h2>
+
+<p>La <a href="https://betterqa.co">BetterQA</a>, testăm software presupunând că e stricat până se dovedește contrariul. Aplică aceeași gândire la mașinile clasice:</p>
+
+<ul>
+<li><strong>Rugina e ucigașul.</strong> Verifică pragurile, podeaua, aripile, părțile de jos ale ușilor</li>
+<li><strong>Verifică documentația.</strong> Se potrivește VIN-ul peste tot?</li>
+<li><strong>Fă o inspecție profesională.</strong> €200-300 e ieftin comparat cu reparațiile surpriză</li>
+</ul>
+
+<p><a href="/auctions">Răsfoiește clasicele accesibile pe Finds</a> — fiecare anunț este verificat, fiecare vânzător este verificat.</p>
 
 <hr />
-<p><em>Finds este construită de <a href="https://betterqa.co">BetterQA</a>.</em></p>
+<p><em>Finds este un proiect <a href="https://betterqa.co">BetterQA</a>. Credem că licitațiile de mașini clasice trebuie să fie transparente, curate și corecte.</em></p>
 `,
     authorSlug: 'anna-lindberg',
     daysAgo: 5,
@@ -235,6 +364,8 @@ export const newBlogPosts = [
     metaDescriptionRo: 'Ghid complet pentru importul mașinilor clasice în România. Vamă, înmatriculare, taxe și documente.',
     contentEn: `
 <p>Romania has become an attractive base for classic car collectors. Lower storage costs, a growing enthusiast community, and access to Eastern European barn finds make it practical for building a collection.</p>
+
+<p>This guide comes from Finds, built by <a href="https://betterqa.co">BetterQA</a> in Cluj-Napoca, Romania. We navigate these processes regularly and understand the practical realities.</p>
 
 <h2>EU to Romania: The Simpler Path</h2>
 
@@ -309,20 +440,22 @@ export const newBlogPosts = [
     daysAgo: 8,
   },
   {
-    slug: 'identifying-rust-classic-car-guide',
-    category: 'technical-guide',
+    slug: 'how-to-identify-rust-classic-car',
+    category: 'buying-guide',
     tags: ['rust', 'bodywork', 'inspection', 'buying tips'],
     readingTime: 8,
-    titleEn: 'Identifying Rust: A Buyer\'s Guide to Classic Car Bodywork',
-    titleRo: 'Identificarea Ruginii: Ghid pentru Caroseria Mașinilor Clasice',
-    excerptEn: 'Rust kills more classic cars than any mechanical failure. Learn to spot warning signs before they become expensive surprises.',
-    excerptRo: 'Rugina ucide mai multe mașini clasice decât orice defecțiune mecanică. Învață să identifici semnele de avertizare.',
+    titleEn: 'How to Identify Rust When Buying a Classic Car',
+    titleRo: 'Cum să Identifici Rugina Când Cumperi o Mașină Clasică',
+    excerptEn: 'Rust kills more classic cars than any mechanical failure. Learn to spot warning signs and hidden problems before they become expensive surprises.',
+    excerptRo: 'Rugina ucide mai multe mașini clasice decât orice defecțiune mecanică. Învață să identifici semnele de avertizare și problemele ascunse.',
     metaTitleEn: 'How to Identify Rust on Classic Cars | Buyer\'s Guide',
     metaTitleRo: 'Cum să Identifici Rugina pe Mașini Clasice | Ghid',
-    metaDescriptionEn: 'Learn to spot rust on classic cars before you buy. Complete guide to inspecting sills, floors, and hidden problem areas.',
-    metaDescriptionRo: 'Învață să identifici rugina înainte să cumperi. Ghid pentru inspectarea pragurilor și zonelor problematice.',
+    metaDescriptionEn: 'Learn how to spot rust on classic cars before you buy. Complete guide to inspecting sills, floors, and hidden problem areas from Finds, a BetterQA project.',
+    metaDescriptionRo: 'Învață cum să identifici rugina înainte să cumperi. Ghid pentru inspectarea pragurilor și zonelor problematice.',
     contentEn: `
 <p>Mechanical problems can usually be fixed. Electrical gremlins can be traced. But rust — rust is the cancer of classic cars. Left unchecked, it spreads until repair costs exceed the vehicle's value.</p>
+
+<p>At <a href="https://betterqa.co">BetterQA</a>, we test software by methodically checking every potential failure point. This guide applies the same systematic approach to rust inspection — because the problems you miss are the ones that cost you.</p>
 
 <h2>The Three Types of Rust</h2>
 
@@ -406,20 +539,22 @@ export const newBlogPosts = [
     daysAgo: 12,
   },
   {
-    slug: 'classic-car-insurance-europe-guide',
-    category: 'practical-guide',
+    slug: 'how-to-insure-classic-car-europe',
+    category: 'buying-guide',
     tags: ['insurance', 'europe', 'coverage', 'legal'],
     readingTime: 6,
-    titleEn: 'Classic Car Insurance in Europe: What You Need to Know',
-    titleRo: 'Asigurarea Mașinilor Clasice în Europa: Ce Trebuie să Știi',
-    excerptEn: 'Standard insurance doesn\'t work for classics. Here\'s how to get proper coverage that reflects your car\'s true value.',
-    excerptRo: 'Asigurarea standard nu funcționează pentru clasice. Iată cum să obții acoperire adecvată.',
-    metaTitleEn: 'Classic Car Insurance in Europe | Coverage Guide 2025',
-    metaTitleRo: 'Asigurarea Mașinilor Clasice în Europa | Ghid 2025',
-    metaDescriptionEn: 'How to insure your classic car in Europe. Agreed value policies, usage restrictions, and specialist insurers.',
-    metaDescriptionRo: 'Cum să-ți asiguri mașina clasică în Europa. Polițe cu valoare convenită și restricții de utilizare.',
+    titleEn: 'How to Insure Your Classic Car in Europe',
+    titleRo: 'Cum să-ți Asiguri Mașina Clasică în Europa',
+    excerptEn: 'Standard insurance doesn\'t work for classics. Learn how to get proper coverage that reflects your car\'s true value and protects your investment.',
+    excerptRo: 'Asigurarea standard nu funcționează pentru clasice. Învață cum să obții acoperire adecvată care reflectă valoarea reală a mașinii tale.',
+    metaTitleEn: 'How to Insure Your Classic Car in Europe | Guide',
+    metaTitleRo: 'Cum să-ți Asiguri Mașina Clasică în Europa | Ghid',
+    metaDescriptionEn: 'Learn how to insure your classic car in Europe. Agreed value policies, usage restrictions, and specialist insurers from Finds, a BetterQA project.',
+    metaDescriptionRo: 'Învață cum să-ți asiguri mașina clasică în Europa. Polițe cu valoare convenită și restricții de utilizare.',
     contentEn: `
 <p>Your 1972 BMW 2002 isn't worth €5,000 anymore. It's worth €25,000, and if someone writes it off, standard insurance will pay you market value for a "45-year-old used car" — a fraction of what you've invested.</p>
+
+<p>This guide from Finds, a <a href="https://betterqa.co">BetterQA</a> project, explains how to get coverage that actually protects your investment.</p>
 
 <h2>Agreed Value vs. Market Value</h2>
 
@@ -594,12 +729,12 @@ export const newBlogPosts = [
   },
 ]
 
-// Author assignments for new posts
+// Author assignments for new posts (updated with v3 slugs)
 export const newPostAuthorAssignments: Record<string, string> = {
-  'top-classic-car-auctions-europe-2025': 'sarah-mitchell',
-  'best-affordable-classic-cars-under-15000': 'anna-lindberg',
+  'how-to-choose-classic-car-auction-platform': 'sarah-mitchell',
+  'how-to-find-first-classic-car-under-15000': 'anna-lindberg',
   'how-to-import-classic-car-romania': 'marcus-webb',
-  'identifying-rust-classic-car-guide': 'james-park',
-  'classic-car-insurance-europe-guide': 'elena-vasquez',
+  'how-to-identify-rust-classic-car': 'james-park',
+  'how-to-insure-classic-car-europe': 'elena-vasquez',
   'why-we-built-finds-betterqa-story': 'marcus-webb',
 }
