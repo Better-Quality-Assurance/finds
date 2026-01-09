@@ -1,11 +1,12 @@
 import { Suspense } from 'react'
 import { getTranslations } from 'next-intl/server'
 import { prisma } from '@/lib/db'
+import { Link } from '@/i18n/routing'
 import { BlogPostCard } from '@/components/blog/blog-post-card'
 import { BlogCategoryFilter } from '@/components/blog/blog-category-filter'
 import { Card } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
-import { BookOpen } from 'lucide-react'
+import { BookOpen, ChevronLeft } from 'lucide-react'
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params
@@ -110,6 +111,15 @@ export default async function BlogPage({
 
   return (
     <div className="container py-8">
+      {/* Back Link */}
+      <Link
+        href="/"
+        className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors mb-6"
+      >
+        <ChevronLeft className="h-4 w-4" />
+        {t('backToHome')}
+      </Link>
+
       {/* Header */}
       <div className="mb-8">
         <div className="flex items-center gap-2 mb-2">

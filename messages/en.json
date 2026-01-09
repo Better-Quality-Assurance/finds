@@ -698,6 +698,7 @@
     "publishedOn": "Published {date}",
     "byAuthor": "By {author}",
     "backToBlog": "Back to Journal",
+    "backToHome": "Back to Home",
     "categories": {
       "all": "All Articles",
       "buying-guide": "Buying Guides",

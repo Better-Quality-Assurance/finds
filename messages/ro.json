@@ -698,6 +698,7 @@
     "publishedOn": "Publicat {date}",
     "byAuthor": "De {author}",
     "backToBlog": "Inapoi la Jurnal",
+    "backToHome": "Inapoi Acasa",
     "categories": {
       "all": "Toate Articolele",
       "buying-guide": "Ghiduri de Cumparare",
