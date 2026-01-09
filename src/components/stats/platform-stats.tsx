@@ -67,7 +67,7 @@ export function PlatformStats() {
   ]
 
   return (
-    <section className="py-8 sm:py-12">
+    <section id="stats" className="py-8 sm:py-12">
       <div className="container px-4 sm:px-6">
         <h2 className="mb-6 text-center text-2xl font-bold sm:text-3xl">
           {t('platformTitle')}

@@ -764,5 +764,14 @@
       "FAIR": "Fair",
       "POOR": "Poor"
     }
+  },
+  "sections": {
+    "hero": "Hero",
+    "stats": "Stats",
+    "features": "Why Us",
+    "howItWorks": "How It Works",
+    "liveBids": "Live Bids",
+    "recentSales": "Recent Sales",
+    "sell": "Sell"
   }
 }

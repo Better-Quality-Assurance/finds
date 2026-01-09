@@ -75,7 +75,7 @@ export async function RecentSalesSection() {
   }
 
   return (
-    <section className="py-24 bg-gradient-to-br from-muted/30 to-background">
+    <section id="recent-sales" className="py-24 bg-gradient-to-br from-muted/30 to-background">
       <div className="container mx-auto px-4">
         <div className="mb-12 flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
           <div>

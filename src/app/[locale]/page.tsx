@@ -6,6 +6,9 @@ import { ArrowRight, Car, Shield, Clock, CheckCircle, Sparkles } from 'lucide-re
 import { LatestBidsSection } from '@/components/home/latest-bids-section'
 import { RecentSalesSection } from '@/components/home/recent-sales-section'
 import { PlatformStats } from '@/components/stats/platform-stats'
+import { ScrollSpy } from '@/components/ui/scroll-spy'
+import { BackToTop } from '@/components/ui/back-to-top'
+import { SectionDivider } from '@/components/ui/section-divider'
 
 export async function generateMetadata(): Promise<Metadata> {
   return {
@@ -32,11 +35,26 @@ export async function generateMetadata(): Promise<Metadata> {
 
 export default function HomePage() {
   const t = useTranslations()
+  const tSections = useTranslations('sections')
+
+  const homeSections = [
+    { id: 'hero', label: tSections('hero') },
+    { id: 'stats', label: tSections('stats') },
+    { id: 'features', label: tSections('features') },
+    { id: 'how-it-works', label: tSections('howItWorks') },
+    { id: 'live-bids', label: tSections('liveBids') },
+    { id: 'recent-sales', label: tSections('recentSales') },
+    { id: 'sell-cta', label: tSections('sell') },
+  ]
 
   return (
     <div className="flex flex-col">
+      {/* Scroll Navigation */}
+      <ScrollSpy sections={homeSections} />
+      <BackToTop />
+
       {/* Hero Section */}
-      <section className="relative overflow-hidden bg-gradient-to-br from-primary/10 via-background to-secondary/10 py-24 md:py-40">
+      <section id="hero" className="relative overflow-hidden bg-gradient-to-br from-primary/10 via-background to-secondary/10 py-24 md:py-40">
         {/* Decorative blur orbs */}
         <div className="absolute -right-20 -top-20 h-[500px] w-[500px] rounded-full bg-primary/10 blur-3xl" />
         <div className="absolute -bottom-20 -left-20 h-[400px] w-[400px] rounded-full bg-secondary/15 blur-3xl" />
@@ -92,11 +110,17 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* Section Divider */}
+      <SectionDivider />
+
       {/* Platform Stats */}
       <PlatformStats />
 
+      {/* Section Divider */}
+      <SectionDivider />
+
       {/* Features Section */}
-      <section className="py-24">
+      <section id="features" className="py-24">
         <div className="container mx-auto px-4">
           <div className="mb-16 text-center">
             <h2 className="font-heading text-3xl font-bold tracking-tight md:text-4xl">
@@ -151,7 +175,7 @@ export default function HomePage() {
       </section>
 
       {/* How It Works Section */}
-      <section className="bg-gradient-to-br from-muted/50 to-muted/30 py-24">
+      <section id="how-it-works" className="bg-gradient-to-br from-muted/50 to-muted/30 py-24">
         <div className="container mx-auto px-4">
           <div className="mb-16 text-center">
             <h2 className="font-heading text-3xl font-bold tracking-tight md:text-4xl">
@@ -186,14 +210,23 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* Section Divider */}
+      <SectionDivider />
+
       {/* Latest Bids Section */}
       <LatestBidsSection />
+
+      {/* Section Divider */}
+      <SectionDivider />
 
       {/* Recent Sales Section - Shows what sold on BaT, Catawiki, etc. */}
       <RecentSalesSection />
 
+      {/* Section Divider */}
+      <SectionDivider />
+
       {/* CTA Section */}
-      <section className="relative overflow-hidden py-24">
+      <section id="sell-cta" className="relative overflow-hidden py-24">
         {/* Background decoration */}
         <div className="absolute inset-0 bg-gradient-to-r from-primary/5 via-transparent to-secondary/5" />
 

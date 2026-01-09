@@ -764,5 +764,14 @@
       "FAIR": "Acceptabil",
       "POOR": "Slab"
     }
+  },
+  "sections": {
+    "hero": "Acasa",
+    "stats": "Statistici",
+    "features": "De Ce Noi",
+    "howItWorks": "Cum Functioneaza",
+    "liveBids": "Licitatii Live",
+    "recentSales": "Vanzari Recente",
+    "sell": "Vinde"
   }
 }

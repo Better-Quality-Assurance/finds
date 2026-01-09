@@ -37,7 +37,7 @@ export function LatestBidsSection() {
   }
 
   return (
-    <section className="py-24">
+    <section id="live-bids" className="py-24">
       <div className="container mx-auto px-4">
         {/* Header */}
         <div className="mb-8 flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
