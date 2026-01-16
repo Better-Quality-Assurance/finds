@@ -22,14 +22,7 @@ export const blogPostsV3 = [
 
 <h2>Why Buy Classic Cars in Romania?</h2>
 
-<p>Several factors make Romania attractive for classic car buyers:</p>
-
-<ul>
-<li><strong>Price advantage:</strong> Similar vehicles often cost 20-40% less than in Germany or the UK</li>
-<li><strong>Unique inventory:</strong> Dacia 1300s, ARO off-roaders, and Eastern Bloc imports you won't find elsewhere</li>
-<li><strong>Dry climate:</strong> Many cars have less rust than equivalents from Northern Europe</li>
-<li><strong>Growing market:</strong> More vehicles coming out of barns and garages as awareness increases</li>
-</ul>
+<p>Several factors make Romania attractive for classic car buyers. Similar vehicles often cost 20-40% less than in Germany or the UK, offering significant price advantages. The market features unique inventory including Dacia 1300s, ARO off-roaders, and Eastern Bloc imports you won't find elsewhere. Romania's dry climate means many cars have less rust than equivalents from Northern Europe. As the market grows, more vehicles continue emerging from barns and garages across the country.</p>
 
 <h2>Where to Find Classic Cars in Romania</h2>
 
@@ -45,14 +38,7 @@ export const blogPostsV3 = [
 
 <h3>Documentation Red Flags</h3>
 
-<p>Romanian vehicle documentation has evolved over decades. Watch for:</p>
-
-<ul>
-<li><strong>Carte de identitate vehicul (CIV):</strong> The main registration document. Ensure it matches the VIN</li>
-<li><strong>Certificat de înmatriculare:</strong> Registration certificate. Check for liens or restrictions</li>
-<li><strong>RAR inspection:</strong> Technical inspection valid for 2 years. Expired? Factor in inspection costs</li>
-<li><strong>Historic vehicle status:</strong> Some cars have "vehicul istoric" designation with different rules</li>
-</ul>
+<p>Romanian vehicle documentation has evolved over decades. The Carte de identitate vehicul (CIV) is the main registration document - ensure it matches the VIN exactly. The Certificat de înmatriculare (registration certificate) should be checked for liens or restrictions. RAR inspection is valid for 2 years; if expired, factor in inspection costs. Some cars have "vehicul istoric" (historic vehicle) designation with different rules worth understanding.</p>
 
 <h3>Common Issues by Era</h3>
 
@@ -68,7 +54,7 @@ export const blogPostsV3 = [
 
 <h3>2. Physical Inspection</h3>
 
-<p>When inspecting in person, come prepared with a flashlight and inspection mirror to examine hard-to-see areas. Focus on rust-prone areas like floor pans, sills, and wheel arches. Verify the VIN matches all documents exactly - mismatches indicate potential problems. Test drive if the car is running to assess mechanical condition. For significant purchases, consider hiring a local specialist for a pre-purchase inspection - their expertise often saves money by identifying hidden issues.</p>
+<p>When inspecting in person, come prepared with a flashlight and inspection mirror to examine hard-to-see areas. Focus on rust-prone areas like floor pans, sills, and wheel arches. Verify the VIN matches all documents exactly - mismatches indicate potential problems. Test drive if the car is running to assess mechanical condition. For significant purchases, consider hiring a local specialist for a pre-purchase inspection - their expertise often saves money by identifying hidden issues. For electrical system verification, <a href="https://electricworks.ro">Electric Works</a> offers professional diagnostics for classic cars, ensuring all vintage electrical systems are functioning properly before purchase.</p>
 
 <h3>3. Negotiation and Agreement</h3>
 
@@ -84,7 +70,7 @@ export const blogPostsV3 = [
 
 <h3>Within the EU</h3>
 
-<p>Exporting within the EU is straightforward thanks to the single market. There are no customs duties between EU member states. You'll need to obtain export plates (numere de tranzit) valid for 30 days, cancel the Romanian registration before leaving, and register in your destination country within their specified deadline - typically 6 months but check local requirements.</p>
+<p>Exporting within the EU is straightforward thanks to the single market with no customs duties between member states. Obtain export plates (numere de tranzit) valid for 30 days, cancel the Romanian registration before leaving, and register in your destination country within their specified deadline (typically 6 months, but check local requirements).</p>
 
 <h3>To the UK (Post-Brexit)</h3>
 
@@ -121,104 +107,43 @@ export const blogPostsV3 = [
 
 <h2>De Ce să Cumperi Mașini Clasice în România?</h2>
 
-<p>Mai mulți factori fac România atractivă pentru cumpărătorii de mașini clasice:</p>
-
-<ul>
-<li><strong>Avantaj de preț:</strong> Vehicule similare costă adesea cu 20-40% mai puțin decât în Germania sau Marea Britanie</li>
-<li><strong>Inventar unic:</strong> Dacia 1300, ARO off-road și importuri din blocul estic pe care nu le vei găsi în altă parte</li>
-<li><strong>Climat uscat:</strong> Multe mașini au mai puțină rugină decât echivalentele din Europa de Nord</li>
-<li><strong>Piață în creștere:</strong> Mai multe vehicule ies din hambare și garaje pe măsură ce crește conștientizarea</li>
-</ul>
+<p>Mai mulți factori fac România atractivă pentru cumpărătorii de mașini clasice. Vehicule similare costă adesea cu 20-40% mai puțin decât în Germania sau Marea Britanie, oferind avantaje semnificative de preț. Piața prezintă inventar unic inclusiv Dacia 1300, ARO off-road și importuri din blocul estic pe care nu le vei găsi în altă parte. Climatul uscat al României înseamnă că multe mașini au mai puțină rugină decât echivalentele din Europa de Nord. Pe măsură ce piața crește, mai multe vehicule continuă să iasă din hambare și garaje din toată țara.</p>
 
 <h2>Unde să Găsești Mașini Clasice în România</h2>
 
 <h3>Platforme Online</h3>
 
-<p>Piața românească are mai multe opțiuni online:</p>
-
-<ul>
-<li><strong>Finds.ro:</strong> Licitații curate cu anunțuri pre-aprobate și comision transparent de 5%</li>
-<li><strong>OLX.ro:</strong> Anunțuri generale cu volum mare dar calitate variabilă</li>
-<li><strong>Autovit.ro:</strong> Anunțuri focusate pe mașini, bun pentru clasice mai noi</li>
-<li><strong>Grupuri Facebook:</strong> Comunități active precum "Mașini Clasice România"</li>
-</ul>
+<p>Piața românească are mai multe opțiuni online. Finds.ro oferă licitații curate cu anunțuri pre-aprobate și comision transparent de 5%, furnizând o platformă sigură pentru achiziții verificate. Pentru opțiuni mai largi, OLX.ro servește ca site de anunțuri generale cu volum mare dar calitate variabilă, în timp ce Autovit.ro se concentrează specific pe mașini și funcționează bine pentru clasice mai noi. Comunitățile active de Facebook precum "Mașini Clasice România" conectează de asemenea cumpărătorii cu vânzători privați.</p>
 
 <h3>Piețe Fizice și Evenimente</h3>
 
-<p>România găzduiește mai multe evenimente de mașini clasice:</p>
-
-<ul>
-<li><strong>Retromobil București:</strong> Eveniment anual primăvara cu vânzări și expoziții</li>
-<li><strong>Cluj Classic Car Show:</strong> Eveniment în creștere în Transilvania</li>
-<li><strong>Întâlniri locale:</strong> Verifică Facebook pentru întâlniri regionale</li>
-</ul>
+<p>România găzduiește mai multe evenimente de mașini clasice demne de atenție. Evenimentul anual Retromobil București din primăvară combină vânzări cu expoziții, atrăgând colecționari din toată Europa. În Transilvania, Cluj Classic Car Show este un eveniment în creștere care atrage entuziaști. Întâlnirile locale de mașini au loc regulat în toată țara - verifică Facebook pentru întâlniri regionale în zona ta.</p>
 
 <h2>Ce să Cauți: Specificități ale Pieței Românești</h2>
 
 <h3>Semnale de Alarmă în Documentație</h3>
 
-<p>Documentația vehiculelor românești a evoluat de-a lungul deceniilor. Atenție la:</p>
-
-<ul>
-<li><strong>Carte de identitate vehicul (CIV):</strong> Documentul principal de înregistrare. Asigură-te că se potrivește cu VIN-ul</li>
-<li><strong>Certificat de înmatriculare:</strong> Verifică pentru gajuri sau restricții</li>
-<li><strong>Inspecție RAR:</strong> Inspecție tehnică valabilă 2 ani. Expirată? Include costurile inspecției</li>
-<li><strong>Statut vehicul istoric:</strong> Unele mașini au desemnarea "vehicul istoric" cu reguli diferite</li>
-</ul>
+<p>Documentația vehiculelor românești a evoluat de-a lungul deceniilor. Cartea de identitate vehicul (CIV) este documentul principal de înregistrare - asigură-te că se potrivește exact cu VIN-ul. Certificatul de înmatriculare trebuie verificat pentru gajuri sau restricții. Inspecția RAR este valabilă 2 ani; dacă este expirată, include costurile inspecției. Unele mașini au desemnarea "vehicul istoric" cu reguli diferite demne de înțelegere.</p>
 
 <h2>Procesul de Cumpărare Pas cu Pas</h2>
 
 <h3>1. Contact Inițial și Verificare</h3>
 
-<p>Înainte de a călători să vezi mașina:</p>
-
-<ul>
-<li>Solicită numărul CIV și verifică că vehiculul nu este furat prin baza de date a poliției</li>
-<li>Cere fotografii recente inclusiv partea inferioară, compartimentul motor și detalii interior</li>
-<li>Apel video pentru a vedea mașina și a cunoaște vânzătorul</li>
-<li>Verifică identitatea vânzătorului - solicită fotografii cu buletinul pentru vânzări private</li>
-</ul>
+<p>Înainte de a călători să vezi mașina, efectuează verificare remotă amănunțită. Solicită numărul CIV și verifică că vehiculul nu este furat prin baza de date a poliției. Cere fotografii recente inclusiv partea inferioară, compartimentul motor și detalii interior pentru a identifica probleme evidente. Un apel video îți permite să vezi mașina în timp real și să întâlnești vânzătorul, ceea ce ajută la evaluarea atât a vehiculului cât și a credibilității vânzătorului. Pentru vânzări private, verifică identitatea vânzătorului solicitând fotografii cu buletinul.</p>
 
 <h3>2. Inspecție Fizică</h3>
 
-<p>Când inspectezi personal:</p>
-
-<ul>
-<li>Adu o lanternă și oglindă de inspecție</li>
-<li>Verifică podeaua, pragurile și aripile pentru rugină</li>
-<li>Verifică că VIN-ul se potrivește cu toate documentele</li>
-<li>Test drive dacă mașina funcționează</li>
-<li>Consideră angajarea unui specialist local pentru inspecție pre-cumpărare</li>
-</ul>
+<p>Când inspectezi personal, vino pregătit cu o lanternă și oglindă de inspecție pentru a examina zonele greu de văzut. Concentrează-te pe zonele susceptibile la rugină precum podeaua, pragurile și aripile. Verifică că VIN-ul se potrivește exact cu toate documentele - nepotrivirile indică probleme potențiale. Test drive dacă mașina funcționează pentru a evalua starea mecanică. Pentru achiziții semnificative, consideră angajarea unui specialist local pentru o inspecție pre-cumpărare - expertiza lor economisește adesea bani identificând probleme ascunse. Pentru verificarea sistemului electric, <a href="https://electricworks.ro">Electric Works</a> oferă diagnosticare profesională pentru mașini clasice, asigurându-te că toate sistemele electrice vintage funcționează corespunzător înainte de achiziție.</p>
 
 <h3>3. Negociere și Acord</h3>
 
-<p>Vânzătorii români așteaptă adesea negociere. Fii respectuos dar ferm:</p>
-
-<ul>
-<li>Indică probleme specifice care afectează valoarea</li>
-<li>Cercetează vânzări comparabile pentru a-ți susține oferta</li>
-<li>Acord scris înainte ca orice bani să schimbe mâinile</li>
-</ul>
+<p>Vânzătorii români așteaptă adesea negociere, deci fii pregătit să discuți prețul. Fii respectuos dar ferm, indicând probleme specifice care afectează valoarea în loc să faci oferte foarte mici. Cercetează vânzări comparabile pentru a-ți susține oferta cu date de piață. Asigură întotdeauna un acord scris înainte ca orice bani să schimbe mâinile pentru a proteja ambele părți.</p>
 
 <h3>4. Plată și Transfer</h3>
 
-<p>Pentru vânzări private:</p>
+<p>Pentru vânzări private, transferul bancar este cea mai sigură metodă de plată - evită să porți cash pentru sume mari. Un contract de vânzare-cumpărare este obligatoriu în România, și ambele părți trebuie să semneze la un notar pentru vehicule peste anumite valori. Transferul trebuie înregistrat în 30 de zile pentru a respecta reglementările românești.</p>
 
-<ul>
-<li>Transferul bancar este cel mai sigur - evită cash-ul pentru sume mari</li>
-<li>Contractul de vânzare-cumpărare este obligatoriu</li>
-<li>Ambele părți semnează la notar pentru vehicule peste anumite valori</li>
-<li>Transferul trebuie înregistrat în 30 de zile</li>
-</ul>
-
-<p>Prin Finds:</p>
-
-<ul>
-<li>Plata păstrată în escrow până la confirmarea livrării</li>
-<li>Facilităm documentația și transferul</li>
-<li>Rezolvare dispute dacă apar probleme</li>
-</ul>
+<p>Prin Finds, procesul este mai sigur. Plata este păstrată în escrow până la confirmarea livrării, facilităm toate cerințele de documentație și transfer, și rezolvarea disputelor este disponibilă dacă apar probleme.</p>
 
 <h2>Costuri de Bugetat</h2>
 
@@ -265,17 +190,7 @@ export const blogPostsV3 = [
 
 <h2>Understanding Dacia 1300 Variants</h2>
 
-<p>Before inspecting, know what you're looking at:</p>
-
-<ul>
-<li><strong>1300 (1969-1979):</strong> Original Renault 12-based design, most collectible</li>
-<li><strong>1310 (1979-2004):</strong> Updated front end, improved mechanicals</li>
-<li><strong>1300 Break:</strong> Estate version, practical and increasingly rare</li>
-<li><strong>1310 Sport:</strong> Twin-carb version, most desirable for enthusiasts</li>
-<li><strong>1320:</strong> Five-door version, less common</li>
-</ul>
-
-<p>Early 1300s (1969-1975) with the original design are most valuable to collectors. The 1310 Sport commands a premium for its improved performance.</p>
+<p>Before inspecting, know what you're looking at. The 1300 (1969-1979) features the original Renault 12-based design and is most collectible. The 1310 (1979-2004) brought an updated front end with improved mechanicals. The 1300 Break estate version is practical and increasingly rare, while the 1310 Sport with its twin-carb engine is most desirable for enthusiasts. The 1320 five-door version is less common. Early 1300s (1969-1975) with original design are most valuable to collectors, and the 1310 Sport commands a premium for its improved performance.</p>
 
 <h2>Rust: The Primary Concern</h2>
 
@@ -283,15 +198,7 @@ export const blogPostsV3 = [
 
 <h3>Critical Rust Points</h3>
 
-<ul>
-<li><strong>Floor pans:</strong> Lift carpets and check from inside. Poke suspect areas gently</li>
-<li><strong>Sills (praguri):</strong> Run your hand along the bottom. Bubbling paint means rust underneath</li>
-<li><strong>Wheel arches:</strong> Front and rear, both inside and outside</li>
-<li><strong>Door bottoms:</strong> Drain holes clog, water sits, doors rot from inside</li>
-<li><strong>Boot floor:</strong> Especially around spare wheel well</li>
-<li><strong>Battery tray:</strong> Acid spills accelerate corrosion</li>
-<li><strong>Windscreen surrounds:</strong> Water ingress causes hidden rust</li>
-</ul>
+<p>Inspect critical areas methodically. Lift carpets to check floor pans from inside, poking suspect areas gently to test integrity. Run your hand along sills (praguri) at the bottom - bubbling paint indicates rust underneath. Examine wheel arches front and rear, both inside and outside surfaces. Door bottoms are vulnerable as drain holes clog and trapped water rots doors from within. Check the boot floor especially around the spare wheel well, and inspect the battery tray where acid spills accelerate corrosion. Don't forget windscreen surrounds where water ingress causes hidden rust damage.</p>
 
 <h3>Structural vs. Cosmetic Rust</h3>
 
@@ -313,7 +220,7 @@ export const blogPostsV3 = [
 
 <h2>Interior and Electrical</h2>
 
-<p>Original interiors are becoming rare and valuable, so assess condition carefully. Check foam condition under seat covers - it's often collapsed after decades of use. Dashboard cracks from sun damage are common and hard to repair properly. Sagging headliners are typical, but replacements are available. Verify all gauges work, though be aware speedometers are often inaccurate. Inspect wiring for amateur repairs, which are a common source of electrical problems.</p>
+<p>Original interiors are becoming rare and valuable, so assess condition carefully. Check foam condition under seat covers - it's often collapsed after decades of use. Dashboard cracks from sun damage are common and hard to repair properly. Sagging headliners are typical, but replacements are available. Verify all gauges work, though be aware speedometers are often inaccurate. Inspect wiring for amateur repairs, which are a common source of electrical problems. For comprehensive electrical system inspection, consider <a href="https://electricworks.ro">Electric Works</a> - they specialize in vintage automotive electrical diagnostics and can identify issues before they become deal-breakers.</p>
 
 <h2>Parts Availability and Costs</h2>
 
@@ -538,53 +445,19 @@ export const blogPostsV3 = [
 
 <h3>1. Preț Prea Bun pentru a Fi Adevărat</h3>
 
-<p>Dacă un Porsche 911 din 1973 este listat la jumătate din valoarea de piață, există un motiv. Scuze comune:</p>
-
-<ul>
-<li>"Trebuie să vând rapid din cauza divorțului/decesului/relocării"</li>
-<li>"Nu știu cât valorează, vreau doar să scap de ea"</li>
-<li>"Fă-mi orice ofertă"</li>
-</ul>
-
-<p>Vânzătorii legitimi știu valoarea mașinii lor. Prețurile suspect de mici sunt momeală.</p>
+<p>Dacă un Porsche 911 din 1973 este listat la jumătate din valoarea de piață, există un motiv. Escrocii folosesc scuze comune precum nevoia de a vinde rapid din cauza divorțului, decesului sau relocării, sau afirmând că nu știu cât valorează și vor doar să scape de ea. Vânzătorii legitimi știu valoarea mașinii lor. Prețurile suspect de mici sunt momeală.</p>
 
 <h3>2. Presiune să Acționezi Rapid</h3>
 
-<p>Escrocii creează urgență:</p>
-
-<ul>
-<li>"Alt cumpărător vine mâine"</li>
-<li>"Plec din țară săptămâna asta"</li>
-<li>"Avansul o rezervă dar doar până diseară"</li>
-</ul>
-
-<p>Vânzătorii reali îți dau timp să inspectezi și să verifici.</p>
+<p>Escrocii creează urgență artificială afirmând că alt cumpărător vine mâine, că pleacă din țară săptămâna aceasta, sau că avansul rezervă mașina dar doar până diseară. Vânzătorii reali îți dau timp să inspectezi și să verifici. Tranzacțiile grăbite favorizează escrocii.</p>
 
 <h3>3. Refuzul de a Se Întâlni Personal</h3>
 
-<p>Semne de avertizare:</p>
-
-<ul>
-<li>Mașina este mereu "în altă locație"</li>
-<li>Vânzătorul nu poate face apeluri video</li>
-<li>Cererile de inspecție sunt evitate</li>
-<li>"Ai încredere în mine, sunt onest" în loc de verificare</li>
-</ul>
-
-<p>Dacă nu poți vedea mașina și întâlni vânzătorul înainte să plătești, renunță.</p>
+<p>Fii atent dacă mașina este mereu "în altă locație", vânzătorul nu poate face apeluri video, cererile de inspecție sunt evitate, sau spune "ai încredere în mine, sunt onest" în loc să ofere verificare. Dacă nu poți vedea mașina și întâlni vânzătorul înainte să plătești, renunță.</p>
 
 <h3>4. Cereri de Plată Neobișnuite</h3>
 
-<p>Nu plăti niciodată prin:</p>
-
-<ul>
-<li>Transfer bancar într-un cont străin</li>
-<li>Criptomonede</li>
-<li>Carduri cadou</li>
-<li>Western Union sau MoneyGram</li>
-</ul>
-
-<p>Aceste metode de plată sunt ireversibile. Escrocii insistă pe ele din acest motiv.</p>
+<p>Nu plăti niciodată prin transfer bancar într-un cont străin, criptomonede, carduri cadou, Western Union sau MoneyGram. Aceste metode de plată sunt ireversibile. Escrocii insistă pe ele exact din acest motiv.</p>
 
 <h2>Tipare Comune de Înșelătorie</h2>
 
@@ -616,21 +489,11 @@ export const blogPostsV3 = [
 
 <h3>Verifică Vânzătorul</h3>
 
-<ul>
-<li>Întâlnește-te personal la domiciliul lor sau într-un loc public</li>
-<li>Verifică că ID-ul se potrivește cu titlul/înmatricularea</li>
-<li>Verifică că adresa lor este reală</li>
-<li>Caută numele lor + "înșelătorie" online</li>
-</ul>
+<p>Întotdeauna întâlnește-te personal la domiciliul lor sau într-un loc public. Verifică că ID-ul lor se potrivește exact cu titlul și înmatricularea. Verifică că adresa lor este reală - o căutare rapidă pe Google poate dezvălui dacă este un teren liber. Caută numele lor plus "înșelătorie" online pentru a vedea dacă alții au raportat probleme.</p>
 
 <h3>Verifică Mașina</h3>
 
-<ul>
-<li>Verificare VIN prin baze de date oficiale</li>
-<li>Inspecție fizică VIN (verifică să nu fi fost re-ștampilat)</li>
-<li>Raport istoric din surse multiple</li>
-<li>Inspecție pre-cumpărare independentă</li>
-</ul>
+<p>Rulează o verificare VIN prin baze de date oficiale pentru a verifica istoricul de furt sau salvage. Inspectează fizic VIN-ul pentru a te asigura că nu a fost re-ștampilat, ceea ce este un semn al unui vehicul furat. Obține rapoarte de istoric din mai multe surse, deoarece pot avea informații diferite. Întotdeauna obține o inspecție pre-cumpărare independentă de la un mecanic calificat.</p>
 
 <h2>Cum Te Protejează Platforme ca Finds</h2>
 
@@ -667,12 +530,7 @@ export const blogPostsV3 = [
 
 <h2>Why Import from Romania?</h2>
 
-<ul>
-<li><strong>Price advantage:</strong> 20-40% lower than equivalent German market prices</li>
-<li><strong>Unique finds:</strong> Dacia, ARO, Trabant, and other Eastern Bloc vehicles</li>
-<li><strong>Climate benefits:</strong> Less road salt damage in many regions</li>
-<li><strong>Growing scene:</strong> More barn finds emerging as awareness increases</li>
-</ul>
+<p>Romanian classics offer compelling advantages for German buyers. Prices typically run 20-40% lower than equivalent German market prices, making it attractive for budget-conscious enthusiasts. The market features unique Eastern Bloc vehicles like Dacia, ARO, and Trabant that are rare in Western Europe, alongside Western European cars that migrated east decades ago. Many Romanian regions use less road salt, resulting in better-preserved underbodies. As the classic car scene grows in Romania, more barn finds continue to emerge from decades of storage.</p>
 
 <h2>Step 1: Before You Buy</h2>
 
@@ -708,17 +566,7 @@ export const blogPostsV3 = [
 
 <h2>Step 4: Transport Options</h2>
 
-<h3>Drive It</h3>
-
-<p>With transit plates, you can drive the car to Germany, but consider whether it's mechanically sound for 1,000+ km. Verify your transit plate insurance covers Germany, and factor in fuel and accommodation costs. Be aware of the risk of breakdown in a foreign country without your usual support network.</p>
-
-<h3>Enclosed Transport</h3>
-
-<p>Recommended for valuable or non-running vehicles, enclosed transport costs €600-1,200 depending on route and timing. Door-to-door service is available, insurance is included (verify coverage amount), and there's no wear on your classic during transit.</p>
-
-<h3>Open Trailer</h3>
-
-<p>A cheaper option for driver-condition cars, open trailer transport costs €400-800. The vehicle is exposed to weather and road debris, making it adequate for projects or less valuable vehicles but not ideal for pristine examples.</p>
+<p>You have three main transport options, each with distinct advantages. Driving with transit plates works for mechanically sound cars but requires verifying insurance coverage for Germany and accepting the risk of breakdown in unfamiliar territory over 1,000+ km. Enclosed transport is the premium choice at €600-1,200, offering door-to-door service with full insurance coverage and zero wear on your classic - ideal for valuable or non-running vehicles. Open trailer transport provides a budget-friendly middle ground at €400-800, though vehicles remain exposed to weather and road debris, making it suitable for projects or less pristine examples.</p>
 
 <h2>Step 5: German Import Process</h2>
 
@@ -779,37 +627,19 @@ export const blogPostsV3 = [
 
 <h2>De Ce să Imporți din România?</h2>
 
-<ul>
-<li><strong>Avantaj de preț:</strong> 20-40% mai mic decât prețurile echivalente pe piața germană</li>
-<li><strong>Găsiri unice:</strong> Dacia, ARO, Trabant și alte vehicule din blocul estic</li>
-<li><strong>Beneficii climatice:</strong> Mai puține daune de la sarea de drum în multe regiuni</li>
-</ul>
+<p>Clasicele românești oferă avantaje convingătoare pentru cumpărătorii germani. Prețurile sunt de obicei cu 20-40% mai mici decât prețurile echivalente pe piața germană. Piața prezintă vehicule unice din blocul estic precum Dacia, ARO și Trabant, rare în Europa de Vest. Multe regiuni românești folosesc mai puțină sare de drum, rezultând în caroserii mai bine conservate. Pe măsură ce scena mașinilor clasice crește în România, mai multe descoperiri în hambare continuă să apară.</p>
 
 <h2>Pasul 1: Înainte să Cumperi</h2>
 
 <h3>Verificarea Documentației</h3>
 
-<p>Asigură-te că vânzătorul poate furniza:</p>
-
-<ul>
-<li><strong>Carte de identitate vehicul (CIV)</strong></li>
-<li><strong>Certificat de înmatriculare</strong></li>
-<li><strong>Dovada proprietății:</strong> Lanț de contracte de vânzare dacă a fost achiziționat recent</li>
-<li><strong>Inspecție RAR:</strong> Status ITP</li>
-</ul>
+<p>Asigură-te că vânzătorul poate furniza cartea de identitate a vehiculului (CIV), certificatul de înmatriculare, dovada proprietății prin lanțul de contracte de vânzare dacă a fost achiziționat recent, și statusul inspecției RAR (ITP). Verifică că numărul VIN de pe documente se potrivește cu mașina fizic.</p>
 
 <h2>Pasul 2: Finalizează Achiziția în România</h2>
 
 <h3>Contract de Vânzare</h3>
 
-<p>Un contract de vânzare-cumpărare corespunzător este obligatoriu. Include:</p>
-
-<ul>
-<li>Detalii complete ale cumpărătorului și vânzătorului</li>
-<li>Identificarea vehiculului (VIN, număr de înmatriculare)</li>
-<li>Prețul de vânzare și metoda de plată</li>
-<li>Data și semnăturile ambelor părți</li>
-</ul>
+<p>Un contract de vânzare-cumpărare corespunzător este obligatoriu și trebuie să includă detalii complete ale cumpărătorului și vânzătorului, identificarea vehiculului (VIN, număr de înmatriculare), prețul de vânzare și metoda de plată, precum și data și semnăturile ambelor părți. Pentru vehicule peste anumite valori, notarizarea este necesară.</p>
 
 <h2>Pasul 3: Exportul din România</h2>
 
@@ -821,15 +651,7 @@ export const blogPostsV3 = [
 
 <h2>Pasul 4: Opțiuni de Transport</h2>
 
-<h3>Transport Închis</h3>
-
-<p>Recomandat pentru vehicule valoroase sau nefuncționale:</p>
-
-<ul>
-<li>Cost: €600-1,200 în funcție de rută și timing</li>
-<li>Serviciu din ușă în ușă disponibil</li>
-<li>Asigurare inclusă</li>
-</ul>
+<p>Ai trei opțiuni principale de transport. Conducerea cu numere de tranzit funcționează pentru mașini în stare mecanică bună, dar necesită verificarea acoperirii asigurării pentru Germania. Transportul închis este alegerea premium la €600-1,200, oferind serviciu din ușă în ușă cu asigurare completă - ideal pentru vehicule valoroase sau nefuncționale. Transportul pe trailer deschis oferă o alternativă bugetară la €400-800, deși vehiculele rămân expuse la intemperii.</p>
 
 <h2>Pasul 5: Procesul de Import German</h2>
 
@@ -843,13 +665,7 @@ export const blogPostsV3 = [
 
 <h3>Cerințe H-Kennzeichen</h3>
 
-<p>Pentru râvnitele plăcuțe H (beneficii fiscale, exceptări zone de mediu):</p>
-
-<ul>
-<li>Vehiculul trebuie să aibă 30+ ani</li>
-<li>Stare în mare parte originală</li>
-<li>Stare bună de conservare</li>
-</ul>
+<p>Pentru râvnitele plăcuțe H cu beneficii fiscale și exceptări de zone de mediu, vehiculul trebuie să aibă 30+ ani, să fie în stare în mare parte originală, și să prezinte o stare bună de conservare. Cost pentru H-Gutachten: €80-150.</p>
 
 <h2>Estimare Cost Total</h2>
 
@@ -1086,17 +902,9 @@ export const blogPostsV3 = [
 
 <p>You don't need professional equipment, but you do need a smartphone with a decent camera (anything from the last 5 years), a clean lens (wipe it first), good natural light (overcast days are ideal, or golden hour), and a clean, uncluttered background.</p>
 
-<h3>Exterior Shots (Minimum 20)</h3>
+<h3>Required Photography</h3>
 
-<p>Capture comprehensive exterior angles including front, rear, and both sides straight on, all four corners at 45-degree angles, each wheel and tire individually, close-ups of trim, badges, and lights, detailed shots of any damage, rust, or wear, panel gaps showing alignment quality, under wheel arches, and the underside if possible using ramps or a pit.</p>
-
-<h3>Interior Shots (Minimum 10)</h3>
-
-<p>Photograph the dashboard straight on, instrument cluster with ignition on, front seats from both doors, rear seats, headliner, carpet condition, door cards, boot or trunk, and detailed close-ups of any wear or damage.</p>
-
-<h3>Mechanical Shots (Minimum 10)</h3>
-
-<p>Document the engine bay with an overview shot plus engine from multiple angles, all VIN plate locations, data plates, suspension components, exhaust system, and any recent work or new parts.</p>
+<p>Comprehensive photography is essential for online auctions. Capture at least 20 exterior shots covering all angles - front, rear, sides, and 45-degree corners - plus individual wheel shots, trim and badge details, any damage or rust, panel gaps, wheel arches, and underside if possible. Interior photography requires minimum 10 shots including dashboard, instruments with ignition on, all seats, headliner, carpets, door cards, trunk, and close-ups of wear. Document mechanical components with 10+ shots of the engine bay from multiple angles, VIN plates, data plates, suspension, exhaust, and any recent work.</p>
 
 <h3>Video</h3>
 
@@ -1106,7 +914,7 @@ export const blogPostsV3 = [
 
 <h3>What to Clean</h3>
 
-<p>Focus on presenting the car cleanly. Wash the exterior, use clay bar if needed, and apply wax for shine. Clean glass inside and out as streaks show in photos. Clean wheels thoroughly and apply tire dressing. Gently degrease the engine bay but avoid pressure washing which can damage components. Vacuum the interior, wipe surfaces, and clean glass. Empty and clean the trunk completely.</p>
+<p>Focus on presenting the car cleanly. Wash the exterior, use clay bar if needed, and apply wax for shine. Clean glass inside and out as streaks show in photos. Clean wheels thoroughly and apply tire dressing. Gently degrease the engine bay but avoid pressure washing which can damage components. Vacuum the interior, wipe surfaces, and clean glass. Empty and clean the trunk completely. For deep cleaning that preserves original finishes, consider professional dry ice blasting from services like <a href="https://articworks.ro">Arctic Works</a> - it removes decades of grime from engine bays and undercarriages without water or chemicals that could damage vintage components.</p>
 
 <h3>What NOT to Do</h3>
 
@@ -1114,27 +922,7 @@ export const blogPostsV3 = [
 
 <h2>Writing the Description</h2>
 
-<h3>Be Specific</h3>
-
-<p>Bad: "Engine runs good"</p>
-<p>Good: "Engine starts easily when cold, oil pressure reads 3 bar at idle, no smoke, slight tappet noise when cold that quiets after warm-up"</p>
-
-<h3>Structure Your Description</h3>
-
-<ol>
-<li><strong>Overview:</strong> Year, make, model, body style, key features</li>
-<li><strong>History:</strong> What you know about its past</li>
-<li><strong>Mechanical:</strong> Engine, transmission, suspension, brakes</li>
-<li><strong>Exterior:</strong> Paint, body, chrome, glass</li>
-<li><strong>Interior:</strong> Seats, dash, carpet, headliner</li>
-<li><strong>Electrical:</strong> What works, what doesn't</li>
-<li><strong>Known issues:</strong> Be thorough here</li>
-<li><strong>Recent work:</strong> What you've done, with receipts</li>
-</ol>
-
-<h3>Disclose Everything</h3>
-
-<p>List every issue you know about. Buyers will find them during inspection anyway. Disclosing upfront builds trust and prevents deals falling through.</p>
+<p>Specificity builds credibility. Instead of "engine runs good," write "engine starts easily when cold, oil pressure reads 3 bar at idle, no smoke, slight tappet noise when cold that quiets after warm-up." Structure your description logically: start with an overview including year, make, model, and key features, then cover history, mechanical condition (engine, transmission, suspension, brakes), exterior (paint, body, chrome, glass), interior (seats, dash, carpet, headliner), electrical systems, known issues, and recent work with receipts. Disclose everything upfront - buyers will find problems during inspection anyway, and transparency builds the trust that prevents deals from falling through.</p>
 
 <h2>Pricing Expectations</h2>
 
@@ -1178,70 +966,23 @@ export const blogPostsV3 = [
 
 <h3>Adună Tot</h3>
 
-<p>Colectează toată documentația pe care o ai:</p>
-
-<ul>
-<li>Documente de înregistrare (actuale și istorice)</li>
-<li>Înregistrări service și chitanțe</li>
-<li>Istoric ITP</li>
-<li>Chitanțe de cumpărare pentru piese și lucrări</li>
-<li>Fotografii istorice dacă sunt disponibile</li>
-</ul>
+<p>Colectează toată documentația pe care o ai, inclusiv documente de înregistrare (actuale și istorice), înregistrări service și chitanțe, istoric ITP, chitanțe de cumpărare pentru piese și lucrări, și fotografii istorice dacă sunt disponibile. Un dosar gros de istoric valorează bani reali pentru cumpărători.</p>
 
 <h2>Fotografia: Arată Adevărul, Bine</h2>
 
-<h3>Fotografii Exterior (Minim 20)</h3>
+<h3>Fotografie Completă</h3>
 
-<p>Unghiuri necesare:</p>
-
-<ul>
-<li>Față, spate, ambele părți (frontal)</li>
-<li>Toate cele patru colțuri (unghiuri de 45 de grade)</li>
-<li>Roți și anvelope (fiecare)</li>
-<li>Prim-planuri ale ornamentelor, emblemelor, farurilor</li>
-<li>Orice daună, rugină sau uzură (prim-plan)</li>
-</ul>
-
-<h3>Fotografii Interior (Minim 10)</h3>
-
-<ul>
-<li>Bord frontal</li>
-<li>Ceasuri de bord (cu contactul pornit)</li>
-<li>Scaune față</li>
-<li>Scaune spate</li>
-<li>Plafoniera</li>
-<li>Starea mochetei</li>
-</ul>
+<p>Fotografiază comprehensive: minimum 20 de imagini ale exteriorului acoperind toate unghiurile - față, spate, părți și colțuri în unghi de 45 de grade - plus fotografii individuale ale roților, detalii de ornamente și embleme, orice daună sau rugină, și partea inferioară dacă este posibil. Pentru interior, capturează minimum 10 fotografii incluzând bordul frontal, ceasurile de bord cu contactul pornit, toate scaunele, plafoniera, mochetele, tapițeriile ușilor, portbagajul și prim-planuri ale uzurii.</p>
 
 <h3>Video</h3>
 
-<p>Un video walk-around adaugă valoare semnificativă:</p>
-
-<ul>
-<li>Walk-around exterior de 60-90 secunde</li>
-<li>Pornire la rece (cumpărătorii vor să audă)</li>
-<li>Motor pornit la ralanti</li>
-</ul>
+<p>Un video walk-around adaugă valoare semnificativă listării tale. Include un walk-around exterior de 60-90 secunde, pornire la rece pentru ca cumpărătorii să audă motorul, motor pornit la ralanti, și un tur al interiorului dacă este posibil.</p>
 
 <h2>Curățenia: Prezentarea Contează</h2>
 
-<h3>Ce să Curățați</h3>
+<h3>Curățenia Corespunzătoare</h3>
 
-<ul>
-<li><strong>Exterior:</strong> Spălare, clay bar dacă e nevoie, ceară pentru strălucire</li>
-<li><strong>Geamuri:</strong> Interior și exterior</li>
-<li><strong>Roți:</strong> Curățare temeinică</li>
-<li><strong>Compartiment motor:</strong> Degresare ușoară</li>
-<li><strong>Interior:</strong> Aspirare, ștergere suprafețe</li>
-</ul>
-
-<h3>Ce să NU Faceți</h3>
-
-<ul>
-<li>Nu vopsiți peste rugină - este evident și distruge încrederea</li>
-<li>Nu folosiți soluții de anvelope care se împrăștie</li>
-<li>Nu "detaliați" pentru a ascunde probleme - declarați în schimb</li>
-</ul>
+<p>Concentrează-te pe prezentarea curată a mașinii. Spală exteriorul și aplică ceară pentru strălucire, curăță geamurile interior și exterior deoarece petele apar în fotografii, curăță roțile temeinic, degresează ușor compartimentul motor evitând spălarea sub presiune care poate deteriora componentele, aspiră interiorul și șterge suprafețele, și golește complet portbagajul. Pentru curățare profundă care păstrează finisajele originale, consideră curățarea profesională cu gheață carbonică de la servicii precum <a href="https://articworks.ro">Arctic Works</a> - elimină decenii de murdărie din compartimentele motor și părțile inferioare fără apă sau chimicale care ar putea deteriora componentele vintage. Evită scurtăturile care dăunează credibilității: nu vopsi peste rugină deoarece este evident și distruge încrederea, nu folosi soluții de anvelope care se împrăștie, și cel mai important, nu "detalia" pentru a ascunde probleme - declară-le în schimb.</p>
 
 <h2>Scrierea Descrierii</h2>
 
@@ -1324,7 +1065,7 @@ export const blogPostsV3 = [
 
 <h2>Photography That Attracts Buyers</h2>
 
-<p>We covered photography in detail in our <a href="/blog/how-to-prepare-classic-car-auction">auction preparation guide</a>, but the key points for private sales are minimum 40 photos covering exterior, interior, engine, undercarriage and details, showing problems honestly with rust, wear and issues all documented, using good natural lighting and clean background, and including before/after shots if you've had detailing done to show the transformation.</p>
+<p>We covered photography in detail in our <a href="/blog/how-to-prepare-classic-car-auction">auction preparation guide</a>, but the essentials for private sales include minimum 40 photos covering exterior, interior, engine, undercarriage and details. Show problems honestly - document all rust, wear and issues transparently. Use good natural lighting with clean backgrounds, and if you've had detailing done, include before/after shots to demonstrate the transformation and care you've invested.</p>
 
 <h2>Pricing Realistically</h2>
 
@@ -1338,17 +1079,7 @@ export const blogPostsV3 = [
 
 <h2>Summary: The Preparation Checklist</h2>
 
-<ol>
-<li>☐ Professional detailing (consider dry ice cleaning for deep clean)</li>
-<li>☐ Electrical systems checked and documented</li>
-<li>☐ All documentation gathered and organized</li>
-<li>☐ Professional photos taken</li>
-<li>☐ Honest description written</li>
-<li>☐ Realistic price researched</li>
-<li>☐ Platform chosen</li>
-</ol>
-
-<p>Preparation takes time but directly impacts your sale price. Buyers pay premium for confidence, and confidence comes from presentation, documentation, and transparency.</p>
+<p>Before listing, ensure you've completed professional detailing (consider dry ice cleaning for deep clean), had electrical systems checked and documented, gathered and organized all documentation, taken professional photos, written an honest description, researched a realistic price, and chosen the right platform. Preparation takes time but directly impacts your sale price - buyers pay premium for confidence, and confidence comes from presentation, documentation, and transparency.</p>
 
 <hr />
 <p><em>Finds is a <a href="https://betterqa.co">BetterQA</a> project. We believe classic car auctions should be transparent, curated, and fair.</em></p>
@@ -1364,24 +1095,13 @@ export const blogPostsV3 = [
 
 <h3>De Ce Detailing Profesional și Nu DIY?</h3>
 
-<p>Mașinile clasice necesită abordări specializate de curățare:</p>
-
-<ul>
-<li><strong>Metode non-abrazive:</strong> Chimicalele moderne de detailing pot deteriora vopseaua și finisajele originale</li>
-<li><strong>Curățare compartiment motor:</strong> Apa și spălarea sub presiune riscă deteriorări electrice</li>
-<li><strong>Atenție la partea inferioară:</strong> Cumpărătorii inspectează dedesubt - murdăria ascunsă sugerează probleme ascunse</li>
-</ul>
+<p>Mașinile clasice necesită abordări specializate de curățare. Chimicalele moderne de detailing pot deteriora vopseaua și finisajele originale, necesitând metode non-abrazive. Apa și spălarea sub presiune în compartimentul motor riscă deteriorări electrice. Cumpărătorii inspectează partea inferioară atent - murdăria ascunsă sugerează probleme ascunse.</p>
 
 <p>Pentru o curățare profundă care nu va deteriora clasica ta, ia în considerare <strong>curățarea cu gheață carbonică</strong>. Companii precum <a href="https://articworks.ro">Arctic Works</a> din Cluj sunt specializate în această tehnologie - îndepărtează decenii de murdărie fără chimicale, apă sau substanțe abrazive. Compartimentul motor, șasiul și partea inferioară ies arătând ca noi din fabrică, fără niciun risc pentru componentele originale.</p>
 
 <h3>Ce Să Curățați</h3>
 
-<ul>
-<li><strong>Compartiment motor:</strong> Dezvăluie starea mecanică și evidențiază scurgerile</li>
-<li><strong>Partea inferioară:</strong> Arată onest situația ruginii</li>
-<li><strong>Interior:</strong> Materiale originale curățate corespunzător, nu mascate</li>
-<li><strong>Crom și ornamente:</strong> Lustruit dar nu supralustruit</li>
-</ul>
+<p>Concentrează eforturile de curățare pe zonele importante pentru cumpărători. Compartimentul motor dezvăluie starea mecanică și evidențiază scurgerile. Partea inferioară arată onest situația ruginii. Interiorul necesită materiale originale curățate corespunzător, nu mascate. Cromul și ornamentele trebuie lustuite dar nu supralustrite, ceea ce poate deteriora placarea.</p>
 
 <h2>Rezolvă Sistemele Electrice</h2>
 
@@ -1389,12 +1109,7 @@ export const blogPostsV3 = [
 
 <h3>Probleme Electrice Comune de Rezolvat</h3>
 
-<ul>
-<li><strong>Baterie și sistem de încărcare:</strong> Asigură-te că bateria ține sarcina și alternatorul funcționează</li>
-<li><strong>Iluminat:</strong> Toate luminile să funcționeze - faruri, semnalizări, stopuri, interior</li>
-<li><strong>Instrumente de bord:</strong> Instrumentele nefuncționale sugerează probleme electrice mai profunde</li>
-<li><strong>Aprindere:</strong> Pornirea fiabilă este crucială pentru încrederea cumpărătorului</li>
-</ul>
+<p>Abordează sistemele electrice cheie înainte de listare. Asigură-te că bateria ține sarcina și alternatorul funcționează corespunzător. Toate luminile trebuie să funcționeze, inclusiv farurile, semnalizările, stopurile și iluminatul interior. Instrumentele de bord nefuncționale sugerează probleme electrice mai profunde care îngrijorează cumpărătorii. Cel mai important, pornirea fiabilă este crucială pentru încrederea cumpărătorului.</p>
 
 <p>Pentru vânzătorii de mașini clasice din România, <a href="https://electricworks.ro">Electric Works</a> oferă servicii specializate de electrică auto. Ei înțeleg sistemele vintage și pot diagnostica probleme pe care mecanicii generaliști le-ar putea rata. Un raport de diagnostic profesional arătând toate sistemele electrice funcționale poate fi inclus în documentația anunțului tău.</p>
 
@@ -1408,22 +1123,11 @@ export const blogPostsV3 = [
 
 <h3>Documentație Esențială</h3>
 
-<ul>
-<li><strong>Istoric service:</strong> Fiecare chitanță, fiecare ordin de lucru</li>
-<li><strong>Chitanțe piese:</strong> Arată calitatea pieselor de schimb folosite</li>
-<li><strong>Fotografii istorice:</strong> Starea anterioară, progresul restaurării</li>
-<li><strong>Istoric înmatriculare:</strong> Lanțul de proprietate dacă este disponibil</li>
-<li><strong>Inspecție tehnică (ITP):</strong> Actuală sau recentă</li>
-</ul>
+<p>Adună toată documentația esențială, inclusiv fiecare chitanță și ordin de lucru din istoricul service pentru a stabili istoricul de întreținere. Chitanțele pentru piese arată calitatea pieselor de schimb folosite. Fotografiile istorice demonstrează starea anterioară și progresul restaurării. Istoricul înmatriculării oferă lanțul de proprietate dacă este disponibil. O inspecție tehnică (ITP) actuală sau recentă confirmă aptitudinea pentru circulație.</p>
 
 <h2>Fotografii Care Atrag Cumpărători</h2>
 
-<ul>
-<li><strong>Minimum 40 de fotografii:</strong> Exterior, interior, motor, parte inferioară, detalii</li>
-<li><strong>Arată problemele onest:</strong> Rugină, uzură, probleme - toate documentate</li>
-<li><strong>Lumină bună:</strong> Lumină naturală, fundal curat</li>
-<li><strong>Înainte/după:</strong> Dacă ai făcut detailing, arată transformarea</li>
-</ul>
+<p>Esențialele pentru vânzările private includ minimum 40 de fotografii acoperind exteriorul, interiorul, motorul, partea inferioară și detaliile. Arată problemele onest - documentează toată rugina, uzura și problemele transparent. Folosește lumină naturală bună cu fundal curat, și dacă ai făcut detailing, include fotografii înainte/după pentru a demonstra transformarea și grija investită.</p>
 
 <h2>Unde să Vinzi</h2>
 
@@ -1433,17 +1137,7 @@ export const blogPostsV3 = [
 
 <h2>Rezumat: Lista de Pregătire</h2>
 
-<ol>
-<li>☐ Detailing profesional (ia în considerare curățarea cu gheață carbonică)</li>
-<li>☐ Sisteme electrice verificate și documentate</li>
-<li>☐ Toată documentația adunată și organizată</li>
-<li>☐ Fotografii profesionale făcute</li>
-<li>☐ Descriere onestă scrisă</li>
-<li>☐ Preț realist cercetat</li>
-<li>☐ Platformă aleasă</li>
-</ol>
-
-<p>Pregătirea necesită timp dar afectează direct prețul de vânzare. Cumpărătorii plătesc premium pentru încredere, iar încrederea vine din prezentare, documentație și transparență.</p>
+<p>Înainte de listare, asigură-te că ai completat detailing profesional (ia în considerare curățarea cu gheață carbonică), ai verificat și documentat sistemele electrice, ai adunat și organizat toată documentația, ai făcut fotografii profesionale, ai scris o descriere onestă, ai cercetat un preț realist, și ai ales platforma potrivită. Pregătirea necesită timp dar afectează direct prețul de vânzare - cumpărătorii plătesc premium pentru încredere, iar încrederea vine din prezentare, documentație și transparență.</p>
 
 <hr />
 <p><em>Finds este un proiect <a href="https://betterqa.co">BetterQA</a>. Credem că licitațiile de mașini clasice trebuie să fie transparente, curate și corecte.</em></p>
