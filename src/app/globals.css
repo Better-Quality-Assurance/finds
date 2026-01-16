@@ -2,100 +2,131 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ═══════════════════════════════════════════════════════════════════════════
+   FINDS.RO - European Heritage Motor Club Design System
+   A sophisticated blend of vintage automotive heritage and modern auction elegance
+   ═══════════════════════════════════════════════════════════════════════════ */
+
 @layer base {
   :root {
-    /* Racing Green Premium Palette */
-    --background: 0 0% 100%;
-    --foreground: 150 30% 10%;
-    --card: 0 0% 100%;
-    --card-foreground: 150 30% 10%;
-    --popover: 0 0% 100%;
-    --popover-foreground: 150 30% 10%;
+    /* ─────────────────────────────────────────────────────────────────────────
+       LIGHT MODE - Parchment & Racing Heritage
+       Inspired by vintage racing programs, leather-bound catalogs, brass gauges
+       ───────────────────────────────────────────────────────────────────────── */
 
-    /* Primary: Racing Green #31654A */
-    --primary: 150 35% 29%;
-    --primary-foreground: 0 0% 98%;
+    /* Background: Warm parchment cream - like aged auction catalogs */
+    --background: 42 30% 98%;
+    --foreground: 150 40% 8%;
 
-    /* Secondary: Cognac Leather #C98D5E */
-    --secondary: 28 52% 58%;
-    --secondary-foreground: 0 0% 98%;
+    /* Cards: Pure white with slight warmth */
+    --card: 40 25% 99%;
+    --card-foreground: 150 40% 8%;
 
-    /* Muted backgrounds */
-    --muted: 150 10% 96%;
-    --muted-foreground: 150 10% 40%;
+    /* Popovers */
+    --popover: 40 25% 99%;
+    --popover-foreground: 150 40% 8%;
 
-    /* Accent: Chrome Silver #A3ADB9 */
-    --accent: 210 15% 68%;
-    --accent-foreground: 150 30% 10%;
+    /* Primary: Deep British Racing Green - heritage and prestige */
+    --primary: 150 45% 24%;
+    --primary-foreground: 42 30% 98%;
+
+    /* Secondary: Rich Cognac Leather - warmth and luxury */
+    --secondary: 25 55% 48%;
+    --secondary-foreground: 42 30% 98%;
+
+    /* Muted: Soft sage undertone */
+    --muted: 42 15% 94%;
+    --muted-foreground: 150 15% 38%;
+
+    /* Accent: Antique Brass - instrument panels, vintage gauges */
+    --accent: 38 45% 55%;
+    --accent-foreground: 150 40% 8%;
+
+    /* Gold: For premium highlights and badges */
+    --gold: 43 75% 50%;
+    --gold-foreground: 150 40% 8%;
 
     /* Semantic colors */
-    --destructive: 0 72% 51%;
+    --destructive: 0 72% 45%;
     --destructive-foreground: 0 0% 98%;
-    --success: 142 71% 35%;
+    --success: 145 65% 32%;
     --success-foreground: 0 0% 98%;
-    --warning: 38 92% 40%;
-    --warning-foreground: 0 0% 98%;
+    --warning: 35 92% 42%;
+    --warning-foreground: 0 0% 10%;
 
-    /* Borders and inputs */
-    --border: 150 15% 88%;
-    --input: 150 15% 88%;
-    --ring: 150 35% 29%;
+    /* Borders and inputs - subtle warmth */
+    --border: 40 20% 88%;
+    --input: 40 20% 88%;
+    --ring: 150 45% 24%;
 
-    /* Radius - increased for modern feel */
-    --radius: 0.75rem;
+    /* Premium radius - generous curves */
+    --radius: 0.875rem;
 
-    /* Chart colors */
-    --chart-1: 150 35% 35%;
-    --chart-2: 28 52% 50%;
-    --chart-3: 210 25% 50%;
-    --chart-4: 142 71% 45%;
-    --chart-5: 38 92% 50%;
+    /* Chart colors - harmonious palette */
+    --chart-1: 150 45% 30%;
+    --chart-2: 25 55% 50%;
+    --chart-3: 38 45% 55%;
+    --chart-4: 145 65% 40%;
+    --chart-5: 35 92% 50%;
   }
 
   .dark {
-    /* Dark mode - Racing Green based */
-    --background: 150 30% 6%;
-    --foreground: 0 0% 95%;
-    --card: 150 25% 9%;
-    --card-foreground: 0 0% 95%;
-    --popover: 150 25% 9%;
-    --popover-foreground: 0 0% 95%;
+    /* ─────────────────────────────────────────────────────────────────────────
+       DARK MODE - Midnight Garage
+       Deep, rich tones like a collector's private garage at night
+       ───────────────────────────────────────────────────────────────────────── */
 
-    /* Primary inverted for dark */
-    --primary: 150 30% 70%;
-    --primary-foreground: 150 30% 6%;
+    /* Background: Deep charcoal with green undertone */
+    --background: 150 25% 5%;
+    --foreground: 40 20% 94%;
 
-    /* Secondary: Warm cognac */
-    --secondary: 28 40% 35%;
-    --secondary-foreground: 0 0% 95%;
+    /* Cards: Elevated surface */
+    --card: 150 20% 8%;
+    --card-foreground: 40 20% 94%;
+
+    /* Popovers */
+    --popover: 150 20% 8%;
+    --popover-foreground: 40 20% 94%;
+
+    /* Primary: Luminous racing green */
+    --primary: 150 40% 60%;
+    --primary-foreground: 150 25% 5%;
+
+    /* Secondary: Warm cognac glow */
+    --secondary: 25 45% 40%;
+    --secondary-foreground: 40 20% 94%;
 
     /* Muted */
-    --muted: 150 20% 15%;
-    --muted-foreground: 150 10% 60%;
+    --muted: 150 15% 12%;
+    --muted-foreground: 40 15% 55%;
 
-    /* Accent */
-    --accent: 210 15% 25%;
-    --accent-foreground: 0 0% 95%;
+    /* Accent: Aged brass */
+    --accent: 38 35% 30%;
+    --accent-foreground: 40 20% 94%;
+
+    /* Gold */
+    --gold: 43 65% 45%;
+    --gold-foreground: 150 25% 5%;
 
     /* Semantic */
-    --destructive: 0 62% 40%;
+    --destructive: 0 60% 45%;
     --destructive-foreground: 0 0% 95%;
-    --success: 142 60% 40%;
+    --success: 145 55% 42%;
     --success-foreground: 0 0% 95%;
-    --warning: 38 80% 45%;
+    --warning: 35 80% 48%;
     --warning-foreground: 0 0% 10%;
 
     /* Borders */
-    --border: 150 20% 18%;
-    --input: 150 20% 18%;
-    --ring: 150 30% 60%;
+    --border: 150 15% 16%;
+    --input: 150 15% 16%;
+    --ring: 150 40% 50%;
 
-    /* Chart colors - dark mode */
-    --chart-1: 150 40% 50%;
-    --chart-2: 28 50% 55%;
-    --chart-3: 210 30% 60%;
-    --chart-4: 142 60% 50%;
-    --chart-5: 38 80% 55%;
+    /* Charts */
+    --chart-1: 150 45% 50%;
+    --chart-2: 25 50% 55%;
+    --chart-3: 38 40% 55%;
+    --chart-4: 145 55% 50%;
+    --chart-5: 35 75% 55%;
   }
 }
 
@@ -103,20 +134,47 @@
   * {
     @apply border-border;
   }
+
   html {
     scroll-behavior: smooth;
     -webkit-tap-highlight-color: transparent;
     overflow-x: hidden;
   }
+
   body {
     @apply bg-background text-foreground;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     overflow-x: hidden;
+    /* Subtle paper texture */
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+    background-blend-mode: overlay;
+    background-size: 200px;
+    background-attachment: fixed;
+  }
+
+  .dark body {
+    background-blend-mode: soft-light;
+  }
+
+  /* Refined heading styles */
+  h1, h2, h3, h4 {
+    @apply font-heading tracking-tight;
+    text-wrap: balance;
+  }
+
+  /* Selection styling */
+  ::selection {
+    background-color: hsl(var(--primary) / 0.2);
+    color: hsl(var(--foreground));
   }
 }
 
 @layer utilities {
+  /* ═══════════════════════════════════════════════════════════════════════════
+     PREMIUM UTILITIES
+     ═══════════════════════════════════════════════════════════════════════════ */
+
   /* Touch-friendly tap targets */
   .touch-target {
     @apply min-h-[44px] min-w-[44px];
@@ -129,6 +187,26 @@
   }
   .scrollbar-hide::-webkit-scrollbar {
     display: none;
+  }
+
+  /* Custom scrollbar for premium feel */
+  .scrollbar-premium {
+    scrollbar-width: thin;
+    scrollbar-color: hsl(var(--primary) / 0.3) transparent;
+  }
+  .scrollbar-premium::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  .scrollbar-premium::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  .scrollbar-premium::-webkit-scrollbar-thumb {
+    background: hsl(var(--primary) / 0.3);
+    border-radius: 3px;
+  }
+  .scrollbar-premium::-webkit-scrollbar-thumb:hover {
+    background: hsl(var(--primary) / 0.5);
   }
 
   /* Safe area insets for mobile */
@@ -147,7 +225,7 @@
 
   /* Improved focus states for accessibility */
   .focus-ring {
-    @apply focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2;
+    @apply focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background;
   }
 
   /* Responsive container padding */
@@ -155,7 +233,7 @@
     @apply px-4 sm:px-6 lg:px-8;
   }
 
-  /* Screen reader only - visually hidden but accessible to screen readers */
+  /* Screen reader only */
   .sr-only {
     position: absolute;
     width: 1px;
@@ -168,7 +246,7 @@
     border-width: 0;
   }
 
-  /* Skip link - visible only on focus */
+  /* Skip link */
   .skip-link {
     position: absolute;
     top: -40px;
@@ -178,14 +256,184 @@
     padding: 8px 16px;
     text-decoration: none;
     z-index: 100;
-    border-radius: 0 0 4px 0;
+    border-radius: 0 0 var(--radius) 0;
+    font-weight: 500;
   }
-
   .skip-link:focus {
     top: 0;
   }
 
-  /* Shimmer animation for loading states */
+  /* ─────────────────────────────────────────────────────────────────────────
+     GRADIENT UTILITIES
+     ───────────────────────────────────────────────────────────────────────── */
+
+  /* Premium text gradient - Racing heritage */
+  .text-gradient {
+    @apply bg-clip-text text-transparent;
+    background-image: linear-gradient(
+      135deg,
+      hsl(var(--primary)) 0%,
+      hsl(var(--gold)) 50%,
+      hsl(var(--secondary)) 100%
+    );
+  }
+
+  /* Headline gradient - Bold and dramatic */
+  .text-gradient-hero {
+    @apply bg-clip-text text-transparent;
+    background-image: linear-gradient(
+      180deg,
+      hsl(var(--foreground)) 0%,
+      hsl(var(--foreground) / 0.85) 100%
+    );
+  }
+
+  /* Gold accent gradient */
+  .text-gradient-gold {
+    @apply bg-clip-text text-transparent;
+    background-image: linear-gradient(
+      135deg,
+      hsl(var(--gold)) 0%,
+      hsl(38 55% 65%) 50%,
+      hsl(var(--gold)) 100%
+    );
+  }
+
+  /* ─────────────────────────────────────────────────────────────────────────
+     GLASS & SURFACE UTILITIES
+     ───────────────────────────────────────────────────────────────────────── */
+
+  /* Glass morphism - frosted effect */
+  .glass {
+    @apply backdrop-blur-xl;
+    background: hsl(var(--card) / 0.8);
+    border: 1px solid hsl(var(--border) / 0.5);
+  }
+
+  /* Premium glass with glow */
+  .glass-premium {
+    @apply backdrop-blur-2xl;
+    background: linear-gradient(
+      135deg,
+      hsl(var(--card) / 0.9) 0%,
+      hsl(var(--card) / 0.7) 100%
+    );
+    border: 1px solid hsl(var(--primary) / 0.1);
+    box-shadow:
+      0 0 0 1px hsl(var(--primary) / 0.05),
+      0 4px 6px -1px hsl(var(--primary) / 0.05),
+      inset 0 1px 0 hsl(var(--background) / 0.5);
+  }
+
+  /* Elevated surface */
+  .surface-elevated {
+    background: hsl(var(--card));
+    box-shadow:
+      0 1px 3px hsl(var(--foreground) / 0.04),
+      0 4px 12px hsl(var(--foreground) / 0.06),
+      0 0 0 1px hsl(var(--border));
+  }
+
+  /* ─────────────────────────────────────────────────────────────────────────
+     ART DECO PATTERNS - Heritage touches
+     ───────────────────────────────────────────────────────────────────────── */
+
+  /* Art deco corner decoration */
+  .deco-corner::before {
+    content: '';
+    position: absolute;
+    top: -1px;
+    left: -1px;
+    width: 24px;
+    height: 24px;
+    border-top: 2px solid hsl(var(--gold) / 0.5);
+    border-left: 2px solid hsl(var(--gold) / 0.5);
+  }
+  .deco-corner::after {
+    content: '';
+    position: absolute;
+    bottom: -1px;
+    right: -1px;
+    width: 24px;
+    height: 24px;
+    border-bottom: 2px solid hsl(var(--gold) / 0.5);
+    border-right: 2px solid hsl(var(--gold) / 0.5);
+  }
+
+  /* Geometric line pattern */
+  .pattern-lines {
+    background-image: repeating-linear-gradient(
+      -45deg,
+      transparent,
+      transparent 4px,
+      hsl(var(--primary) / 0.03) 4px,
+      hsl(var(--primary) / 0.03) 5px
+    );
+  }
+
+  /* Chevron pattern - racing heritage */
+  .pattern-chevron {
+    background-image:
+      linear-gradient(135deg, hsl(var(--primary) / 0.03) 25%, transparent 25%),
+      linear-gradient(225deg, hsl(var(--primary) / 0.03) 25%, transparent 25%),
+      linear-gradient(315deg, hsl(var(--primary) / 0.03) 25%, transparent 25%),
+      linear-gradient(45deg, hsl(var(--primary) / 0.03) 25%, transparent 25%);
+    background-size: 20px 20px;
+    background-position: 0 0, 10px 0, 10px -10px, 0 10px;
+  }
+
+  /* ─────────────────────────────────────────────────────────────────────────
+     CARD & HOVER EFFECTS
+     ───────────────────────────────────────────────────────────────────────── */
+
+  /* Premium card lift */
+  .card-hover {
+    @apply transition-all duration-500 ease-out;
+  }
+  .card-hover:hover {
+    transform: translateY(-4px);
+    box-shadow:
+      0 8px 30px hsl(var(--primary) / 0.08),
+      0 4px 12px hsl(var(--foreground) / 0.04);
+  }
+
+  /* Image zoom on hover */
+  .img-hover {
+    @apply transition-transform duration-700 ease-out;
+  }
+  .group:hover .img-hover {
+    transform: scale(1.08);
+  }
+
+  /* Shine sweep effect */
+  .shine-hover {
+    position: relative;
+    overflow: hidden;
+  }
+  .shine-hover::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 50%;
+    height: 100%;
+    background: linear-gradient(
+      90deg,
+      transparent,
+      hsl(var(--background) / 0.3),
+      transparent
+    );
+    transition: left 0.6s ease;
+  }
+  .shine-hover:hover::after {
+    left: 100%;
+  }
+
+  /* ─────────────────────────────────────────────────────────────────────────
+     ANIMATION UTILITIES
+     ───────────────────────────────────────────────────────────────────────── */
+
+  /* Shimmer loading state */
   .animate-shimmer {
     background: linear-gradient(
       90deg,
@@ -202,49 +450,120 @@
     animation: pulse-subtle 2s ease-in-out infinite;
   }
 
-  /* Gradient text utility */
-  .text-gradient {
-    @apply bg-clip-text text-transparent;
-    background-image: linear-gradient(
-      135deg,
-      hsl(var(--primary)) 0%,
-      hsl(var(--secondary)) 100%
-    );
+  /* Float animation */
+  .animate-float {
+    animation: float 6s ease-in-out infinite;
   }
 
-  /* Glass morphism utility */
-  .glass {
-    @apply backdrop-blur-xl bg-white/80 dark:bg-black/80;
-    @apply border border-white/20 dark:border-white/10;
+  /* Glow pulse */
+  .animate-glow {
+    animation: glow-pulse 2s ease-in-out infinite;
   }
 
-  /* Card hover lift effect */
-  .card-hover {
-    @apply transition-all duration-300;
-    @apply hover:-translate-y-1 hover:shadow-lg;
+  /* Stagger delays for reveal animations */
+  .stagger-1 { animation-delay: 0.1s; }
+  .stagger-2 { animation-delay: 0.2s; }
+  .stagger-3 { animation-delay: 0.3s; }
+  .stagger-4 { animation-delay: 0.4s; }
+  .stagger-5 { animation-delay: 0.5s; }
+  .stagger-6 { animation-delay: 0.6s; }
+
+  /* ─────────────────────────────────────────────────────────────────────────
+     BADGE & LABEL STYLES
+     ───────────────────────────────────────────────────────────────────────── */
+
+  /* Premium badge */
+  .badge-premium {
+    @apply inline-flex items-center gap-1.5;
+    @apply px-3 py-1 text-xs font-semibold tracking-wide uppercase;
+    @apply rounded-full;
+    background: linear-gradient(135deg, hsl(var(--gold) / 0.15), hsl(var(--gold) / 0.05));
+    border: 1px solid hsl(var(--gold) / 0.3);
+    color: hsl(var(--gold));
+  }
+
+  /* Live indicator */
+  .badge-live {
+    @apply inline-flex items-center gap-1.5;
+    @apply px-2.5 py-1 text-xs font-semibold;
+    @apply rounded-full;
+    background: hsl(var(--destructive));
+    color: hsl(var(--destructive-foreground));
+    animation: pulse-subtle 1.5s ease-in-out infinite;
+  }
+  .badge-live::before {
+    content: '';
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: currentColor;
+    animation: pulse 1s ease-in-out infinite;
   }
 }
 
-/* Keyframes */
+/* ═══════════════════════════════════════════════════════════════════════════
+   KEYFRAMES
+   ═══════════════════════════════════════════════════════════════════════════ */
+
 @keyframes shimmer {
-  0% {
-    background-position: -200% 0;
-  }
-  100% {
-    background-position: 200% 0;
-  }
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
 }
 
 @keyframes pulse-subtle {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.85; }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+
+@keyframes glow-pulse {
   0%, 100% {
-    opacity: 1;
+    box-shadow: 0 0 20px hsl(var(--primary) / 0.2);
   }
   50% {
-    opacity: 0.85;
+    box-shadow: 0 0 40px hsl(var(--primary) / 0.4);
   }
 }
 
-/* Reduced motion support - WCAG compliance */
+@keyframes slide-up-fade {
+  0% {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes scale-in {
+  0% {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes reveal-right {
+  0% {
+    clip-path: inset(0 100% 0 0);
+  }
+  100% {
+    clip-path: inset(0 0 0 0);
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   REDUCED MOTION - Accessibility
+   ═══════════════════════════════════════════════════════════════════════════ */
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
@@ -253,5 +572,27 @@
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
+  }
+
+  .animate-shimmer,
+  .animate-pulse-subtle,
+  .animate-float,
+  .animate-glow {
+    animation: none !important;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   PRINT STYLES
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+@media print {
+  body {
+    background: white !important;
+    background-image: none !important;
+  }
+
+  .no-print {
+    display: none !important;
   }
 }
