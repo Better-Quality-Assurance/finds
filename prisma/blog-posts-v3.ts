@@ -35,24 +35,11 @@ export const blogPostsV3 = [
 
 <h3>Online Platforms</h3>
 
-<p>The Romanian market has several online options:</p>
-
-<ul>
-<li><strong>Finds.ro:</strong> Curated auctions with pre-approved listings and transparent 5% buyer fee</li>
-<li><strong>OLX.ro:</strong> General classifieds with large volume but variable quality</li>
-<li><strong>Autovit.ro:</strong> Car-focused classifieds, good for newer classics</li>
-<li><strong>Facebook groups:</strong> Active communities like "Mașini Clasice România"</li>
-</ul>
+<p>The Romanian market has several online options. Finds.ro offers curated auctions with pre-approved listings and a transparent 5% buyer fee, providing a secure platform for verified purchases. For those seeking broader options, OLX.ro serves as a general classifieds site with large volume but variable quality, while Autovit.ro focuses specifically on cars and works well for newer classics. Active Facebook communities like "Mașini Clasice România" also connect buyers with private sellers.</p>
 
 <h3>Physical Markets and Events</h3>
 
-<p>Romania hosts several classic car events:</p>
-
-<ul>
-<li><strong>Retromobil București:</strong> Annual event in spring with sales and exhibits</li>
-<li><strong>Cluj Classic Car Show:</strong> Growing event in Transylvania</li>
-<li><strong>Local car meets:</strong> Check Facebook for regional gatherings</li>
-</ul>
+<p>Romania hosts several classic car events worth attending. The Retromobil București annual event in spring combines sales with exhibits, drawing collectors from across Europe. In Transylvania, the Cluj Classic Car Show is a growing event attracting enthusiasts. Local car meets happen regularly throughout the country - check Facebook for regional gatherings in your area.</p>
 
 <h2>What to Look For: Romanian Market Specifics</h2>
 
@@ -69,95 +56,39 @@ export const blogPostsV3 = [
 
 <h3>Common Issues by Era</h3>
 
-<p><strong>Communist-era vehicles (pre-1989):</strong></p>
-<ul>
-<li>Parts availability varies wildly by model</li>
-<li>Documentation may be incomplete or reconstructed</li>
-<li>Many have been modified with non-original components</li>
-</ul>
+<p>Communist-era vehicles (pre-1989) present unique challenges. Parts availability varies wildly by model, with some Dacia and ARO components still readily available while others require creative sourcing. Documentation may be incomplete or reconstructed, as record-keeping was inconsistent during this period. Many vehicles have been modified with non-original components out of necessity.</p>
 
-<p><strong>1990s imports:</strong></p>
-<ul>
-<li>Many Western European cars were imported used in the 90s</li>
-<li>Check for accident history that may not appear in Romanian records</li>
-<li>Odometer rollbacks were common during this period</li>
-</ul>
+<p>For 1990s imports, be aware that many Western European cars were imported used during this era. Check carefully for accident history that may not appear in Romanian records, as documentation wasn't always transferred. Odometer rollbacks were unfortunately common during this period, so verify mileage claims through service records and vehicle condition.</p>
 
 <h2>The Buying Process Step by Step</h2>
 
 <h3>1. Initial Contact and Verification</h3>
 
-<p>Before traveling to see a car:</p>
-
-<ul>
-<li>Request the CIV number and verify the vehicle isn't stolen via police database</li>
-<li>Ask for recent photos including underside, engine bay, and interior details</li>
-<li>Video call to see the car and meet the seller</li>
-<li>Verify seller identity — request ID photos for private sales</li>
-</ul>
+<p>Before traveling to see a car, conduct thorough remote verification. Request the CIV number and verify the vehicle isn't stolen via the police database. Ask for recent photos including underside, engine bay, and interior details to spot obvious issues. A video call lets you see the car in real-time and meet the seller, which helps assess both the vehicle and the seller's credibility. For private sales, verify seller identity by requesting ID photos.</p>
 
 <h3>2. Physical Inspection</h3>
 
-<p>When inspecting in person:</p>
-
-<ul>
-<li>Bring a flashlight and inspection mirror</li>
-<li>Check floor pans, sills, and wheel arches for rust</li>
-<li>Verify VIN matches all documents</li>
-<li>Test drive if the car is running</li>
-<li>Consider hiring a local specialist for pre-purchase inspection</li>
-</ul>
+<p>When inspecting in person, come prepared with a flashlight and inspection mirror to examine hard-to-see areas. Focus on rust-prone areas like floor pans, sills, and wheel arches. Verify the VIN matches all documents exactly - mismatches indicate potential problems. Test drive if the car is running to assess mechanical condition. For significant purchases, consider hiring a local specialist for a pre-purchase inspection - their expertise often saves money by identifying hidden issues.</p>
 
 <h3>3. Negotiation and Agreement</h3>
 
-<p>Romanian sellers often expect negotiation. Be respectful but firm:</p>
-
-<ul>
-<li>Point to specific issues that affect value</li>
-<li>Research comparable sales to support your offer</li>
-<li>Written agreement before any money changes hands</li>
-</ul>
+<p>Romanian sellers often expect negotiation, so be prepared to discuss price. Be respectful but firm, pointing to specific issues that affect value rather than making low-ball offers. Research comparable sales to support your offer with market data. Always secure a written agreement before any money changes hands to protect both parties.</p>
 
 <h3>4. Payment and Transfer</h3>
 
-<p>For private sales:</p>
+<p>For private sales, bank transfer is the safest payment method - avoid carrying cash for large amounts. A sales contract (contract de vânzare-cumpărare) is mandatory in Romania, and both parties must sign at a notary for vehicles over certain values. The transfer must be registered within 30 days to comply with Romanian regulations.</p>
 
-<ul>
-<li>Bank transfer is safest — avoid cash for large amounts</li>
-<li>Sales contract (contract de vânzare-cumpărare) is mandatory</li>
-<li>Both parties sign at a notary for vehicles over certain values</li>
-<li>Transfer must be registered within 30 days</li>
-</ul>
-
-<p>Through Finds:</p>
-
-<ul>
-<li>Payment held in escrow until delivery confirmed</li>
-<li>We facilitate documentation and transfer</li>
-<li>Dispute resolution if issues arise</li>
-</ul>
+<p>Through Finds, the process is more secure. Payment is held in escrow until delivery is confirmed, we facilitate all documentation and transfer requirements, and dispute resolution is available if issues arise.</p>
 
 <h2>Exporting from Romania</h2>
 
-<p>If you're buying to export to another EU country:</p>
-
 <h3>Within the EU</h3>
 
-<ul>
-<li>No customs duties between EU member states</li>
-<li>Obtain export plates (numere de tranzit) valid for 30 days</li>
-<li>Cancel Romanian registration before leaving</li>
-<li>Register in destination country within their deadline</li>
-</ul>
+<p>Exporting within the EU is straightforward thanks to the single market. There are no customs duties between EU member states. You'll need to obtain export plates (numere de tranzit) valid for 30 days, cancel the Romanian registration before leaving, and register in your destination country within their specified deadline - typically 6 months but check local requirements.</p>
 
 <h3>To the UK (Post-Brexit)</h3>
 
-<ul>
-<li>Customs declaration required</li>
-<li>VAT may apply depending on vehicle age and value</li>
-<li>Type approval requirements for registration</li>
-<li>Consider using a specialist import agent</li>
-</ul>
+<p>Exporting to the UK post-Brexit involves additional steps. A customs declaration is required, and VAT may apply depending on vehicle age and value. Type approval requirements for registration can be complex, so consider using a specialist import agent who handles classic car imports from the EU.</p>
 
 <h2>Costs to Budget For</h2>
 
@@ -174,11 +105,11 @@ export const blogPostsV3 = [
 
 <h2>Making Your Decision</h2>
 
-<p>Romania offers genuine opportunities for classic car buyers willing to do their homework. The key is verification — of the car, the seller, and the documentation.</p>
+<p>Romania offers genuine opportunities for classic car buyers willing to do their homework. The key is verification - of the car, the seller, and the documentation.</p>
 
 <p>Whether you find a pristine Dacia 1300 or an imported Alfa Romeo that's been hiding in a Transylvanian garage, take your time and inspect thoroughly.</p>
 
-<p><a href="https://finds.ro">Browse verified listings on Finds</a> — every vehicle is pre-approved with seller verification.</p>
+<p><a href="https://finds.ro">Browse verified listings on Finds</a> - every vehicle is pre-approved with seller verification.</p>
 
 <hr />
 <p><em>Finds is a <a href="https://betterqa.co">BetterQA</a> project. We believe classic car auctions should be transparent, curated, and fair.</em></p>
@@ -245,7 +176,7 @@ export const blogPostsV3 = [
 <li>Solicită numărul CIV și verifică că vehiculul nu este furat prin baza de date a poliției</li>
 <li>Cere fotografii recente inclusiv partea inferioară, compartimentul motor și detalii interior</li>
 <li>Apel video pentru a vedea mașina și a cunoaște vânzătorul</li>
-<li>Verifică identitatea vânzătorului — solicită fotografii cu buletinul pentru vânzări private</li>
+<li>Verifică identitatea vânzătorului - solicită fotografii cu buletinul pentru vânzări private</li>
 </ul>
 
 <h3>2. Inspecție Fizică</h3>
@@ -275,7 +206,7 @@ export const blogPostsV3 = [
 <p>Pentru vânzări private:</p>
 
 <ul>
-<li>Transferul bancar este cel mai sigur — evită cash-ul pentru sume mari</li>
+<li>Transferul bancar este cel mai sigur - evită cash-ul pentru sume mari</li>
 <li>Contractul de vânzare-cumpărare este obligatoriu</li>
 <li>Ambele părți semnează la notar pentru vehicule peste anumite valori</li>
 <li>Transferul trebuie înregistrat în 30 de zile</li>
@@ -304,11 +235,11 @@ export const blogPostsV3 = [
 
 <h2>Luarea Deciziei</h2>
 
-<p>România oferă oportunități reale pentru cumpărătorii de mașini clasice dispuși să-și facă temele. Cheia este verificarea — a mașinii, vânzătorului și documentației.</p>
+<p>România oferă oportunități reale pentru cumpărătorii de mașini clasice dispuși să-și facă temele. Cheia este verificarea - a mașinii, vânzătorului și documentației.</p>
 
 <p>Fie că găsești o Dacia 1300 impecabilă sau un Alfa Romeo importat care s-a ascuns într-un garaj transilvănean, ia-ți timp și inspectează cu atenție.</p>
 
-<p><a href="https://finds.ro">Răsfoiește anunțurile verificate pe Finds</a> — fiecare vehicul este pre-aprobat cu verificarea vânzătorului.</p>
+<p><a href="https://finds.ro">Răsfoiește anunțurile verificate pe Finds</a> - fiecare vehicul este pre-aprobat cu verificarea vânzătorului.</p>
 
 <hr />
 <p><em>Finds este un proiect <a href="https://betterqa.co">BetterQA</a>. Credem că licitațiile de mașini clasice trebuie să fie transparente, curate și corecte.</em></p>
@@ -330,7 +261,7 @@ export const blogPostsV3 = [
     contentEn: `
 <p>The Dacia 1300 is Romania's most iconic classic car. Produced from 1969 to 2004, with over 2 million units built, it represents an era and a culture. Today, well-preserved examples are increasingly sought after by collectors both in Romania and internationally.</p>
 
-<p>But finding a good Dacia 1300 requires knowing where to look — and more importantly, what to look for. This guide covers the key inspection points, common problems, and realistic costs.</p>
+<p>But finding a good Dacia 1300 requires knowing where to look - and more importantly, what to look for. This guide covers the key inspection points, common problems, and realistic costs.</p>
 
 <h2>Understanding Dacia 1300 Variants</h2>
 
@@ -370,44 +301,19 @@ export const blogPostsV3 = [
 
 <h3>Engine (1.3L Renault-derived)</h3>
 
-<p>The Renault-based engine is robust if maintained:</p>
-
-<ul>
-<li><strong>Oil pressure:</strong> Should read at least 2 bar when warm at idle</li>
-<li><strong>Blue smoke:</strong> Worn valve guides or rings — budget for rebuild</li>
-<li><strong>White smoke:</strong> Head gasket — common and fixable</li>
-<li><strong>Overheating:</strong> Check thermostat, water pump, radiator condition</li>
-<li><strong>Timing chain:</strong> Listen for rattle on cold start — chains stretch with age</li>
-</ul>
+<p>The Renault-based engine is robust if maintained properly. Check oil pressure - it should read at least 2 bar when warm at idle. Blue smoke indicates worn valve guides or rings requiring a rebuild, while white smoke typically means a head gasket issue, which is common but fixable. Watch for overheating by checking the thermostat, water pump, and radiator condition. Listen for timing chain rattle on cold start, as chains stretch with age and need replacement.</p>
 
 <h3>Gearbox</h3>
 
-<ul>
-<li><strong>Synchros:</strong> Test all gears, especially 2nd — crunching means rebuild</li>
-<li><strong>Bearings:</strong> Whining in gear indicates worn bearings</li>
-<li><strong>Clutch:</strong> Should engage smoothly, not slip under load</li>
-</ul>
+<p>Test all gears during your test drive, paying special attention to 2nd gear where synchro wear is most common - crunching indicates a rebuild is needed. Whining in gear suggests worn bearings. The clutch should engage smoothly without slipping under load.</p>
 
 <h3>Suspension and Steering</h3>
 
-<ul>
-<li><strong>Front suspension:</strong> Check for play in ball joints and tie rod ends</li>
-<li><strong>Rear axle:</strong> Look for oil leaks from differential seals</li>
-<li><strong>Steering box:</strong> Excessive play indicates wear — adjustable but eventually needs rebuild</li>
-<li><strong>Shock absorbers:</strong> Bounce each corner — should settle in one bounce</li>
-</ul>
+<p>Inspect the front suspension carefully for play in ball joints and tie rod ends. Check the rear axle for oil leaks from differential seals. The steering box often shows excessive play with age - it's adjustable but eventually needs rebuilding. Test shock absorbers by bouncing each corner - the car should settle in one bounce.</p>
 
 <h2>Interior and Electrical</h2>
 
-<p>Original interiors are becoming rare and valuable:</p>
-
-<ul>
-<li><strong>Seats:</strong> Check foam condition under covers — often collapsed</li>
-<li><strong>Dashboard:</strong> Cracks from sun damage are common — hard to repair</li>
-<li><strong>Headliner:</strong> Sagging is typical — replacement available</li>
-<li><strong>Instruments:</strong> All gauges should work — speedometers often inaccurate</li>
-<li><strong>Wiring:</strong> Check for amateur repairs — common source of problems</li>
-</ul>
+<p>Original interiors are becoming rare and valuable, so assess condition carefully. Check foam condition under seat covers - it's often collapsed after decades of use. Dashboard cracks from sun damage are common and hard to repair properly. Sagging headliners are typical, but replacements are available. Verify all gauges work, though be aware speedometers are often inaccurate. Inspect wiring for amateur repairs, which are a common source of electrical problems.</p>
 
 <h2>Parts Availability and Costs</h2>
 
@@ -445,7 +351,7 @@ export const blogPostsV3 = [
 
 <p>Budget realistically for restoration. A €2,000 car needing €5,000 in work is only a good deal if you're doing the work yourself or truly want that specific car.</p>
 
-<p><a href="https://finds.ro">Browse Dacia 1300 listings on Finds</a> — we verify condition descriptions and seller authenticity.</p>
+<p><a href="https://finds.ro">Browse Dacia 1300 listings on Finds</a> - we verify condition descriptions and seller authenticity.</p>
 
 <hr />
 <p><em>Finds is a <a href="https://betterqa.co">BetterQA</a> project. We believe classic car auctions should be transparent, curated, and fair.</em></p>
@@ -453,7 +359,7 @@ export const blogPostsV3 = [
     contentRo: `
 <p>Dacia 1300 este cea mai iconică mașină clasică a României. Produsă din 1969 până în 2004, cu peste 2 milioane de unități construite, reprezintă o eră și o cultură. Astăzi, exemplarele bine conservate sunt din ce în ce mai căutate de colecționari atât în România, cât și internațional.</p>
 
-<p>Dar găsirea unei Dacia 1300 bune necesită să știi unde să cauți — și mai important, ce să cauți. Acest ghid acoperă punctele cheie de inspecție, problemele comune și costurile realiste.</p>
+<p>Dar găsirea unei Dacia 1300 bune necesită să știi unde să cauți - și mai important, ce să cauți. Acest ghid acoperă punctele cheie de inspecție, problemele comune și costurile realiste.</p>
 
 <h2>Înțelegerea Variantelor Dacia 1300</h2>
 
@@ -489,8 +395,8 @@ export const blogPostsV3 = [
 
 <ul>
 <li><strong>Presiune ulei:</strong> Ar trebui să citească cel puțin 2 bari când este cald la ralanti</li>
-<li><strong>Fum albastru:</strong> Ghiduri de supape sau segmenți uzați — bugetează pentru recondiționare</li>
-<li><strong>Fum alb:</strong> Garnitura de chiulasă — comună și reparabilă</li>
+<li><strong>Fum albastru:</strong> Ghiduri de supape sau segmenți uzați - bugetează pentru recondiționare</li>
+<li><strong>Fum alb:</strong> Garnitura de chiulasă - comună și reparabilă</li>
 <li><strong>Supraîncălzire:</strong> Verifică termostatul, pompa de apă, starea radiatorului</li>
 </ul>
 
@@ -522,7 +428,7 @@ export const blogPostsV3 = [
 
 <p>O Dacia 1300 bună este o clasică cu caracter, utilizabilă, care te conectează la istoria auto românească. Cheia este găsirea uneia unde rugina nu a câștigat.</p>
 
-<p><a href="https://finds.ro">Răsfoiește anunțurile Dacia 1300 pe Finds</a> — verificăm descrierile stării și autenticitatea vânzătorilor.</p>
+<p><a href="https://finds.ro">Răsfoiește anunțurile Dacia 1300 pe Finds</a> - verificăm descrierile stării și autenticitatea vânzătorilor.</p>
 
 <hr />
 <p><em>Finds este un proiect <a href="https://betterqa.co">BetterQA</a>. Credem că licitațiile de mașini clasice trebuie să fie transparente, curate și corecte.</em></p>
@@ -550,102 +456,43 @@ export const blogPostsV3 = [
 
 <h3>1. Price Too Good to Be True</h3>
 
-<p>If a 1973 Porsche 911 is listed at half market value, there's a reason. Common excuses:</p>
-
-<ul>
-<li>"I need to sell quickly due to divorce/death/relocation"</li>
-<li>"I don't know what it's worth, just want it gone"</li>
-<li>"Make me any offer"</li>
-</ul>
-
-<p>Legitimate sellers know their car's value. Suspiciously low prices are bait.</p>
+<p>If a 1973 Porsche 911 is listed at half market value, there's a reason. Scammers use common excuses like needing to sell quickly due to divorce, death, or relocation, or claiming they don't know what it's worth and just want it gone. Legitimate sellers know their car's value. Suspiciously low prices are bait.</p>
 
 <h3>2. Pressure to Act Fast</h3>
 
-<p>Scammers create urgency:</p>
-
-<ul>
-<li>"Another buyer is coming tomorrow"</li>
-<li>"I'm leaving the country this week"</li>
-<li>"Deposit holds it but only until tonight"</li>
-</ul>
-
-<p>Real sellers give you time to inspect and verify. Rushed transactions favor scammers.</p>
+<p>Scammers create artificial urgency by claiming another buyer is coming tomorrow, they're leaving the country this week, or a deposit holds the car but only until tonight. Real sellers give you time to inspect and verify. Rushed transactions favor scammers.</p>
 
 <h3>3. Reluctance to Meet in Person</h3>
 
-<p>Warning signs:</p>
-
-<ul>
-<li>Car is always "at another location"</li>
-<li>Seller can't do video calls</li>
-<li>Inspection requests are deflected</li>
-<li>"Trust me, I'm honest" instead of verification</li>
-</ul>
-
-<p>If you can't see the car and meet the seller before paying, walk away.</p>
+<p>Be wary if the car is always "at another location," the seller can't do video calls, inspection requests are deflected, or they say "trust me, I'm honest" instead of providing verification. If you can't see the car and meet the seller before paying, walk away.</p>
 
 <h3>4. Unusual Payment Requests</h3>
 
-<p>Never pay via:</p>
-
-<ul>
-<li>Wire transfer to a foreign account</li>
-<li>Cryptocurrency</li>
-<li>Gift cards (yes, this happens)</li>
-<li>Western Union or MoneyGram</li>
-<li>Cash sent by mail</li>
-</ul>
-
-<p>These payment methods are irreversible. Scammers insist on them for that reason.</p>
+<p>Never pay via wire transfer to a foreign account, cryptocurrency, gift cards, Western Union, MoneyGram, or cash sent by mail. These payment methods are irreversible. Scammers insist on them for exactly that reason.</p>
 
 <h2>Common Scam Patterns</h2>
 
 <h3>The Fake Listing Scam</h3>
 
-<p>How it works:</p>
-<ol>
-<li>Scammer copies photos from a legitimate sale (often completed auctions)</li>
-<li>Creates listing at attractive price</li>
-<li>Requests deposit to "hold" the car</li>
-<li>Disappears after payment</li>
-</ol>
+<p>In this common scam, a fraudster copies photos from a legitimate sale (often completed auctions), creates a listing at an attractive price, requests a deposit to "hold" the car, then disappears after payment.</p>
 
 <p><strong>Protection:</strong> Reverse image search the photos. If they appear elsewhere, ask why. Request photos with today's newspaper or a specific pose you request.</p>
 
 <h3>The Escrow Scam</h3>
 
-<p>How it works:</p>
-<ol>
-<li>Seller suggests using "escrow" for buyer protection</li>
-<li>Provides link to fake escrow site that looks legitimate</li>
-<li>Buyer sends money to fake escrow</li>
-<li>Money goes directly to scammer</li>
-</ol>
+<p>The seller suggests using "escrow" for buyer protection, provides a link to a fake escrow site that looks legitimate, the buyer sends money to the fake escrow, and the money goes directly to the scammer.</p>
 
 <p><strong>Protection:</strong> Never use an escrow service suggested by the seller. Use established platforms with built-in payment protection.</p>
 
 <h3>The Title Washing Scam</h3>
 
-<p>How it works:</p>
-<ol>
-<li>Car has salvage title due to accident or flood damage</li>
-<li>Seller registers it in a state/country with lax title laws</li>
-<li>Gets "clean" title that hides the history</li>
-<li>Sells at full market value</li>
-</ol>
+<p>A car with a salvage title due to accident or flood damage gets registered in a state or country with lax title laws, receives a "clean" title that hides the history, then sells at full market value.</p>
 
 <p><strong>Protection:</strong> Get a vehicle history report. Check for signs of flood damage (musty smell, water lines, corroded electronics). Have a professional inspect.</p>
 
 <h3>The Curbstoner</h3>
 
-<p>How it works:</p>
-<ol>
-<li>Unlicensed dealer poses as private seller</li>
-<li>Buys problematic cars cheaply at auction</li>
-<li>Does cosmetic fixes to hide issues</li>
-<li>Sells "as-is" with no recourse</li>
-</ol>
+<p>An unlicensed dealer poses as a private seller, buys problematic cars cheaply at auction, does cosmetic fixes to hide issues, then sells "as-is" with no recourse for the buyer.</p>
 
 <p><strong>Protection:</strong> Check if seller has multiple cars listed. Ask how long they've owned it and why they're selling. Request maintenance records.</p>
 
@@ -653,54 +500,23 @@ export const blogPostsV3 = [
 
 <h3>Verify the Seller</h3>
 
-<ul>
-<li>Meet in person at their home or a public place</li>
-<li>Check ID matches the title/registration</li>
-<li>Verify their address is real</li>
-<li>Search their name + "scam" online</li>
-</ul>
+<p>Always meet in person at their home or a public place. Check that their ID matches the title and registration exactly. Verify their address is real - a quick Google search can reveal if it's a vacant lot. Search their name plus "scam" online to see if others have reported problems.</p>
 
 <h3>Verify the Car</h3>
 
-<ul>
-<li>VIN check through official databases</li>
-<li>Physical VIN inspection (check it hasn't been re-stamped)</li>
-<li>History report from multiple sources</li>
-<li>Independent pre-purchase inspection</li>
-</ul>
+<p>Run a VIN check through official databases to check for theft or salvage history. Physically inspect the VIN to ensure it hasn't been re-stamped, which is a sign of a stolen vehicle. Get history reports from multiple sources, as they may have different information. Always get an independent pre-purchase inspection from a qualified mechanic.</p>
 
 <h3>Verify the Documentation</h3>
 
-<ul>
-<li>Title in seller's name (not a relative or "friend")</li>
-<li>No liens or encumbrances</li>
-<li>Registration matches the VIN</li>
-<li>Service records from named shops you can call</li>
-</ul>
+<p>The title must be in the seller's name, not a relative's or "friend's." Check that there are no liens or encumbrances that could complicate ownership transfer. Verify the registration matches the VIN exactly. Examine service records from named shops you can call to confirm the work was actually done.</p>
 
 <h2>How Platforms Like Finds Protect You</h2>
 
-<p>We built Finds with fraud prevention as a core feature:</p>
-
-<ul>
-<li><strong>Seller verification:</strong> We verify identity before listing approval</li>
-<li><strong>Listing review:</strong> Every vehicle is manually reviewed</li>
-<li><strong>Payment protection:</strong> Funds held until delivery confirmed</li>
-<li><strong>Dispute resolution:</strong> We mediate if issues arise</li>
-</ul>
-
-<p>This is why we charge a 5% buyer fee — it funds the verification infrastructure that protects you.</p>
+<p>We built Finds with fraud prevention as a core feature. We verify seller identity before listing approval, manually review every vehicle, hold funds until delivery is confirmed, and provide dispute resolution if issues arise. This is why we charge a 5% buyer fee - it funds the verification infrastructure that protects you.</p>
 
 <h2>What to Do If You've Been Scammed</h2>
 
-<p>If you've already sent money:</p>
-
-<ol>
-<li><strong>Contact your bank immediately</strong> — some transfers can be reversed if caught quickly</li>
-<li><strong>File a police report</strong> — required for insurance claims and prosecutions</li>
-<li><strong>Report to the platform</strong> — helps prevent others from being victimized</li>
-<li><strong>Document everything</strong> — screenshots, emails, phone numbers, payment receipts</li>
-</ol>
+<p>If you've already sent money, act immediately. Contact your bank first - some transfers can be reversed if caught quickly. File a police report, which is required for insurance claims and prosecutions. Report the scam to the platform to help prevent others from being victimized. Document everything - screenshots, emails, phone numbers, and payment receipts will be essential for any recovery efforts or legal action.</p>
 
 <h2>Trust Your Instincts</h2>
 
@@ -708,7 +524,7 @@ export const blogPostsV3 = [
 
 <p>A legitimate seller will understand your caution. Someone who doesn't want you to verify is someone you shouldn't trust.</p>
 
-<p><a href="https://finds.ro">Browse verified listings on Finds</a> — every seller is verified before their first listing goes live.</p>
+<p><a href="https://finds.ro">Browse verified listings on Finds</a> - every seller is verified before their first listing goes live.</p>
 
 <hr />
 <p><em>Finds is a <a href="https://betterqa.co">BetterQA</a> project. We believe classic car auctions should be transparent, curated, and fair.</em></p>
@@ -827,7 +643,7 @@ export const blogPostsV3 = [
 <li><strong>Rezolvarea disputelor:</strong> Mediem dacă apar probleme</li>
 </ul>
 
-<p><a href="https://finds.ro">Răsfoiește anunțurile verificate pe Finds</a> — fiecare vânzător este verificat înainte ca primul anunț să devină activ.</p>
+<p><a href="https://finds.ro">Răsfoiește anunțurile verificate pe Finds</a> - fiecare vânzător este verificat înainte ca primul anunț să devină activ.</p>
 
 <hr />
 <p><em>Finds este un proiect <a href="https://betterqa.co">BetterQA</a>. Credem că licitațiile de mașini clasice trebuie să fie transparente, curate și corecte.</em></p>
@@ -847,7 +663,7 @@ export const blogPostsV3 = [
     metaDescriptionEn: 'Complete guide to importing classic cars from Romania to Germany. Export paperwork, transport options, TÜV requirements, and H-Kennzeichen registration.',
     metaDescriptionRo: 'Ghid complet pentru importul mașinilor clasice din România în Germania. Acte de export, opțiuni de transport și înmatriculare.',
     contentEn: `
-<p>Germany is one of the largest markets for classic cars in Europe, and Romanian classics offer interesting opportunities — both unique Eastern Bloc vehicles and Western European cars that found their way east decades ago. Here's how to bring one home.</p>
+<p>Germany is one of the largest markets for classic cars in Europe, and Romanian classics offer interesting opportunities - both unique Eastern Bloc vehicles and Western European cars that found their way east decades ago. Here's how to bring one home.</p>
 
 <h2>Why Import from Romania?</h2>
 
@@ -862,16 +678,7 @@ export const blogPostsV3 = [
 
 <h3>Documentation Check</h3>
 
-<p>Ensure the seller can provide:</p>
-
-<ul>
-<li><strong>Carte de identitate vehicul (CIV):</strong> Vehicle identity card</li>
-<li><strong>Certificat de înmatriculare:</strong> Registration certificate</li>
-<li><strong>Proof of ownership:</strong> Sales contract chain if recently purchased</li>
-<li><strong>RAR inspection:</strong> Technical inspection (ITP) status</li>
-</ul>
-
-<p>Verify the VIN on documents matches the car physically. Check all locations: dashboard, door jamb, engine bay, and under carpet.</p>
+<p>Ensure the seller can provide the Carte de identitate vehicul (CIV) or vehicle identity card, the Certificat de înmatriculare (registration certificate), proof of ownership such as sales contract chain if recently purchased, and the RAR inspection technical status (ITP). Verify the VIN on documents matches the car physically by checking all locations: dashboard, door jamb, engine bay, and under carpet.</p>
 
 <h3>History Verification</h3>
 
@@ -881,25 +688,11 @@ export const blogPostsV3 = [
 
 <h3>Sales Contract</h3>
 
-<p>A proper sales contract (contract de vânzare-cumpărare) is mandatory. Include:</p>
-
-<ul>
-<li>Full details of buyer and seller</li>
-<li>Vehicle identification (VIN, registration number)</li>
-<li>Sale price and payment method</li>
-<li>Date and signatures of both parties</li>
-</ul>
-
-<p>For vehicles over certain values, notarization is required.</p>
+<p>A proper sales contract (contract de vânzare-cumpărare) is mandatory and must include full details of buyer and seller, vehicle identification (VIN, registration number), sale price and payment method, and date and signatures of both parties. For vehicles over certain values, notarization is required.</p>
 
 <h3>Export Registration Cancellation</h3>
 
-<p>The seller must cancel the Romanian registration at the local vehicle registration authority (DRPCIV). You'll receive:</p>
-
-<ul>
-<li>Certificat de radiere (deregistration certificate)</li>
-<li>The original documents for export</li>
-</ul>
+<p>The seller must cancel the Romanian registration at the local vehicle registration authority (DRPCIV). You'll receive the Certificat de radiere (deregistration certificate) and the original documents for export.</p>
 
 <h2>Step 3: Export from Romania</h2>
 
@@ -911,41 +704,21 @@ export const blogPostsV3 = [
 
 <h3>CMR (International Consignment Note)</h3>
 
-<p>If transporting by truck, the transport company will provide a CMR document. Keep this — German customs may request it.</p>
+<p>If transporting by truck, the transport company will provide a CMR document. Keep this - German customs may request it.</p>
 
 <h2>Step 4: Transport Options</h2>
 
 <h3>Drive It</h3>
 
-<p>With transit plates, you can drive the car to Germany. Consider:</p>
-
-<ul>
-<li>Is the car mechanically sound for 1,000+ km?</li>
-<li>Insurance: Verify your transit plate insurance covers Germany</li>
-<li>Fuel and accommodation costs</li>
-<li>Risk of breakdown in a foreign country</li>
-</ul>
+<p>With transit plates, you can drive the car to Germany, but consider whether it's mechanically sound for 1,000+ km. Verify your transit plate insurance covers Germany, and factor in fuel and accommodation costs. Be aware of the risk of breakdown in a foreign country without your usual support network.</p>
 
 <h3>Enclosed Transport</h3>
 
-<p>Recommended for valuable or non-running vehicles:</p>
-
-<ul>
-<li>Cost: €600-1,200 depending on route and timing</li>
-<li>Door-to-door service available</li>
-<li>Insurance included (verify coverage amount)</li>
-<li>No wear on the classic</li>
-</ul>
+<p>Recommended for valuable or non-running vehicles, enclosed transport costs €600-1,200 depending on route and timing. Door-to-door service is available, insurance is included (verify coverage amount), and there's no wear on your classic during transit.</p>
 
 <h3>Open Trailer</h3>
 
-<p>Cheaper option for driver-condition cars:</p>
-
-<ul>
-<li>Cost: €400-800</li>
-<li>Exposed to weather and road debris</li>
-<li>Adequate for projects or less valuable vehicles</li>
-</ul>
+<p>A cheaper option for driver-condition cars, open trailer transport costs €400-800. The vehicle is exposed to weather and road debris, making it adequate for projects or less valuable vehicles but not ideal for pristine examples.</p>
 
 <h2>Step 5: German Import Process</h2>
 
@@ -955,50 +728,17 @@ export const blogPostsV3 = [
 
 <h3>TÜV Inspection (Hauptuntersuchung)</h3>
 
-<p>Before registration, the car needs a German technical inspection. For classic cars, this means:</p>
-
-<ul>
-<li><strong>Standard HU:</strong> For regular registration</li>
-<li><strong>H-Gutachten:</strong> Additional assessment for H-Kennzeichen (historic plates)</li>
-</ul>
-
-<p>Bring all documentation. The inspector will verify:</p>
-
-<ul>
-<li>VIN matches documents</li>
-<li>Technical safety (brakes, lights, steering, suspension)</li>
-<li>Emissions (varies by age and historic status)</li>
-<li>Overall condition and originality (for H-Kennzeichen)</li>
-</ul>
+<p>Before registration, the car needs a German technical inspection. For classic cars, this means either a standard HU for regular registration or an H-Gutachten for additional assessment if seeking H-Kennzeichen (historic plates). Bring all documentation. The inspector will verify the VIN matches documents, technical safety including brakes, lights, steering and suspension, emissions which varies by age and historic status, and overall condition and originality for H-Kennzeichen eligibility.</p>
 
 <h3>H-Kennzeichen Requirements</h3>
 
-<p>For the coveted H-plates (tax benefits, environmental zone exemptions):</p>
-
-<ul>
-<li>Vehicle must be 30+ years old</li>
-<li>Largely original condition</li>
-<li>Good state of preservation</li>
-<li>No significant modifications from original specification</li>
-</ul>
-
-<p>Cost for H-Gutachten: €80-150</p>
+<p>For the coveted H-plates with their tax benefits and environmental zone exemptions, the vehicle must be 30+ years old, in largely original condition, show a good state of preservation, and have no significant modifications from original specification. Cost for H-Gutachten: €80-150.</p>
 
 <h2>Step 6: German Registration</h2>
 
 <h3>Required Documents</h3>
 
-<p>Bring to your local Zulassungsstelle (registration office):</p>
-
-<ul>
-<li>Romanian CIV and certificat de radiere</li>
-<li>COC (Certificate of Conformity) if available — unlikely for older cars</li>
-<li>TÜV report / HU certificate</li>
-<li>H-Gutachten (if applying for H-plates)</li>
-<li>Proof of insurance (eVB number)</li>
-<li>Your ID and proof of German address</li>
-<li>Sales contract</li>
-</ul>
+<p>Bring to your local Zulassungsstelle (registration office) the Romanian CIV and certificat de radiere, COC (Certificate of Conformity) if available though unlikely for older cars, TÜV report or HU certificate, H-Gutachten if applying for H-plates, proof of insurance with eVB number, your ID and proof of German address, and the sales contract.</p>
 
 <h3>Registration Costs</h3>
 
@@ -1023,24 +763,19 @@ export const blogPostsV3 = [
 
 <h2>Common Pitfalls</h2>
 
-<ul>
-<li><strong>Missing COC:</strong> For post-1996 EU vehicles, the COC simplifies registration. Without it, you may need a Vollgutachten (full assessment)</li>
-<li><strong>Modified vehicles:</strong> Undocumented modifications can fail TÜV or prevent H-Kennzeichen</li>
-<li><strong>Incomplete deregistration:</strong> Ensure Romanian registration is properly cancelled</li>
-<li><strong>Insurance gaps:</strong> Verify coverage for the transport and registration period</li>
-</ul>
+<p>Be aware of several common issues. For post-1996 EU vehicles, a missing COC simplifies registration, but without it you may need a Vollgutachten (full assessment). Undocumented modifications can fail TÜV inspection or prevent H-Kennzeichen eligibility. Ensure Romanian registration is properly and completely cancelled to avoid complications. Verify insurance coverage for both the transport period and registration period to avoid gaps.</p>
 
 <h2>Summary</h2>
 
 <p>Importing a classic car from Romania to Germany is straightforward within the EU framework. The key steps are proper documentation, transport arrangement, TÜV inspection, and registration. Budget €800-1,500 beyond the purchase price for the complete process.</p>
 
-<p><a href="https://finds.ro">Browse Romanian classic cars on Finds</a> — we can help coordinate with German buyers on documentation requirements.</p>
+<p><a href="https://finds.ro">Browse Romanian classic cars on Finds</a> - we can help coordinate with German buyers on documentation requirements.</p>
 
 <hr />
 <p><em>Finds is a <a href="https://betterqa.co">BetterQA</a> project. We believe classic car auctions should be transparent, curated, and fair.</em></p>
 `,
     contentRo: `
-<p>Germania este una dintre cele mai mari piețe pentru mașini clasice din Europa, iar clasicele românești oferă oportunități interesante — atât vehicule unice din blocul estic, cât și mașini vest-europene care și-au găsit drumul spre est în deceniile trecute.</p>
+<p>Germania este una dintre cele mai mari piețe pentru mașini clasice din Europa, iar clasicele românești oferă oportunități interesante - atât vehicule unice din blocul estic, cât și mașini vest-europene care și-au găsit drumul spre est în deceniile trecute.</p>
 
 <h2>De Ce să Imporți din România?</h2>
 
@@ -1131,7 +866,7 @@ export const blogPostsV3 = [
 
 <p>Importul unei mașini clasice din România în Germania este simplu în cadrul UE. Pașii cheie sunt documentația corespunzătoare, aranjarea transportului, inspecția TÜV și înmatricularea.</p>
 
-<p><a href="https://finds.ro">Răsfoiește mașinile clasice românești pe Finds</a> — putem ajuta la coordonarea cu cumpărătorii germani privind cerințele de documentație.</p>
+<p><a href="https://finds.ro">Răsfoiește mașinile clasice românești pe Finds</a> - putem ajuta la coordonarea cu cumpărătorii germani privind cerințele de documentație.</p>
 
 <hr />
 <p><em>Finds este un proiect <a href="https://betterqa.co">BetterQA</a>. Credem că licitațiile de mașini clasice trebuie să fie transparente, curate și corecte.</em></p>
@@ -1144,8 +879,8 @@ export const blogPostsV3 = [
     readingTime: 6,
     titleEn: 'Why We Built Finds: The Auction Platform Classic Car Enthusiasts Deserve',
     titleRo: 'De Ce Am Construit Finds: Platforma de Licitații pe Care o Merită Pasionații de Mașini Clasice',
-    excerptEn: 'The story behind Finds — why a Romanian software quality company decided to build a classic car auction platform.',
-    excerptRo: 'Povestea din spatele Finds — de ce o companie românească de calitate software a decis să construiască o platformă de licitații pentru mașini clasice.',
+    excerptEn: 'The story behind Finds - why a Romanian software quality company decided to build a classic car auction platform.',
+    excerptRo: 'Povestea din spatele Finds - de ce o companie românească de calitate software a decis să construiască o platformă de licitații pentru mașini clasice.',
     metaTitleEn: 'Why We Built Finds | A BetterQA Project',
     metaTitleRo: 'De Ce Am Construit Finds | Un Proiect BetterQA',
     metaDescriptionEn: 'The story behind Finds.ro. How BetterQA engineers applied quality thinking to classic car auctions. Built in Romania, serving Europe.',
@@ -1153,7 +888,7 @@ export const blogPostsV3 = [
     contentEn: `
 <p>Finds exists because we got frustrated trying to buy classic cars in Romania.</p>
 
-<p>We're <a href="https://betterqa.co">BetterQA</a>, a software quality company based in Cluj-Napoca. We test software for companies across Europe — everyone from startups to enterprises with NATO-certified security requirements. We obsess over quality, verification, and getting things right.</p>
+<p>We're <a href="https://betterqa.co">BetterQA</a>, a software quality company based in Cluj-Napoca. We test software for companies across Europe - everyone from startups to enterprises with NATO-certified security requirements. We obsess over quality, verification, and getting things right.</p>
 
 <p>Several of us are classic car enthusiasts. And when we tried to buy classics in Romania, we ran into the same problems over and over.</p>
 
@@ -1169,11 +904,11 @@ export const blogPostsV3 = [
 
 <p>Private sales with no verification. No way to know if the seller was legitimate. No recourse if something went wrong after payment. Facebook marketplace negotiations with strangers.</p>
 
-<p>The existing Romanian platforms were general classifieds — no curation, no quality control, no accountability.</p>
+<p>The existing Romanian platforms were general classifieds - no curation, no quality control, no accountability.</p>
 
 <h3>Hidden Costs</h3>
 
-<p>Even the international auction platforms that served Romania had fee structures that weren't clear until you'd already won. Buyer's premium, listing fees, payment processing fees — it added up in ways that weren't transparent upfront.</p>
+<p>Even the international auction platforms that served Romania had fee structures that weren't clear until you'd already won. Buyer's premium, listing fees, payment processing fees - it added up in ways that weren't transparent upfront.</p>
 
 <h2>What We Decided to Build</h2>
 
@@ -1183,7 +918,7 @@ export const blogPostsV3 = [
 
 <p>Every seller goes through identity verification before their first listing. Every vehicle goes through manual approval. We check that descriptions match reality, that documentation exists, that the seller can actually deliver what they're promising.</p>
 
-<p>This is what we do professionally — verify things work as claimed. We're applying it to cars.</p>
+<p>This is what we do professionally - verify things work as claimed. We're applying it to cars.</p>
 
 <h3>Transparency as Default</h3>
 
@@ -1203,13 +938,13 @@ export const blogPostsV3 = [
 
 <p>The market is growing. More cars are emerging. International buyers are discovering Romanian classics. But there wasn't a platform built for this specific market with the verification infrastructure it needed.</p>
 
-<p>We're starting in Romania because we're here and we understand the market. But we're building for Europe — the platform handles multiple languages, EU payment processing, and cross-border transactions.</p>
+<p>We're starting in Romania because we're here and we understand the market. But we're building for Europe - the platform handles multiple languages, EU payment processing, and cross-border transactions.</p>
 
 <h2>What We're Not</h2>
 
 <p>We're not trying to be Bring a Trailer or RM Sotheby's. We're not chasing seven-figure Ferraris or competing for the high-end auction business.</p>
 
-<p>We're focused on accessible classics — the cars enthusiasts actually drive. Project cars with honest descriptions. Barn finds with realistic expectations. Driver-quality vehicles at fair prices.</p>
+<p>We're focused on accessible classics - the cars enthusiasts actually drive. Project cars with honest descriptions. Barn finds with realistic expectations. Driver-quality vehicles at fair prices.</p>
 
 <p>The €5,000 Dacia 1300 that someone will actually restore and enjoy. The €15,000 BMW E30 that will become someone's weekend car. The €3,000 barn find ARO that's more rust than metal but has a story.</p>
 
@@ -1235,7 +970,7 @@ export const blogPostsV3 = [
 
 <p>Browse the current listings at <a href="https://finds.ro">finds.ro</a>. See if our approach to transparency resonates with how you think classic cars should be bought and sold.</p>
 
-<p>If you have a classic to sell, we'd like to talk. If you're looking for something specific, let us know — we might know where to find it.</p>
+<p>If you have a classic to sell, we'd like to talk. If you're looking for something specific, let us know - we might know where to find it.</p>
 
 <p>We built this because we wanted it to exist. We think you might want it too.</p>
 
@@ -1245,7 +980,7 @@ export const blogPostsV3 = [
     contentRo: `
 <p>Finds există pentru că ne-am frustrat încercând să cumpărăm mașini clasice în România.</p>
 
-<p>Suntem <a href="https://betterqa.co">BetterQA</a>, o companie de calitate software cu sediul în Cluj-Napoca. Testăm software pentru companii din toată Europa — de la startup-uri la întreprinderi cu cerințe de securitate certificate NATO. Suntem obsedați de calitate, verificare și de a face lucrurile corect.</p>
+<p>Suntem <a href="https://betterqa.co">BetterQA</a>, o companie de calitate software cu sediul în Cluj-Napoca. Testăm software pentru companii din toată Europa - de la startup-uri la întreprinderi cu cerințe de securitate certificate NATO. Suntem obsedați de calitate, verificare și de a face lucrurile corect.</p>
 
 <p>Mai mulți dintre noi suntem pasionați de mașini clasice. Și când am încercat să cumpărăm clasice în România, am întâlnit aceleași probleme iar și iar.</p>
 
@@ -1291,7 +1026,7 @@ export const blogPostsV3 = [
 
 <p>Nu încercăm să fim Bring a Trailer sau RM Sotheby's. Nu urmărim Ferrari-uri de șapte cifre.</p>
 
-<p>Ne concentrăm pe clasice accesibile — mașinile pe care pasionații le conduc efectiv. Proiecte cu descrieri oneste. Barn find-uri cu așteptări realiste.</p>
+<p>Ne concentrăm pe clasice accesibile - mașinile pe care pasionații le conduc efectiv. Proiecte cu descrieri oneste. Barn find-uri cu așteptări realiste.</p>
 
 <h2>Conexiunea BetterQA</h2>
 
@@ -1321,7 +1056,7 @@ export const blogPostsV3 = [
     metaDescriptionEn: 'Sell your classic car for maximum value. Complete preparation guide covering photography, documentation, cleaning, and honest presentation.',
     metaDescriptionRo: 'Vinde mașina clasică la valoarea maximă. Ghid complet de pregătire acoperind fotografia, documentația și prezentarea.',
     contentEn: `
-<p>The difference between a classic car that sells for €8,000 and one that sells for €12,000 often isn't the car itself — it's how it's presented. Proper preparation builds buyer confidence and drives competitive bidding.</p>
+<p>The difference between a classic car that sells for €8,000 and one that sells for €12,000 often isn't the car itself - it's how it's presented. Proper preparation builds buyer confidence and drives competitive bidding.</p>
 
 <p>Here's how to prepare your classic for auction, based on what we see working at Finds.</p>
 
@@ -1335,28 +1070,11 @@ export const blogPostsV3 = [
 
 <h3>Gather Everything</h3>
 
-<p>Collect all documentation you have:</p>
-
-<ul>
-<li>Registration documents (current and historical)</li>
-<li>Service records and receipts</li>
-<li>MOT/ITP history</li>
-<li>Purchase receipts for parts and work</li>
-<li>Historical photos if available</li>
-<li>Manuals and literature</li>
-<li>Previous owner information</li>
-</ul>
+<p>Collect all documentation you have including registration documents (current and historical), service records and receipts, MOT/ITP history, purchase receipts for parts and work, historical photos if available, manuals and literature, and previous owner information.</p>
 
 <h3>Create a Timeline</h3>
 
-<p>Organize the history chronologically. Buyers want to understand:</p>
-
-<ul>
-<li>When was major work done?</li>
-<li>What's been replaced vs. original?</li>
-<li>Any gaps in the history?</li>
-<li>Who owned it and where was it kept?</li>
-</ul>
+<p>Organize the history chronologically. Buyers want to understand when major work was done, what's been replaced versus original, any gaps in the history, and who owned it and where it was kept. This context helps buyers assess the car's provenance and care history.</p>
 
 <h3>Photograph the Paperwork</h3>
 
@@ -1366,89 +1084,33 @@ export const blogPostsV3 = [
 
 <h3>Equipment</h3>
 
-<p>You don't need professional equipment, but you do need:</p>
-
-<ul>
-<li>A smartphone with a decent camera (anything from the last 5 years)</li>
-<li>Clean lens (wipe it first — seriously)</li>
-<li>Good natural light (overcast days are ideal, or golden hour)</li>
-<li>A clean, uncluttered background</li>
-</ul>
+<p>You don't need professional equipment, but you do need a smartphone with a decent camera (anything from the last 5 years), a clean lens (wipe it first), good natural light (overcast days are ideal, or golden hour), and a clean, uncluttered background.</p>
 
 <h3>Exterior Shots (Minimum 20)</h3>
 
-<p>Required angles:</p>
-
-<ul>
-<li>Front, rear, both sides (straight on)</li>
-<li>All four corners (45-degree angles)</li>
-<li>Wheels and tires (each one)</li>
-<li>Close-ups of trim, badges, lights</li>
-<li>Any damage, rust, or wear (close-up)</li>
-<li>Panel gaps (show alignment quality)</li>
-<li>Under wheel arches</li>
-<li>Underside if possible (use ramps or a pit)</li>
-</ul>
+<p>Capture comprehensive exterior angles including front, rear, and both sides straight on, all four corners at 45-degree angles, each wheel and tire individually, close-ups of trim, badges, and lights, detailed shots of any damage, rust, or wear, panel gaps showing alignment quality, under wheel arches, and the underside if possible using ramps or a pit.</p>
 
 <h3>Interior Shots (Minimum 10)</h3>
 
-<ul>
-<li>Dashboard straight on</li>
-<li>Instrument cluster (with ignition on)</li>
-<li>Front seats (from both doors)</li>
-<li>Rear seats</li>
-<li>Headliner</li>
-<li>Carpet condition</li>
-<li>Door cards</li>
-<li>Boot/trunk</li>
-<li>Any wear or damage (close-up)</li>
-</ul>
+<p>Photograph the dashboard straight on, instrument cluster with ignition on, front seats from both doors, rear seats, headliner, carpet condition, door cards, boot or trunk, and detailed close-ups of any wear or damage.</p>
 
 <h3>Mechanical Shots (Minimum 10)</h3>
 
-<ul>
-<li>Engine bay overview</li>
-<li>Engine from multiple angles</li>
-<li>VIN plates (all locations)</li>
-<li>Data plates</li>
-<li>Suspension components</li>
-<li>Exhaust system</li>
-<li>Any recent work or new parts</li>
-</ul>
+<p>Document the engine bay with an overview shot plus engine from multiple angles, all VIN plate locations, data plates, suspension components, exhaust system, and any recent work or new parts.</p>
 
 <h3>Video</h3>
 
-<p>A walk-around video adds significant value:</p>
-
-<ul>
-<li>60-90 second exterior walk-around</li>
-<li>Cold start (buyers want to hear it)</li>
-<li>Running engine at idle</li>
-<li>Interior tour</li>
-<li>Short driving clip if possible</li>
-</ul>
+<p>A walk-around video adds significant value to your listing. Include a 60-90 second exterior walk-around, cold start so buyers can hear the engine, running engine at idle, interior tour, and a short driving clip if possible.</p>
 
 <h2>Cleaning: Presentation Matters</h2>
 
 <h3>What to Clean</h3>
 
-<ul>
-<li><strong>Exterior:</strong> Wash, clay bar if needed, wax for shine</li>
-<li><strong>Glass:</strong> Inside and out — streaks show in photos</li>
-<li><strong>Wheels:</strong> Clean thoroughly, tire dressing</li>
-<li><strong>Engine bay:</strong> Gentle degreasing, not pressure washing</li>
-<li><strong>Interior:</strong> Vacuum, wipe surfaces, clean glass</li>
-<li><strong>Trunk:</strong> Empty and clean</li>
-</ul>
+<p>Focus on presenting the car cleanly. Wash the exterior, use clay bar if needed, and apply wax for shine. Clean glass inside and out as streaks show in photos. Clean wheels thoroughly and apply tire dressing. Gently degrease the engine bay but avoid pressure washing which can damage components. Vacuum the interior, wipe surfaces, and clean glass. Empty and clean the trunk completely.</p>
 
 <h3>What NOT to Do</h3>
 
-<ul>
-<li>Don't paint over rust — it's obvious and destroys trust</li>
-<li>Don't use tire shine that flings off — looks cheap</li>
-<li>Don't apply heavy dressing to interior — looks artificial</li>
-<li>Don't "detail" to hide problems — disclose instead</li>
-</ul>
+<p>Avoid shortcuts that damage credibility. Don't paint over rust as it's obvious and destroys trust. Don't use tire shine that flings off as it looks cheap. Don't apply heavy dressing to interior surfaces as it looks artificial. Most importantly, don't "detail" to hide problems - disclose them instead.</p>
 
 <h2>Writing the Description</h2>
 
@@ -1478,34 +1140,17 @@ export const blogPostsV3 = [
 
 <h3>Research the Market</h3>
 
-<ul>
-<li>Search completed auctions for similar vehicles</li>
-<li>Note condition differences that affected price</li>
-<li>Consider your car's specific strengths and weaknesses</li>
-<li>Be realistic — emotional value doesn't transfer</li>
-</ul>
+<p>Search completed auctions for similar vehicles and note condition differences that affected price. Consider your car's specific strengths and weaknesses honestly. Be realistic - your emotional value doesn't transfer to buyers who judge based on market comparables.</p>
 
 <h3>Setting a Reserve</h3>
 
-<p>If your platform allows reserves:</p>
-
-<ul>
-<li>Set it at the minimum you'd accept</li>
-<li>Don't set it at your dream price</li>
-<li>Remember: no-reserve auctions attract more bidders</li>
-</ul>
+<p>If your platform allows reserves, set it at the minimum you'd actually accept, not at your dream price. Remember that no-reserve auctions attract more bidders and often achieve higher final prices through competitive bidding.</p>
 
 <h2>Before Listing</h2>
 
 <h3>Final Checks</h3>
 
-<ul>
-<li>All lights working</li>
-<li>Fluid levels correct</li>
-<li>Tires properly inflated</li>
-<li>Battery charged</li>
-<li>Car starts reliably for viewings</li>
-</ul>
+<p>Before listing, verify all lights are working, fluid levels are correct, tires are properly inflated, battery is charged, and the car starts reliably for viewings. First impressions matter when potential buyers arrive.</p>
 
 <h3>Be Available</h3>
 
@@ -1513,15 +1158,15 @@ export const blogPostsV3 = [
 
 <h2>Summary</h2>
 
-<p>Preparing your classic for auction takes time, but it directly affects your result. Clean presentation, thorough documentation, honest disclosure, and quality photography build buyer confidence — and confident buyers bid higher.</p>
+<p>Preparing your classic for auction takes time, but it directly affects your result. Clean presentation, thorough documentation, honest disclosure, and quality photography build buyer confidence - and confident buyers bid higher.</p>
 
-<p><a href="https://finds.ro/sell">Submit your classic car to Finds</a> — we'll help you present it properly and reach verified buyers across Europe.</p>
+<p><a href="https://finds.ro/sell">Submit your classic car to Finds</a> - we'll help you present it properly and reach verified buyers across Europe.</p>
 
 <hr />
 <p><em>Finds is a <a href="https://betterqa.co">BetterQA</a> project. We believe classic car auctions should be transparent, curated, and fair.</em></p>
 `,
     contentRo: `
-<p>Diferența dintre o mașină clasică care se vinde cu €8,000 și una care se vinde cu €12,000 adesea nu este mașina în sine — este modul în care este prezentată. Pregătirea corespunzătoare construiește încrederea cumpărătorului și stimulează licitarea competitivă.</p>
+<p>Diferența dintre o mașină clasică care se vinde cu €8,000 și una care se vinde cu €12,000 adesea nu este mașina în sine - este modul în care este prezentată. Pregătirea corespunzătoare construiește încrederea cumpărătorului și stimulează licitarea competitivă.</p>
 
 <h2>Începe cu Onestitatea</h2>
 
@@ -1593,9 +1238,9 @@ export const blogPostsV3 = [
 <h3>Ce să NU Faceți</h3>
 
 <ul>
-<li>Nu vopsiți peste rugină — este evident și distruge încrederea</li>
+<li>Nu vopsiți peste rugină - este evident și distruge încrederea</li>
 <li>Nu folosiți soluții de anvelope care se împrăștie</li>
-<li>Nu "detaliați" pentru a ascunde probleme — declarați în schimb</li>
+<li>Nu "detaliați" pentru a ascunde probleme - declarați în schimb</li>
 </ul>
 
 <h2>Scrierea Descrierii</h2>
@@ -1611,14 +1256,199 @@ export const blogPostsV3 = [
 
 <h2>Rezumat</h2>
 
-<p>Pregătirea clasicei tale pentru licitație necesită timp, dar afectează direct rezultatul. Prezentarea curată, documentația completă, declararea onestă și fotografia de calitate construiesc încrederea cumpărătorului — și cumpărătorii încrezători licitează mai sus.</p>
+<p>Pregătirea clasicei tale pentru licitație necesită timp, dar afectează direct rezultatul. Prezentarea curată, documentația completă, declararea onestă și fotografia de calitate construiesc încrederea cumpărătorului - și cumpărătorii încrezători licitează mai sus.</p>
 
-<p><a href="https://finds.ro/sell">Trimite mașina ta clasică pe Finds</a> — te vom ajuta să o prezinți corespunzător și să ajungi la cumpărători verificați din toată Europa.</p>
+<p><a href="https://finds.ro/sell">Trimite mașina ta clasică pe Finds</a> - te vom ajuta să o prezinți corespunzător și să ajungi la cumpărători verificați din toată Europa.</p>
 
 <hr />
 <p><em>Finds este un proiect <a href="https://betterqa.co">BetterQA</a>. Credem că licitațiile de mașini clasice trebuie să fie transparente, curate și corecte.</em></p>
 `
   },
+  {
+    slug: 'how-to-prepare-classic-car-for-sale',
+    category: 'selling-guide',
+    tags: ['selling', 'preparation', 'detailing', 'electrical', 'maintenance'],
+    readingTime: 9,
+    titleEn: 'How to Prepare Your Classic Car for Sale: Detailing, Electrical, and Presentation',
+    titleRo: 'Cum să Pregătești Mașina Clasică pentru Vânzare: Detailing, Electrică și Prezentare',
+    excerptEn: 'Maximize your classic car\'s sale value with proper preparation. Professional detailing, electrical systems check, and documentation strategies.',
+    excerptRo: 'Maximizează valoarea de vânzare a mașinii tale clasice cu pregătire corespunzătoare. Detailing profesional, verificare sisteme electrice și documentație.',
+    metaTitleEn: 'How to Prepare Classic Car for Sale | Complete Guide',
+    metaTitleRo: 'Cum să Pregătești Mașina Clasică pentru Vânzare | Ghid Complet',
+    metaDescriptionEn: 'Prepare your classic car for maximum sale value. Professional detailing, electrical checks, and presentation tips from Finds, a BetterQA project.',
+    metaDescriptionRo: 'Pregătește mașina clasică pentru valoare maximă de vânzare. Detailing profesional, verificări electrice și sfaturi de prezentare.',
+    contentEn: `
+<p>Selling a classic car is different from selling a modern vehicle. Buyers are looking for authenticity, documentation, and confidence that the car has been properly maintained. The difference between a €5,000 sale and a €8,000 sale often comes down to preparation.</p>
+
+<p>At Finds, we've seen hundreds of classic cars cross our auction platform. Here's what separates vehicles that sell quickly at strong prices from those that struggle to find buyers.</p>
+
+<h2>Start with Professional Detailing</h2>
+
+<p>First impressions matter enormously in classic car sales. A properly detailed car signals to buyers that the owner cared about the vehicle.</p>
+
+<h3>Why Professional Detailing Over DIY?</h3>
+
+<p>Classic cars require specialized cleaning approaches. Modern detailing chemicals can damage original paint and finishes with non-abrasive methods needed to protect these surfaces. Water and pressure washing the engine bay risk electrical damage. Buyers inspect underneath, so hidden dirt suggests hidden problems.</p>
+
+<p>For deep cleaning that won't damage your classic, consider dry ice blasting. Companies like <a href="https://articworks.ro">Arctic Works</a> in Cluj specialize in this technology - it removes decades of grime without chemicals, water, or abrasives. The engine bay, chassis, and undercarriage emerge looking factory-fresh without any risk to original components.</p>
+
+<h3>What to Clean</h3>
+
+<p>Focus your cleaning efforts on areas that matter to buyers. The engine bay reveals mechanical condition and catches leaks. The undercarriage shows the rust situation honestly. The interior should have original materials properly cleaned, not masked. Chrome and trim should be polished but not over-buffed, which can damage plating.</p>
+
+<h2>Address Electrical Systems</h2>
+
+<p>Electrical problems are among the most common issues with classic cars, and buyers know it. A car that starts reliably and has functioning lights, gauges, and accessories commands a premium.</p>
+
+<h3>Common Electrical Issues to Address</h3>
+
+<p>Address key electrical systems before listing. Ensure the battery holds charge and the alternator works properly. All lights should function including headlights, indicators, brake lights, and interior lighting. Non-working gauges suggest deeper electrical problems that concern buyers. Most importantly, reliable starting is crucial for buyer confidence.</p>
+
+<p>For Romanian classic car sellers, <a href="https://electricworks.ro">Electric Works</a> offers specialized auto electrical services. They understand vintage systems and can diagnose issues that general mechanics might miss. A professional diagnostic report showing all electrical systems working can be included in your listing documentation.</p>
+
+<h3>Document Your Electrical Work</h3>
+
+<p>If you've had electrical repairs done, keep receipts and photos. Buyers appreciate seeing that problems were fixed properly, not patched.</p>
+
+<h2>Documentation That Sells</h2>
+
+<p>The car itself is only half the sale. Documentation builds buyer confidence and justifies your asking price.</p>
+
+<h3>Essential Documentation</h3>
+
+<p>Gather all essential documentation including every service receipt and work order to establish service history. Parts receipts show the quality of replacement parts used. Historical photos demonstrate previous condition and restoration progress. Registration history provides chain of ownership if available. A current or recent technical inspection (ITP) confirms roadworthiness.</p>
+
+<h3>Pre-Sale Inspection Reports</h3>
+
+<p>Consider having professional inspections done before listing including a mechanical inspection for independent assessment of condition, electrical diagnostic with written report of all systems, and rust assessment providing professional evaluation of structural integrity. These reports cost money but typically return more than their cost in buyer confidence and reduced negotiation.</p>
+
+<h2>Photography That Attracts Buyers</h2>
+
+<p>We covered photography in detail in our <a href="/blog/how-to-prepare-classic-car-auction">auction preparation guide</a>, but the key points for private sales are minimum 40 photos covering exterior, interior, engine, undercarriage and details, showing problems honestly with rust, wear and issues all documented, using good natural lighting and clean background, and including before/after shots if you've had detailing done to show the transformation.</p>
+
+<h2>Pricing Realistically</h2>
+
+<p>Research completed sales of similar vehicles and be honest about where your car stands in condition comparison. Good history adds a 10-20% documentation premium. Factor in recent documented improvements. Consider market timing - spring and early summer typically see stronger prices.</p>
+
+<h2>Where to Sell</h2>
+
+<p>Your selling platform matters. General classifieds attract tire-kickers. Curated platforms attract serious buyers.</p>
+
+<p>On <a href="https://finds.ro">Finds</a>, every listing is pre-approved and every buyer is verified. The 5% buyer fee funds this verification infrastructure - and verified buyers bid with confidence.</p>
+
+<h2>Summary: The Preparation Checklist</h2>
+
+<ol>
+<li>☐ Professional detailing (consider dry ice cleaning for deep clean)</li>
+<li>☐ Electrical systems checked and documented</li>
+<li>☐ All documentation gathered and organized</li>
+<li>☐ Professional photos taken</li>
+<li>☐ Honest description written</li>
+<li>☐ Realistic price researched</li>
+<li>☐ Platform chosen</li>
+</ol>
+
+<p>Preparation takes time but directly impacts your sale price. Buyers pay premium for confidence, and confidence comes from presentation, documentation, and transparency.</p>
+
+<hr />
+<p><em>Finds is a <a href="https://betterqa.co">BetterQA</a> project. We believe classic car auctions should be transparent, curated, and fair.</em></p>
+`,
+    contentRo: `
+<p>Vânzarea unei mașini clasice este diferită de vânzarea unui vehicul modern. Cumpărătorii caută autenticitate, documentație și încrederea că mașina a fost întreținută corespunzător. Diferența dintre o vânzare de €5,000 și una de €8,000 depinde adesea de pregătire.</p>
+
+<p>La Finds, am văzut sute de mașini clasice trecând prin platforma noastră de licitații. Iată ce separă vehiculele care se vând rapid la prețuri bune de cele care se chinuie să găsească cumpărători.</p>
+
+<h2>Începe cu Detailing Profesional</h2>
+
+<p>Prima impresie contează enorm în vânzările de mașini clasice. O mașină corect detaliată semnalează cumpărătorilor că proprietarul a avut grijă de vehicul.</p>
+
+<h3>De Ce Detailing Profesional și Nu DIY?</h3>
+
+<p>Mașinile clasice necesită abordări specializate de curățare:</p>
+
+<ul>
+<li><strong>Metode non-abrazive:</strong> Chimicalele moderne de detailing pot deteriora vopseaua și finisajele originale</li>
+<li><strong>Curățare compartiment motor:</strong> Apa și spălarea sub presiune riscă deteriorări electrice</li>
+<li><strong>Atenție la partea inferioară:</strong> Cumpărătorii inspectează dedesubt - murdăria ascunsă sugerează probleme ascunse</li>
+</ul>
+
+<p>Pentru o curățare profundă care nu va deteriora clasica ta, ia în considerare <strong>curățarea cu gheață carbonică</strong>. Companii precum <a href="https://articworks.ro">Arctic Works</a> din Cluj sunt specializate în această tehnologie - îndepărtează decenii de murdărie fără chimicale, apă sau substanțe abrazive. Compartimentul motor, șasiul și partea inferioară ies arătând ca noi din fabrică, fără niciun risc pentru componentele originale.</p>
+
+<h3>Ce Să Curățați</h3>
+
+<ul>
+<li><strong>Compartiment motor:</strong> Dezvăluie starea mecanică și evidențiază scurgerile</li>
+<li><strong>Partea inferioară:</strong> Arată onest situația ruginii</li>
+<li><strong>Interior:</strong> Materiale originale curățate corespunzător, nu mascate</li>
+<li><strong>Crom și ornamente:</strong> Lustruit dar nu supralustruit</li>
+</ul>
+
+<h2>Rezolvă Sistemele Electrice</h2>
+
+<p>Problemele electrice sunt printre cele mai comune la mașinile clasice, iar cumpărătorii știu asta. O mașină care pornește fiabil și are lumini, instrumente și accesorii funcționale comandă un preț premium.</p>
+
+<h3>Probleme Electrice Comune de Rezolvat</h3>
+
+<ul>
+<li><strong>Baterie și sistem de încărcare:</strong> Asigură-te că bateria ține sarcina și alternatorul funcționează</li>
+<li><strong>Iluminat:</strong> Toate luminile să funcționeze - faruri, semnalizări, stopuri, interior</li>
+<li><strong>Instrumente de bord:</strong> Instrumentele nefuncționale sugerează probleme electrice mai profunde</li>
+<li><strong>Aprindere:</strong> Pornirea fiabilă este crucială pentru încrederea cumpărătorului</li>
+</ul>
+
+<p>Pentru vânzătorii de mașini clasice din România, <a href="https://electricworks.ro">Electric Works</a> oferă servicii specializate de electrică auto. Ei înțeleg sistemele vintage și pot diagnostica probleme pe care mecanicii generaliști le-ar putea rata. Un raport de diagnostic profesional arătând toate sistemele electrice funcționale poate fi inclus în documentația anunțului tău.</p>
+
+<h3>Documentează Lucrările Electrice</h3>
+
+<p>Dacă ai făcut reparații electrice, păstrează chitanțele și fotografiile. Cumpărătorii apreciază să vadă că problemele au fost rezolvate profesional, nu peticite.</p>
+
+<h2>Documentația Care Vinde</h2>
+
+<p>Mașina în sine este doar jumătate din vânzare. Documentația construiește încrederea cumpărătorului și justifică prețul cerut.</p>
+
+<h3>Documentație Esențială</h3>
+
+<ul>
+<li><strong>Istoric service:</strong> Fiecare chitanță, fiecare ordin de lucru</li>
+<li><strong>Chitanțe piese:</strong> Arată calitatea pieselor de schimb folosite</li>
+<li><strong>Fotografii istorice:</strong> Starea anterioară, progresul restaurării</li>
+<li><strong>Istoric înmatriculare:</strong> Lanțul de proprietate dacă este disponibil</li>
+<li><strong>Inspecție tehnică (ITP):</strong> Actuală sau recentă</li>
+</ul>
+
+<h2>Fotografii Care Atrag Cumpărători</h2>
+
+<ul>
+<li><strong>Minimum 40 de fotografii:</strong> Exterior, interior, motor, parte inferioară, detalii</li>
+<li><strong>Arată problemele onest:</strong> Rugină, uzură, probleme - toate documentate</li>
+<li><strong>Lumină bună:</strong> Lumină naturală, fundal curat</li>
+<li><strong>Înainte/după:</strong> Dacă ai făcut detailing, arată transformarea</li>
+</ul>
+
+<h2>Unde să Vinzi</h2>
+
+<p>Platforma de vânzare contează. Anunțurile generale atrag curioși. Platformele curate atrag cumpărători serioși.</p>
+
+<p>Pe <a href="https://finds.ro">Finds</a>, fiecare anunț este pre-aprobat și fiecare cumpărător este verificat. Comisionul de 5% pentru cumpărător finanțează această infrastructură de verificare - iar cumpărătorii verificați licitează cu încredere.</p>
+
+<h2>Rezumat: Lista de Pregătire</h2>
+
+<ol>
+<li>☐ Detailing profesional (ia în considerare curățarea cu gheață carbonică)</li>
+<li>☐ Sisteme electrice verificate și documentate</li>
+<li>☐ Toată documentația adunată și organizată</li>
+<li>☐ Fotografii profesionale făcute</li>
+<li>☐ Descriere onestă scrisă</li>
+<li>☐ Preț realist cercetat</li>
+<li>☐ Platformă aleasă</li>
+</ol>
+
+<p>Pregătirea necesită timp dar afectează direct prețul de vânzare. Cumpărătorii plătesc premium pentru încredere, iar încrederea vine din prezentare, documentație și transparență.</p>
+
+<hr />
+<p><em>Finds este un proiect <a href="https://betterqa.co">BetterQA</a>. Credem că licitațiile de mașini clasice trebuie să fie transparente, curate și corecte.</em></p>
+`
+  }
 ]
 
 // Author assignments for new posts
@@ -1629,4 +1459,5 @@ export const v3PostAuthorAssignments: Record<string, string> = {
   'how-to-import-classic-car-germany': 'sarah-mitchell',
   'why-we-built-finds': 'marcus-webb',
   'how-to-prepare-classic-car-auction': 'elena-vasquez',
+  'how-to-prepare-classic-car-for-sale': 'anna-lindberg',
 }
