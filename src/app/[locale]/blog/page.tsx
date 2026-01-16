@@ -110,52 +110,68 @@ export default async function BlogPage({
   const t = await getTranslations({ locale, namespace: 'blog' })
 
   return (
-    <div className="container py-8">
-      {/* Back Link */}
-      <Link
-        href="/"
-        className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors mb-6"
-      >
-        <ChevronLeft className="h-4 w-4" />
-        {t('backToHome')}
-      </Link>
+    <div className="flex flex-col">
+      {/* Hero Section */}
+      <section className="relative overflow-hidden bg-gradient-to-br from-primary/10 via-background to-secondary/10 py-16 md:py-24">
+        {/* Decorative blur orbs */}
+        <div className="absolute -right-20 -top-20 h-[400px] w-[400px] rounded-full bg-primary/10 blur-3xl" />
+        <div className="absolute -bottom-20 -left-20 h-[300px] w-[300px] rounded-full bg-secondary/15 blur-3xl" />
 
-      {/* Header */}
-      <div className="mb-8">
-        <div className="flex items-center gap-2 mb-2">
-          <span className="text-xs font-medium text-primary bg-primary/10 px-2 py-1 rounded">
-            {t('betterQA.badge')}
-          </span>
+        <div className="container relative mx-auto px-4">
+          {/* Back Link */}
+          <Link
+            href="/"
+            className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors mb-8"
+          >
+            <ChevronLeft className="h-4 w-4" />
+            {t('backToHome')}
+          </Link>
+
+          {/* Header */}
+          <div className="max-w-3xl">
+            <div className="flex items-center gap-2 mb-4">
+              <span className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/5 px-4 py-2 text-sm font-medium text-primary backdrop-blur-sm">
+                <BookOpen className="h-4 w-4" />
+                {t('betterQA.badge')}
+              </span>
+            </div>
+            <h1 className="font-heading text-4xl font-bold tracking-tight md:text-5xl lg:text-6xl mb-4">
+              {t('title')}
+            </h1>
+            <p className="text-lg md:text-xl text-muted-foreground">
+              {t('subtitle')}
+            </p>
+          </div>
         </div>
-        <h1 className="text-3xl font-bold mb-2">{t('title')}</h1>
-        <p className="text-muted-foreground">
-          {t('subtitle')}
-        </p>
-      </div>
+      </section>
 
-      {/* Category Filter */}
-      <div className="mb-8">
-        <BlogCategoryFilter currentCategory={category} />
-      </div>
+      <div className="container mx-auto px-4 py-12">
+        {/* Category Filter */}
+        <div className="mb-12">
+          <BlogCategoryFilter currentCategory={category} />
+        </div>
 
-      {/* Blog Posts */}
-      <Suspense fallback={<BlogSkeleton />}>
-        <BlogContent category={category} locale={locale} />
-      </Suspense>
+        {/* Blog Posts */}
+        <Suspense fallback={<BlogSkeleton />}>
+          <BlogContent category={category} locale={locale} />
+        </Suspense>
 
-      {/* BetterQA Attribution */}
-      <div className="mt-12 p-6 bg-muted/50 rounded-lg text-center">
-        <p className="text-sm text-muted-foreground">
-          {t('betterQA.footer')}
-        </p>
-        <a
-          href="https://betterqa.co"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="text-sm text-primary hover:underline"
-        >
-          betterqa.co
-        </a>
+        {/* BetterQA Attribution */}
+        <Card variant="glass" className="mt-16 mx-auto max-w-2xl">
+          <div className="p-8 text-center">
+            <p className="text-sm text-muted-foreground mb-2">
+              {t('betterQA.footer')}
+            </p>
+            <a
+              href="https://betterqa.co"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-sm font-medium text-primary hover:underline"
+            >
+              betterqa.co
+            </a>
+          </div>
+        </Card>
       </div>
     </div>
   )

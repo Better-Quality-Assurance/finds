@@ -168,7 +168,8 @@ export const blogPostsV3 = [
 
 <hr />
 <p><em>Finds este un proiect <a href="https://betterqa.co">BetterQA</a>. Credem că licitațiile de mașini clasice trebuie să fie transparente, curate și corecte.</em></p>
-`
+`,
+    featuredImage: 'https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?w=1200&h=630&fit=crop'
   },
   {
     slug: 'how-to-evaluate-dacia-1300',
@@ -339,7 +340,8 @@ export const blogPostsV3 = [
 
 <hr />
 <p><em>Finds este un proiect <a href="https://betterqa.co">BetterQA</a>. Credem că licitațiile de mașini clasice trebuie să fie transparente, curate și corecte.</em></p>
-`
+`,
+    featuredImage: 'https://images.unsplash.com/photo-1552519507-da3b142c6e3d?w=1200&h=630&fit=crop'
   },
   {
     slug: 'how-to-spot-classic-car-scams',
@@ -510,7 +512,8 @@ export const blogPostsV3 = [
 
 <hr />
 <p><em>Finds este un proiect <a href="https://betterqa.co">BetterQA</a>. Credem că licitațiile de mașini clasice trebuie să fie transparente, curate și corecte.</em></p>
-`
+`,
+    featuredImage: 'https://images.unsplash.com/photo-1568605117036-5fe5e7bab0b7?w=1200&h=630&fit=crop'
   },
   {
     slug: 'how-to-import-classic-car-germany',
@@ -686,7 +689,8 @@ export const blogPostsV3 = [
 
 <hr />
 <p><em>Finds este un proiect <a href="https://betterqa.co">BetterQA</a>. Credem că licitațiile de mașini clasice trebuie să fie transparente, curate și corecte.</em></p>
-`
+`,
+    featuredImage: 'https://images.unsplash.com/photo-1485291571150-772bcfc10da5?w=1200&h=630&fit=crop'
   },
   {
     slug: 'why-we-built-finds',
@@ -856,7 +860,8 @@ export const blogPostsV3 = [
 
 <hr />
 <p><em>Finds este un proiect <a href="https://betterqa.co">BetterQA</a>. Credem că licitațiile de mașini clasice trebuie să fie transparente, curate și corecte.</em></p>
-`
+`,
+    featuredImage: 'https://images.unsplash.com/photo-1542362567-b07e54358753?w=1200&h=630&fit=crop'
   },
   {
     slug: 'how-to-prepare-classic-car-auction',
@@ -1003,7 +1008,8 @@ export const blogPostsV3 = [
 
 <hr />
 <p><em>Finds este un proiect <a href="https://betterqa.co">BetterQA</a>. Credem că licitațiile de mașini clasice trebuie să fie transparente, curate și corecte.</em></p>
-`
+`,
+    featuredImage: 'https://images.unsplash.com/photo-1583121274602-3e2820c69888?w=1200&h=630&fit=crop'
   },
   {
     slug: 'how-to-prepare-classic-car-for-sale',
@@ -1141,7 +1147,8 @@ export const blogPostsV3 = [
 
 <hr />
 <p><em>Finds este un proiect <a href="https://betterqa.co">BetterQA</a>. Credem că licitațiile de mașini clasice trebuie să fie transparente, curate și corecte.</em></p>
-`
+`,
+    featuredImage: 'https://images.unsplash.com/photo-1503376780353-7e6692767b70?w=1200&h=630&fit=crop'
   }
 ]
 

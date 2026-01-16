@@ -36,23 +36,26 @@ export function BlogCategoryFilter({ currentCategory = 'all' }: Props) {
   }
 
   return (
-    <div className="flex flex-wrap gap-2">
-      {categories.map(category => (
-        <Button
-          key={category}
-          variant="ghost"
-          size="sm"
-          className={cn(
-            'rounded-full',
-            currentCategory === category || (category === 'all' && !currentCategory)
-              ? 'bg-primary text-primary-foreground hover:bg-primary/90'
-              : 'bg-muted hover:bg-muted/80'
-          )}
-          onClick={() => handleCategoryChange(category)}
-        >
-          {t(`categories.${category}`)}
-        </Button>
-      ))}
+    <div className="flex flex-wrap gap-3">
+      {categories.map(category => {
+        const isActive = currentCategory === category || (category === 'all' && !currentCategory)
+        return (
+          <Button
+            key={category}
+            variant="ghost"
+            size="sm"
+            className={cn(
+              'rounded-full font-medium transition-all duration-300',
+              isActive
+                ? 'bg-gradient-premium text-primary-foreground shadow-md hover:shadow-lg hover:bg-gradient-premium-hover'
+                : 'bg-muted/50 hover:bg-muted border border-border/50 hover:border-primary/30'
+            )}
+            onClick={() => handleCategoryChange(category)}
+          >
+            {t(`categories.${category}`)}
+          </Button>
+        )
+      })}
     </div>
   )
 }
