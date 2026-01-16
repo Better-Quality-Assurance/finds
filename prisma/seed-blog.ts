@@ -76,6 +76,7 @@ const blogPosts = [
     tags: ['beginner', 'bidding', 'auctions', 'classic cars'],
     readingTime: 7,
     publishedAt: daysAgo(0), // Today
+    featuredImage: 'https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?w=1200&h=630&fit=crop',
     titleEn: 'Your First Classic Car Auction: A Complete Guide for New Bidders',
     titleRo: 'Prima Ta Licitație de Mașini Clasice: Ghid Complet pentru Începători',
     excerptEn: 'Everything you need to know before placing your first bid at a classic car auction, from research and budgeting to bidding strategies that work.',
@@ -237,6 +238,7 @@ const blogPosts = [
     tags: ['barn find', 'evaluation', 'hidden costs', 'restoration'],
     readingTime: 8,
     publishedAt: daysAgo(12), // 12 days ago
+    featuredImage: 'https://images.unsplash.com/photo-1503376780353-7e6692767b70?w=1200&h=630&fit=crop',
     titleEn: 'Barn Finds: How to Evaluate Condition and Calculate True Costs',
     titleRo: 'Mașini Descoperite în Hambare: Cum să Evaluezi Starea și să Calculezi Costurile Reale',
     excerptEn: 'That dusty barn find might look like a bargain, but restoration costs can quickly exceed the finished value. Learn how to assess condition and avoid costly mistakes.',
@@ -452,6 +454,7 @@ const blogPosts = [
     tags: ['scams', 'fraud', 'verification', 'safety'],
     readingTime: 6,
     publishedAt: daysAgo(25), // 25 days ago
+    featuredImage: 'https://images.unsplash.com/photo-1552519507-da3b142c6e3d?w=1200&h=630&fit=crop',
     titleEn: 'How to Avoid Scams When Buying Classic Cars Online',
     titleRo: 'Cum să Eviți Înșelătoriile la Cumpărarea de Mașini Clasice Online',
     excerptEn: 'Fraudsters target classic car buyers with sophisticated scams. Learn the warning signs and verification steps that protect your money.',
@@ -641,6 +644,7 @@ const blogPosts = [
     tags: ['selling', 'auction', 'private sale', 'valuation'],
     readingTime: 6,
     publishedAt: daysAgo(38), // 38 days ago
+    featuredImage: 'https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?w=1200&h=630&fit=crop',
     titleEn: 'Selling Your Classic Car: Auction vs Private Sale',
     titleRo: 'Vânzarea Mașinii Tale Clasice: Licitație vs Vânzare Privată',
     excerptEn: 'Both auction and private sale have their place. We break down the pros, cons, and which approach suits different types of vehicles and sellers.',
@@ -856,6 +860,7 @@ const blogPosts = [
     tags: ['restoration', 'budget', 'project car', 'planning'],
     readingTime: 7,
     publishedAt: daysAgo(52), // 52 days ago
+    featuredImage: 'https://images.unsplash.com/photo-1503376780353-7e6692767b70?w=1200&h=630&fit=crop',
     titleEn: 'Planning Your Project Car Restoration: A Realistic Budget Guide',
     titleRo: 'Planificarea Restaurării Mașinii Proiect: Un Ghid Realist de Buget',
     excerptEn: 'Restoration costs spiral out of control when you don\'t plan properly. Here\'s how to create a realistic budget and stick to it.',
@@ -1131,6 +1136,7 @@ const blogPosts = [
     tags: ['market', 'trends', '2025', 'investment'],
     readingTime: 5,
     publishedAt: daysAgo(68), // 68 days ago
+    featuredImage: 'https://images.unsplash.com/photo-1552519507-da3b142c6e3d?w=1200&h=630&fit=crop',
     titleEn: 'Classic Car Market Trends: What\'s Selling in 2025',
     titleRo: 'Tendințe pe Piața Mașinilor Clasice: Ce Se Vinde în 2025',
     excerptEn: 'The classic car market is evolving. New collectors are reshaping demand while traditional segments stabilize. Here\'s what the data tells us.',
